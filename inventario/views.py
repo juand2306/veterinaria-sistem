@@ -5,6 +5,9 @@ from django.core.paginator import Paginator
 from .models import Vacuna, VacunaAplicada, Producto, ProductoAplicado
 from .forms import VacunaForm, VacunaAplicadaForm, ProductoForm, ProductoAplicadoForm
 from clientes.models import Mascota
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # ----- VACUNAS -----
 @login_required
@@ -227,3 +230,108 @@ def lista_productos_aplicados(request):
         context['mascota'] = get_object_or_404(Mascota, pk=mascota_id)
     
     return render(request, 'inventario/lista_productos_aplicados.html', context)
+
+#----------------------------------- BLOQUE A DISCUTIR ------------------------------------------------------------
+class VacunaListView(LoginRequiredMixin, ListView):
+    model = Vacuna
+    template_name = 'inventario/vacuna_list.html'
+    context_object_name = 'vacunas'
+    paginate_by = 10
+
+class VacunaCreateView(LoginRequiredMixin, CreateView):
+    model = Vacuna
+    form_class = VacunaForm
+    template_name = 'inventario/vacuna_form.html'
+    success_url = reverse_lazy('vacuna-list')
+
+class VacunaUpdateView(LoginRequiredMixin, UpdateView):
+    model = Vacuna
+    form_class = VacunaForm
+    template_name = 'inventario/vacuna_form.html'
+    success_url = reverse_lazy('vacuna-list')
+
+class VacunaDeleteView(LoginRequiredMixin, DeleteView):
+    model = Vacuna
+    template_name = 'inventario/vacuna_confirm_delete.html'
+    success_url = reverse_lazy('vacuna-list')
+
+class VacunaAplicadaCreateView(LoginRequiredMixin, CreateView):
+    model = VacunaAplicada
+    form_class = VacunaAplicadaForm
+    template_name = 'inventario/vacuna_aplicada_form.html'
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'mascota_id' in self.kwargs:
+            initial['mascota'] = self.kwargs['mascota_id']
+        return initial
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])
+
+class VacunaAplicadaUpdateView(LoginRequiredMixin, UpdateView):
+    model = VacunaAplicada
+    form_class = VacunaAplicadaForm
+    template_name = 'inventario/vacuna_aplicada_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])
+
+class VacunaAplicadaDeleteView(LoginRequiredMixin, DeleteView):
+    model = VacunaAplicada
+    template_name = 'inventario/vacuna_aplicada_confirm_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])
+
+class ProductoListView(LoginRequiredMixin, ListView):
+    model = Producto
+    template_name = 'inventario/producto_list.html'
+    context_object_name = 'productos'
+    paginate_by = 10
+
+class ProductoCreateView(LoginRequiredMixin, CreateView):
+    model = Producto
+    form_class = ProductoForm
+    template_name = 'inventario/producto_form.html'
+    success_url = reverse_lazy('producto-list')
+
+class ProductoUpdateView(LoginRequiredMixin, UpdateView):
+    model = Producto
+    form_class = ProductoForm
+    template_name = 'inventario/producto_form.html'
+    success_url = reverse_lazy('producto-list')
+
+class ProductoDeleteView(LoginRequiredMixin, DeleteView):
+    model = Producto
+    template_name = 'inventario/producto_confirm_delete.html'
+    success_url = reverse_lazy('producto-list')
+
+class ProductoAplicadoCreateView(LoginRequiredMixin, CreateView):
+    model = ProductoAplicado
+    form_class = ProductoAplicadoForm
+    template_name = 'inventario/producto_aplicado_form.html'
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'mascota_id' in self.kwargs:
+            initial['mascota'] = self.kwargs['mascota_id']
+        return initial
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])
+
+class ProductoAplicadoUpdateView(LoginRequiredMixin, UpdateView):
+    model = ProductoAplicado
+    form_class = ProductoAplicadoForm
+    template_name = 'inventario/producto_aplicado_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])
+
+class ProductoAplicadoDeleteView(LoginRequiredMixin, DeleteView):
+    model = ProductoAplicado
+    template_name = 'inventario/producto_aplicado_confirm_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])

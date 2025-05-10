@@ -4,9 +4,12 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.urls import reverse
 from datetime import datetime, timedelta
-from .models import Cita, Consulta
-from .forms import CitaForm, ConsultaForm
 from clientes.models import Mascota
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Cita, Consulta, ImagenDiagnostica
+from .forms import CitaForm, ConsultaForm, ImagenDiagnosticaForm
 
 @login_required
 def lista_citas(request):
@@ -212,3 +215,100 @@ def editar_consulta(request, pk):
         'consulta': consulta,
         'cita': cita
     })
+    
+#----------------------- BLOQUE A DISCUTIR ------------------------------------------------------------------
+class CitaListView(LoginRequiredMixin, ListView):
+    model = Cita
+    template_name = 'consultas/cita_list.html'
+    context_object_name = 'citas'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.order_by('fecha')
+
+class CitaCreateView(LoginRequiredMixin, CreateView):
+    model = Cita
+    form_class = CitaForm
+    template_name = 'consultas/cita_form.html'
+    success_url = reverse_lazy('cita-list')
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'mascota_id' in self.kwargs:
+            initial['mascota'] = self.kwargs['mascota_id']
+        return initial
+
+class CitaDetailView(LoginRequiredMixin, DetailView):
+    model = Cita
+    template_name = 'consultas/cita_detail.html'
+    context_object_name = 'cita'
+
+class CitaUpdateView(LoginRequiredMixin, UpdateView):
+    model = Cita
+    form_class = CitaForm
+    template_name = 'consultas/cita_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('cita-detail', args=[self.object.pk])
+
+class CitaDeleteView(LoginRequiredMixin, DeleteView):
+    model = Cita
+    template_name = 'consultas/cita_confirm_delete.html'
+    success_url = reverse_lazy('cita-list')
+
+class ConsultaCreateView(LoginRequiredMixin, CreateView):
+    model = Consulta
+    form_class = ConsultaForm
+    template_name = 'consultas/consulta_form.html'
+    
+    def dispatch(self, request, *args, **kwargs):
+        self.cita = get_object_or_404(Cita, pk=self.kwargs['cita_id'])
+        if hasattr(self.cita, 'consulta'):
+            messages.error(request, "Esta cita ya tiene una consulta registrada.")
+            return redirect('cita-detail', pk=self.cita.pk)
+        return super().dispatch(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        form.instance.cita = self.cita
+        return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cita'] = self.cita
+        return context
+    
+    def get_success_url(self):
+        return reverse_lazy('cita-detail', args=[self.cita.pk])
+
+class ConsultaDetailView(LoginRequiredMixin, DetailView):
+    model = Consulta
+    template_name = 'consultas/consulta_detail.html'
+    context_object_name = 'consulta'
+
+class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
+    model = Consulta
+    form_class = ConsultaForm
+    template_name = 'consultas/consulta_form.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cita'] = self.object.cita
+        return context
+    
+    def get_success_url(self):
+        return reverse_lazy('consulta-detail', args=[self.object.pk])
+
+class ImagenDiagnosticaCreateView(LoginRequiredMixin, CreateView):
+    model = ImagenDiagnostica
+    form_class = ImagenDiagnosticaForm
+    template_name = 'consultas/imagen_diagnostica_form.html'
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'mascota_id' in self.kwargs:
+            initial['mascota'] = self.kwargs['mascota_id']
+        return initial
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])

@@ -3,9 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.core.paginator import Paginator
-from .models import Cliente, Mascota, ImagenDiagnostica
-from .forms import ClienteForm, MascotaForm, ImagenDiagnosticaForm
 from configuracion.models import Raza
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
+from .models import Cliente, Mascota
+from .forms import ClienteForm, MascotaForm
+from consultas.models import Cita, Consulta
+from inventario.models import VacunaAplicada, ProductoAplicado
 
 @login_required
 def lista_clientes(request):
@@ -78,7 +84,8 @@ def eliminar_cliente(request, pk):
     return render(request, 'clientes/eliminar_cliente.html', {
         'cliente': cliente
     })
-
+    
+    
 @login_required
 def crear_mascota(request, cliente_id):
     cliente = get_object_or_404(Cliente, pk=cliente_id)
@@ -154,22 +161,88 @@ def cargar_razas(request):
     razas = Raza.objects.filter(especie_id=especie_id).order_by('nombre')
     return JsonResponse(list(razas.values('id', 'nombre')), safe=False)
 
+    
+#--------------------------- BLOQUE A DETERMINAR ----------------------------------------------------------------
+class ClienteListView(LoginRequiredMixin, ListView):
+    model = Cliente
+    template_name = 'clientes/cliente_list.html'
+    context_object_name = 'clientes'
+    paginate_by = 10
+
+class ClienteDetailView(LoginRequiredMixin, DetailView):
+    model = Cliente
+    template_name = 'clientes/cliente_detail.html'
+    context_object_name = 'cliente'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mascotas'] = self.object.mascotas.all()
+        return context
+
+class ClienteCreateView(LoginRequiredMixin, CreateView):
+    model = Cliente
+    form_class = ClienteForm
+    template_name = 'clientes/cliente_form.html'
+    success_url = reverse_lazy('cliente-list')
+
+class ClienteUpdateView(LoginRequiredMixin, UpdateView):
+    model = Cliente
+    form_class = ClienteForm
+    template_name = 'clientes/cliente_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('cliente-detail', args=[self.object.pk])
+
+class ClienteDeleteView(LoginRequiredMixin, DeleteView):
+    model = Cliente
+    template_name = 'clientes/cliente_confirm_delete.html'
+    success_url = reverse_lazy('cliente-list')
+
+class MascotaCreateView(LoginRequiredMixin, CreateView):
+    model = Mascota
+    form_class = MascotaForm
+    template_name = 'clientes/mascota_form.html'
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'cliente_id' in self.kwargs:
+            initial['cliente'] = self.kwargs['cliente_id']
+        return initial
+    
+    def get_success_url(self):
+        return reverse_lazy('cliente-detail', args=[self.object.cliente.pk])
+
+class MascotaDetailView(LoginRequiredMixin, DetailView):
+    model = Mascota
+    template_name = 'clientes/mascota_detail.html'
+    context_object_name = 'mascota'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['citas'] = self.object.citas.all().order_by('-fecha')[:5]
+        context['vacunas'] = self.object.vacunas_aplicadas.all().order_by('-fecha_aplicacion')
+        context['productos'] = self.object.productos_aplicados.all().order_by('-fecha_aplicacion')
+        return context
+
+class MascotaUpdateView(LoginRequiredMixin, UpdateView):
+    model = Mascota
+    form_class = MascotaForm
+    template_name = 'clientes/mascota_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.pk])
+
+class MascotaDeleteView(LoginRequiredMixin, DeleteView):
+    model = Mascota
+    template_name = 'clientes/mascota_confirm_delete.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('cliente-detail', args=[self.object.cliente.pk])
+
 @login_required
-def agregar_imagen(request, mascota_id):
-    mascota = get_object_or_404(Mascota, pk=mascota_id)
-    
-    if request.method == 'POST':
-        form = ImagenDiagnosticaForm(request.POST, request.FILES)
-        if form.is_valid():
-            imagen = form.save(commit=False)
-            imagen.mascota = mascota
-            imagen.save()
-            messages.success(request, "Imagen diagnóstica agregada correctamente")
-            return redirect('detalle_mascota', pk=mascota.pk)
-    else:
-        form = ImagenDiagnosticaForm()
-    
-    return render(request, 'clientes/agregar_imagen.html', {
-        'form': form,
-        'mascota': mascota
-    })
+def get_razas_by_especie(request):
+    especie_id = request.GET.get('especie_id')
+    razas = Raza.objects.filter(especie_id=especie_id).values('id', 'nombre')
+    return JsonResponse(list(razas), safe=False)
+
+#--------------------------------------------------------------------------------------------------------------------------------
