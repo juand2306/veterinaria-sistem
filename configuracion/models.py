@@ -18,7 +18,7 @@ class Raza(models.Model):
     descripcion = models.TextField(blank=True, null=True)
     
     def __str__(self):
-        return f"{self.nombre} ({self.especie})"
+        return f"{self.nombre} ({self.especie.nombre})"
     
     class Meta:
         verbose_name = "Raza"

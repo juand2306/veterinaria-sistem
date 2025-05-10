@@ -14,14 +14,14 @@ class Vacuna(models.Model):
         ordering = ['nombre']
 
 class VacunaAplicada(models.Model):
-    mascota = models.ForeignKey(Mascota, on_delete=models.CASCADE, related_name='vacunas_aplicadas')
+    mascota = models.ForeignKey('clientes.Mascota', on_delete=models.CASCADE, related_name='vacunas_aplicadas')
     vacuna = models.ForeignKey(Vacuna, on_delete=models.PROTECT)
     fecha_aplicacion = models.DateField()
     fecha_proxima = models.DateField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
     
     def __str__(self):
-        return f"{self.vacuna.nombre} - {self.mascota.nombre} - {self.fecha_aplicacion}"
+        return f"{self.vacuna.nombre} - {self.mascota.nombre} ({self.fecha_aplicacion.strftime('%d/%m/%Y')})"
     
     def save(self, *args, **kwargs):
         # Verificar que la mascota esté activa
@@ -42,7 +42,7 @@ class Producto(models.Model):
     
     nombre = models.CharField(max_length=100, unique=True)
     tipo = models.CharField(max_length=1, choices=TIPO_CHOICES)
-    descripcion = models.TextField()
+    descripcion = models.TextField(blank=True, null=True)
     
     def __str__(self):
         return f"{self.nombre} ({self.get_tipo_display()})"
@@ -53,14 +53,14 @@ class Producto(models.Model):
         ordering = ['nombre']
 
 class ProductoAplicado(models.Model):
-    mascota = models.ForeignKey(Mascota, on_delete=models.CASCADE, related_name='productos_aplicados')
+    mascota = models.ForeignKey('clientes.Mascota', on_delete=models.CASCADE, related_name='productos_aplicados')
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     fecha_aplicacion = models.DateField()
     fecha_proxima = models.DateField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
     
     def __str__(self):
-        return f"{self.producto.nombre} - {self.mascota.nombre} - {self.fecha_aplicacion}"
+        return f"{self.producto.nombre} - {self.mascota.nombre} ({self.fecha_aplicacion.strftime('%d/%m/%Y')})"
     
     def save(self, *args, **kwargs):
         # Verificar que la mascota esté activa

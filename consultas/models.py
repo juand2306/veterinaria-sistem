@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 class Cita(models.Model):
-    mascota = models.ForeignKey(Mascota, on_delete=models.CASCADE, related_name='citas')
+    mascota = models.ForeignKey('clientes.Mascota', on_delete=models.CASCADE, related_name='citas')
     fecha = models.DateTimeField()
     motivo = models.TextField()
     programada = models.BooleanField(default=True, help_text="Indica si es una cita programada o atención de urgencia")
@@ -53,3 +53,17 @@ class Consulta(models.Model):
         verbose_name = "Consulta"
         verbose_name_plural = "Consultas"
         ordering = ['-fecha_registro']
+        
+class ImagenDiagnostica(models.Model):
+    mascota = models.ForeignKey('clientes.Mascota', on_delete=models.CASCADE, related_name='imagenes')
+    archivo = models.ImageField(upload_to='imagenes_diagnosticas/%Y/%m/%d/')
+    descripcion = models.TextField()
+    fecha = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Imagen de {self.mascota.nombre} - {self.fecha.strftime('%d/%m/%Y')}"
+    
+    class Meta:
+        verbose_name = "Imagen Diagnóstica"
+        verbose_name_plural = "Imágenes Diagnósticas"
+        ordering = ['-fecha']
