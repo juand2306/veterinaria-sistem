@@ -18,16 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from reportes.views import dashboard_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('usuarios.urls')),
+    path('', dashboard_view, name='dashboard'),
     path('clientes/', include('clientes.urls')),
     path('consultas/', include('consultas.urls')),
     path('inventario/', include('inventario.urls')),
     path('reportes/', include('reportes.urls')),
     path('configuracion/', include('configuracion.urls')),
-]
+    path('usuarios/', include('usuarios.urls')),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Agregar rutas para archivos multimedia en desarrollo
 if settings.DEBUG:

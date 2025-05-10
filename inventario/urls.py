@@ -2,25 +2,25 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Rutas para vacunas
-    path('vacunas/', views.lista_vacunas, name='lista_vacunas'),
-    path('vacunas/crear/', views.crear_vacuna, name='crear_vacuna'),
-    path('vacunas/<int:pk>/editar/', views.editar_vacuna, name='editar_vacuna'),
-    path('vacunas/<int:pk>/eliminar/', views.eliminar_vacuna, name='eliminar_vacuna'),
+    # URLs para Vacunas
+    path('vacunas/', views.VacunaListView.as_view(), name='vacuna-list'),
+    path('vacunas/nueva/', views.VacunaCreateView.as_view(), name='vacuna-create'),
+    path('vacunas/<int:pk>/editar/', views.VacunaUpdateView.as_view(), name='vacuna-update'),
+    path('vacunas/<int:pk>/eliminar/', views.VacunaDeleteView.as_view(), name='vacuna-delete'),
     
-    # Rutas para vacunas aplicadas
-    path('vacunas/aplicar/', views.aplicar_vacuna, name='aplicar_vacuna'),
-    path('vacunas/aplicar/<int:mascota_id>/', views.aplicar_vacuna, name='aplicar_vacuna_mascota'),
-    path('vacunas/aplicadas/', views.lista_vacunas_aplicadas, name='lista_vacunas_aplicadas'),
+    # URLs para Vacunas Aplicadas
+    path('vacunas/aplicar/<int:mascota_id>/', views.VacunaAplicadaCreateView.as_view(), name='vacuna-aplicada-create'),
+    path('vacunas/aplicada/<int:pk>/editar/', views.VacunaAplicadaUpdateView.as_view(), name='vacuna-aplicada-update'),
+    path('vacunas/aplicada/<int:pk>/eliminar/', views.VacunaAplicadaDeleteView.as_view(), name='vacuna-aplicada-delete'),
     
-    # Rutas para productos
-    path('productos/', views.lista_productos, name='lista_productos'),
-    path('productos/crear/', views.crear_producto, name='crear_producto'),
-    path('productos/<int:pk>/editar/', views.editar_producto, name='editar_producto'),
-    path('productos/<int:pk>/eliminar/', views.eliminar_producto, name='eliminar_producto'),
+    # URLs para Productos
+    path('productos/', views.ProductoListView.as_view(), name='producto-list'),
+    path('productos/nuevo/', views.ProductoCreateView.as_view(), name='producto-create'),
+    path('productos/<int:pk>/editar/', views.ProductoUpdateView.as_view(), name='producto-update'),
+    path('productos/<int:pk>/eliminar/', views.ProductoDeleteView.as_view(), name='producto-delete'),
     
-    # Rutas para productos aplicados
-    path('productos/aplicar/', views.aplicar_producto, name='aplicar_producto'),
-    path('productos/aplicar/<int:mascota_id>/', views.aplicar_producto, name='aplicar_producto_mascota'),
-    path('productos/aplicados/', views.lista_productos_aplicados, name='lista_productos_aplicados'),
+    # URLs para Productos Aplicados
+    path('productos/aplicar/<int:mascota_id>/', views.ProductoAplicadoCreateView.as_view(), name='producto-aplicado-create'),
+    path('productos/aplicado/<int:pk>/editar/', views.ProductoAplicadoUpdateView.as_view(), name='producto-aplicada-update'),
+    path('productos/aplicado/<int:pk>/eliminar/', views.ProductoAplicadoDeleteView.as_view(), name='producto-aplicada-delete'),
 ]

@@ -2,22 +2,19 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Rutas para clientes
-    path('', views.lista_clientes, name='lista_clientes'),
-    path('crear/', views.crear_cliente, name='crear_cliente'),
-    path('<int:pk>/', views.detalle_cliente, name='detalle_cliente'),
-    path('<int:pk>/editar/', views.editar_cliente, name='editar_cliente'),
-    path('<int:pk>/eliminar/', views.eliminar_cliente, name='eliminar_cliente'),
+    # URLs para Clientes
+    path('', views.ClienteListView.as_view(), name='cliente-list'),
+    path('nuevo/', views.ClienteCreateView.as_view(), name='cliente-create'),
+    path('<int:pk>/', views.ClienteDetailView.as_view(), name='cliente-detail'),
+    path('<int:pk>/editar/', views.ClienteUpdateView.as_view(), name='cliente-update'),
+    path('<int:pk>/eliminar/', views.ClienteDeleteView.as_view(), name='cliente-delete'),
     
-    # Rutas para mascotas
-    path('mascota/crear/<int:cliente_id>/', views.crear_mascota, name='crear_mascota'),
-    path('mascota/<int:pk>/', views.detalle_mascota, name='detalle_mascota'),
-    path('mascota/<int:pk>/editar/', views.editar_mascota, name='editar_mascota'),
-    path('mascota/<int:pk>/eliminar/', views.eliminar_mascota, name='eliminar_mascota'),
+    # URLs para Mascotas
+    path('mascota/nueva/<int:cliente_id>/', views.MascotaCreateView.as_view(), name='mascota-create'),
+    path('mascota/<int:pk>/', views.MascotaDetailView.as_view(), name='mascota-detail'),
+    path('mascota/<int:pk>/editar/', views.MascotaUpdateView.as_view(), name='mascota-update'),
+    path('mascota/<int:pk>/eliminar/', views.MascotaDeleteView.as_view(), name='mascota-delete'),
     
-    # Ajax para cargar razas
-    path('cargar-razas/', views.cargar_razas, name='cargar_razas'),
-    
-    # Imágenes diagnósticas
-    path('mascota/<int:mascota_id>/agregar-imagen/', views.agregar_imagen, name='agregar_imagen'),
+    # URLs para APIs AJAX
+    path('api/razas/', views.get_razas_by_especie, name='get-razas'),
 ]
