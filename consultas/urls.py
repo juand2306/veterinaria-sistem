@@ -1,20 +1,23 @@
 from django.urls import path
 from . import views
 
+app_name = 'consultas'
+
 urlpatterns = [
     # URLs para Citas
-    path('citas/', views.CitaListView.as_view(), name='cita-list'),
-    path('citas/nueva/', views.CitaCreateView.as_view(), name='cita-create'),
-    path('citas/nueva/<int:mascota_id>/', views.CitaCreateView.as_view(), name='cita-create-mascota'),
-    path('citas/<int:pk>/', views.CitaDetailView.as_view(), name='cita-detail'),
-    path('citas/<int:pk>/editar/', views.CitaUpdateView.as_view(), name='cita-update'),
-    path('citas/<int:pk>/eliminar/', views.CitaDeleteView.as_view(), name='cita-delete'),
+    path('citas/', views.CitaListView.as_view(), name='lista_citas'),
+    path('citas/crear/', views.CitaCreateView.as_view(), name='crear_cita'),
+    path('mascota/<int:mascota_id>/cita/crear/', views.CitaCreateView.as_view(), name='crear_cita_mascota'),
+    path('cita/<int:pk>/', views.CitaDetailView.as_view(), name='detalle_cita'),
+    path('cita/<int:pk>/editar/', views.CitaUpdateView.as_view(), name='editar_cita'),
+    path('cita/<int:pk>/eliminar/', views.CitaDeleteView.as_view(), name='eliminar_cita'),
     
     # URLs para Consultas
-    path('citas/<int:cita_id>/consulta/nueva/', views.ConsultaCreateView.as_view(), name='consulta-create'),
-    path('consulta/<int:pk>/', views.ConsultaDetailView.as_view(), name='consulta-detail'),
-    path('consulta/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='consulta-update'),
+    path('cita/<int:cita_id>/consulta/crear/', views.ConsultaCreateView.as_view(), name='crear_consulta'),
+    path('consulta/<int:pk>/', views.ConsultaDetailView.as_view(), name='detalle_consulta'),
+    path('consulta/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='editar_consulta'),
+    path('consulta/<int:pk>/eliminar/', views.ConsultaDeleteView.as_view(), name='eliminar_consulta'),
     
-    # URLs para Imágenes Diagnósticas
-    path('imagenes/nueva/<int:mascota_id>/', views.ImagenDiagnosticaCreateView.as_view(), name='imagen-create'),
+    # URL para Historia Clínica
+    path('mascota/<int:mascota_id>/historia-clinica/', views.HistoriaClinicaView.as_view(), name='historia_clinica'),
 ]

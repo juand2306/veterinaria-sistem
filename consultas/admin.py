@@ -10,10 +10,10 @@ class CitaAdmin(admin.ModelAdmin):
 
 @admin.register(Consulta)
 class ConsultaAdmin(admin.ModelAdmin):
-    list_display = ('cita', 'fecha_consulta', 'diagnostico', 'es_eutanasia')
-    list_filter = ('es_eutanasia', 'fecha_consulta')
+    list_display = ('cita', 'fecha_registro', 'diagnostico', 'es_eutanasia')
+    list_filter = ('es_eutanasia', 'fecha_registro')
     search_fields = ('cita__mascota__nombre', 'diagnostico', 'tratamiento')
-    date_hierarchy = 'fecha_consulta'
+    date_hierarchy = 'fecha_registro'
 
 @admin.register(ImagenDiagnostica)
 class ImagenDiagnosticaAdmin(admin.ModelAdmin):
