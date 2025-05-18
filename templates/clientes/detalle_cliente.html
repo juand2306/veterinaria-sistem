@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cliente: {{ cliente.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_clientes' %}">Clientes</a></li>
+            <li class="breadcrumb-item active">{{ cliente.nombre }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Datos del Cliente</h5>
+                    <div>
+                        <a href="{% url 'clientes:editar_cliente' cliente.id %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'clientes:eliminar_cliente' cliente.id %}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Nombre:</dt>
+                        <dd class="col-sm-8">{{ cliente.nombre }}</dd>
+
+                        <dt class="col-sm-4">Teléfono:</dt>
+                        <dd class="col-sm-8">{{ cliente.telefono }}</dd>
+
+                        <dt class="col-sm-4">Correo:</dt>
+                        <dd class="col-sm-8">{{ cliente.correo|default:"-" }}</dd>
+
+                        <dt class="col-sm-4">Dirección:</dt>
+                        <dd class="col-sm-8">{{ cliente.direccion|default:"-"|linebreaks }}</dd>
+
+                        <dt class="col-sm-4">Fecha Registro:</dt>
+                        <dd class="col-sm-8">{{ cliente.fecha_registro|date:"d/m/Y H:i" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Mascotas</h5>
+                    <a href="{% url 'clientes:crear_mascota' cliente.id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus"></i> Nueva Mascota
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if mascotas %}
+                    <div class="list-group">
+                        {% for mascota in mascotas %}
+                        <a href="{% url 'clientes:detalle_mascota' mascota.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">{{ mascota.nombre }}</h5>
+                                <small>{{ mascota.fecha_nacimiento|date:"d/m/Y" }}</small>
+                            </div>
+                            <p class="mb-1">{{ mascota.especie.nombre }} - {{ mascota.raza.nombre }}</p>
+                            <small>{{ mascota.get_sexo_display }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        Este cliente no tiene mascotas registradas.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

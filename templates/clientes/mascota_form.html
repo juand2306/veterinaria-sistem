@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+{% if form.instance.id %}
+    Editar Mascota: {{ form.instance.nombre }}
+{% else %}
+    Nueva Mascota para {{ cliente.nombre }}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_clientes' %}">Clientes</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_cliente' cliente.id %}">{{ cliente.nombre }}</a></li>
+            <li class="breadcrumb-item active">
+                {% if form.instance.id %}Editar{% else %}Nueva{% endif %} Mascota
+            </li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                {% if form.instance.id %}
+                    Editar Mascota: {{ form.instance.nombre }}
+                {% else %}
+                    Nueva Mascota para {{ cliente.nombre }}
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body">
+            {% crispy form %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Función para cargar las razas según la especie seleccionada
+        function cargarRazas() {
+            const especieId = $('#id_especie').val();
+            if (especieId) {
+                $.ajax({
+                    url: '{% url "clientes:get_razas_by_especie" %}',
+                    data: {
+                        'especie_id': especieId
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#id_raza').empty();
+                        if (data.length > 0) {
+                            $.each(data, function(index, raza) {
+                                $('#id_raza').append($('<option></option>').attr('value', raza.id).text(raza.nombre));
+                            });
+                        } else {
+                            $('#id_raza').append($('<option></option>').text('No hay razas disponibles'));
+                        }
+                    }
+                });
+            } else {
+                $('#id_raza').empty();
+                $('#id_raza').append($('<option></option>').text('Primero seleccione una especie'));
+            }
+        }
+
+        // Cargar razas al cambiar la especie
+        $('#id_especie').change(cargarRazas);
+        
+        // Cargar razas al cargar la página (para edición)
+        cargarRazas();
+    });
+</script>
+{% endblock %}

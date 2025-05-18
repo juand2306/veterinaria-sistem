@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Consulta{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'consultas:lista_citas' %}">Citas</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'consultas:detalle_cita' consulta.cita.id %}">Detalle de Cita</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Consulta Médica</li>
+                </ol>
+            </nav>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-stethoscope me-2"></i>Consulta Médica
+                    </h4>
+                    <div>
+                        <a href="{% url 'consultas:editar_consulta' consulta.id %}" class="btn btn-light btn-sm me-1">
+                            <i class="fas fa-edit me-1"></i>Editar
+                        </a>
+                        <a href="{% url 'consultas:eliminar_consulta' consulta.id %}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i>Eliminar
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Información de la Mascota</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 150px">Nombre:</th>
+                                    <td>{{ consulta.cita.mascota.nombre }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Especie/Raza:</th>
+                                    <td>{{ consulta.cita.mascota.especie }} / {{ consulta.cita.mascota.raza }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Propietario:</th>
+                                    <td>{{ consulta.cita.mascota.propietario.nombre }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Información de la Cita</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 150px">Fecha de Cita:</th>
+                                    <td>{{ consulta.cita.fecha|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Motivo:</th>
+                                    <td>{{ consulta.cita.motivo }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tipo:</th>
+                                    <td>{% if consulta.cita.programada %}Programada{% else %}Urgencia{% endif %}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h5 class="card-title">Diagnóstico</h5>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            {{ consulta.diagnostico|linebreaks }}
+                        </div>
+                    </div>
+
+                    <h5 class="card-title">Tratamiento</h5>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            {{ consulta.tratamiento|linebreaks }}
+                        </div>
+                    </div>
+
+                    {% if consulta.notas %}
+                    <h5 class="card-title">Notas Adicionales</h5>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            {{ consulta.notas|linebreaks }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if consulta.es_eutanasia %}
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>EUTANASIA:</strong> Esta consulta ha sido registrada como una eutanasia.
+                        La mascota ha sido marcada como inactiva en el sistema.
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'consultas:detalle_cita' consulta.cita.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Volver a Cita
+                        </a>
+                        <a href="{% url 'consultas:historia_clinica' consulta.cita.mascota.id %}" class="btn btn-info">
+                            <i class="fas fa-book-medical me-1"></i>Ver Historia Clínica
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Fecha de registro: {{ consulta.fecha_registro|date:"d/m/Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

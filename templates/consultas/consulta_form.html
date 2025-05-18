@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.id %}Editar Consulta{% else %}Nueva Consulta{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-stethoscope me-2"></i>
+                        {% if form.instance.id %}Editar Consulta{% else %}Nueva Consulta{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if cita %}
+                    <div class="alert alert-info mb-4">
+                        <strong>Información de la Cita:</strong>
+                        <div class="mt-2">
+                            <p><strong>Mascota:</strong> {{ cita.mascota.nombre }} ({{ cita.mascota.especie }})</p>
+                            <p><strong>Propietario:</strong> {{ cita.mascota.propietario.nombre }}</p>
+                            <p><strong>Fecha de la Cita:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Motivo:</strong> {{ cita.motivo }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            {% if form.instance.id %}
+                            <a href="{% url 'consultas:detalle_consulta' form.instance.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i>Cancelar
+                            </a>
+                            {% else %}
+                            <a href="{% url 'consultas:detalle_cita' cita.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i>Cancelar
+                            </a>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Guardar Consulta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

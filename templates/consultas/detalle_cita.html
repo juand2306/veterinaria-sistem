@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Detalle de Cita{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'consultas:lista_citas' %}">Citas</a></li>
+            <li class="breadcrumb-item active">Detalle de Cita</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-calendar-day me-2"></i>Detalle de Cita</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+                <a href="{% url 'consultas:editar_cita' cita.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i>Editar
+                </a>
+                <a href="{% url 'consultas:eliminar_cita' cita.id %}" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i>Eliminar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-info-circle me-1"></i>Información de la Cita
+                </div>
+                <div class="card-body">
+                    <p><strong>Mascota:</strong> 
+                        <a href="{% url 'clientes:detalle_mascota' cita.mascota.id %}">
+                            {{ cita.mascota.nombre }}
+                        </a>
+                    </p>
+                    <p><strong>Propietario:</strong> 
+                        <a href="{% url 'clientes:detalle_cliente' cita.mascota.propietario.id %}">
+                            {{ cita.mascota.propietario.nombre }}
+                        </a>
+                    </p>
+                    <p><strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Tipo:</strong> 
+                        {% if cita.programada %}
+                        <span class="badge bg-primary">Programada</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">Urgencia</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Estado:</strong> 
+                        {% if cita.atendida %}
+                        <span class="badge bg-success">Atendida</span>
+                        {% else %}
+                        <span class="badge bg-danger">Pendiente</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Fecha de Creación:</strong> {{ cita.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-clipboard-list me-1"></i>Motivo de la Cita
+                </div>
+                <div class="card-body">
+                    <p>{{ cita.motivo|linebreaks }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Si existe una consulta asociada a esta cita, mostrar información -->
+    {% if consulta %}
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <i class="fas fa-stethoscope me-1"></i>Consulta Realizada
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <h5>Diagnóstico</h5>
+                    <p>{{ consulta.diagnostico|linebreaks }}</p>
+                </div>
+                
+                <div class="col-md-12 mb-3">
+                    <h5>Tratamiento</h5>
+                    <p>{{ consulta.tratamiento|linebreaks }}</p>
+                </div>
+                
+                {% if consulta.notas %}
+                <div class="col-md-12 mb-3">
+                    <h5>Notas Adicionales</h5>
+                    <p>{{ consulta.notas|linebreaks }}</p>
+                </div>
+                {% endif %}
+                
+                {% if consulta.es_eutanasia %}
+                <div class="col-md-12">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Esta consulta registra un procedimiento de eutanasia.
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="text-end mt-3">
+                <a href="{% url 'consultas:detalle_consulta' consulta.id %}" class="btn btn-outline-primary">
+                    <i class="fas fa-eye me-1"></i>Ver Consulta Completa
+                </a>
+                <a href="{% url 'consultas:editar_consulta' consulta.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-edit me-1"></i>Editar Consulta
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Si la cita no tiene consulta asociada y no está atendida, mostrar botón para registrar -->
+    {% if not cita.atendida %}
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <i class="fas fa-stethoscope me-1"></i>Registrar Consulta
+        </div>
+        <div class="card-body">
+            <p>Esta cita aún no ha sido atendida. Puedes registrar la consulta médica ahora.</p>
+            <a href="{% url 'consultas:crear_consulta' cita.id %}" class="btn btn-success">
+                <i class="fas fa-plus-circle me-1"></i>Registrar Consulta
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Enlace a la historia clínica de la mascota -->
+    <div class="text-center mt-4">
+        <a href="{% url 'consultas:historia_clinica' cita.mascota.id %}" class="btn btn-info">
+            <i class="fas fa-file-medical me-1"></i>Ver Historia Clínica Completa
+        </a>
+    </div>
+</div>
+{% endblock %}

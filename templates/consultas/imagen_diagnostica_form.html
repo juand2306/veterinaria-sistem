@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.id %}Editar Imagen Diagnóstica{% else %}Nueva Imagen Diagnóstica{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-x-ray me-2"></i>
+                        {% if form.instance.id %}Editar Imagen Diagnóstica{% else %}Nueva Imagen Diagnóstica{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if form.initial.mascota %}
+                    <div class="alert alert-info mb-4">
+                        <strong>Mascota:</strong> {{ form.initial.mascota.nombre }} ({{ form.initial.mascota.especie }})
+                        <br>
+                        <strong>Propietario:</strong> {{ form.initial.mascota.propietario.nombre }}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            {% if form.instance.id %}
+                            <a href="{% url 'consultas:historia_clinica' form.instance.mascota.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i>Cancelar
+                            </a>
+                            {% else %}
+                                {% if form.initial.mascota %}
+                                <a href="{% url 'consultas:historia_clinica' form.initial.mascota.id %}" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-times me-1"></i>Cancelar
+                                </a>
+                                {% else %}
+                                <a href="{% url 'consultas:lista_citas' %}" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-times me-1"></i>Cancelar
+                                </a>
+                                {% endif %}
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Guardar Imagen
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

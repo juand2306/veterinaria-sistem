@@ -7,8 +7,8 @@ from django.utils import timezone
 from django.db import transaction
 
 from clientes.models import Mascota
-from .models import Cita, Consulta
-from .forms import CitaForm, ConsultaForm
+from .models import Cita, Consulta, ImagenDiagnostica
+from .forms import CitaForm, ConsultaForm, ImagenDiagnosticaForm
 
 # Vistas para Citas
 class CitaListView(LoginRequiredMixin, ListView):
@@ -217,3 +217,17 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
             'productos_aplicados': productos_aplicados,
         }
         return render(request, self.template_name, context)
+    
+class ImagenDiagnosticaCreateView(LoginRequiredMixin, CreateView):
+    model = ImagenDiagnostica
+    form_class = ImagenDiagnosticaForm
+    template_name = 'consultas/imagen_diagnostica_form.html'
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        if 'mascota_id' in self.kwargs:
+            initial['mascota'] = self.kwargs['mascota_id']
+        return initial
+    
+    def get_success_url(self):
+        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])

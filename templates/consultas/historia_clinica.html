@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Historia Clínica de {{ mascota.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' mascota.id %}">Mascota</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Historia Clínica</li>
+                </ol>
+            </nav>
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-book-medical me-2"></i>Historia Clínica de {{ mascota.nombre }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información de la mascota -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Información de la Mascota</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 150px">Nombre:</th>
+                                    <td>{{ mascota.nombre }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Especie/Raza:</th>
+                                    <td>{{ mascota.especie }} / {{ mascota.raza }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Sexo:</th>
+                                    <td>{{ mascota.get_sexo_display }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha de Nacimiento:</th>
+                                    <td>{{ mascota.fecha_nacimiento|date:"d/m/Y" }} ({{ mascota.edad_calculada }})</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Información del Propietario</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th style="width: 150px">Nombre:</th>
+                                    <td>{{ mascota.propietario.nombre }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Teléfono:</th>
+                                    <td>{{ mascota.propietario.telefono }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ mascota.propietario.email }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pestañas para organizar la información -->
+                    <ul class="nav nav-tabs" id="historyTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="consultas-tab" data-bs-toggle="tab" data-bs-target="#consultas" type="button" role="tab" aria-controls="consultas" aria-selected="true">
+                                <i class="fas fa-stethoscope me-1"></i>Consultas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="vacunas-tab" data-bs-toggle="tab" data-bs-target="#vacunas" type="button" role="tab" aria-controls="vacunas" aria-selected="false">
+                                <i class="fas fa-syringe me-1"></i>Vacunas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="imagenes-tab" data-bs-toggle="tab" data-bs-target="#imagenes" type="button" role="tab" aria-controls="imagenes" aria-selected="false">
+                                <i class="fas fa-x-ray me-1"></i>Imágenes Diagnósticas
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3 border border-top-0 rounded-bottom" id="historyTabContent">
+                        <!-- Pestaña de Consultas -->
+                        <div class="tab-pane fade show active" id="consultas" role="tabpanel" aria-labelledby="consultas-tab">
+                            {% if consultas %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Diagnóstico</th>
+                                                <th>Tratamiento</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for consulta in consultas %}
+                                            <tr>
+                                                <td>{{ consulta.fecha_registro|date:"d/m/Y" }}</td>
+                                                <td>{{ consulta.diagnostico|truncatechars:70 }}</td>
+                                                <td>{{ consulta.tratamiento|truncatechars:70 }}</td>
+                                                <td>
+                                                    <a href="{% url 'consultas:detalle_consulta' consulta.id %}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye me-1"></i>Ver
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    No hay consultas registradas para esta mascota.
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Pestaña de Vacunas -->
+                        <div class="tab-pane fade" id="vacunas" role="tabpanel" aria-labelledby="vacunas-tab">
+                            {% if vacunas_aplicadas %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Vacuna</th>
+                                                <th>Próxima Aplicación</th>
+                                                <th>Notas</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for vacuna in vacunas_aplicadas %}
+                                            <tr>
+                                                <td>{{ vacuna.fecha|date:"d/m/Y" }}</td>
+                                                <td>{{ vacuna.vacuna.nombre }}</td>
+                                                <td>
+                                                    {% if vacuna.fecha_proxima %}
+                                                        {{ vacuna.fecha_proxima|date:"d/m/Y" }}
+                                                    {% else %}
+                                                        No requiere
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ vacuna.notas|default:"-" }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    No hay vacunas registradas para esta mascota.
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Pestaña de Imágenes Diagnósticas -->
+                        <div class="tab-pane fade" id="imagenes" role="tabpanel" aria-labelledby="imagenes-tab">
+                            {% if imagenes_diagnosticas %}
+                                <div class="row">
+                                    {% for imagen in imagenes_diagnosticas %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card">
+                                            <img src="{{ imagen.archivo.url }}" class="card-img-top" alt="Imagen diagnóstica">
+                                            <div class="card-body">
+                                                <h6 class="card-title">{{ imagen.fecha|date:"d/m/Y" }}</h6>
+                                                <p class="card-text">{{ imagen.descripcion|truncatechars:100 }}</p>
+                                                <a href="{{ imagen.archivo.url }}" class="btn btn-sm btn-primary" target="_blank">
+                                                    <i class="fas fa-search-plus me-1"></i>Ver Completa
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    No hay imágenes diagnósticas registradas para esta mascota.
+                                </div>
+                                
+                                <!-- Botón para agregar una nueva imagen diagnóstica -->
+                                <a href="#" class="btn btn-primary mt-2">
+                                    <i class="fas fa-plus me-1"></i>Agregar Imagen Diagnóstica
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'clientes:detalle_mascota' mascota.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Volver a Mascota
+                        </a>
+                        <a href="{% url 'consultas:crear_cita_mascota' mascota.id %}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus me-1"></i>Nueva Cita
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

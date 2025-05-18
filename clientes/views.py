@@ -145,7 +145,7 @@ class MascotaDeleteView(LoginRequiredMixin, DeleteView):
         messages.success(request, "Mascota eliminada exitosamente.")
         return super().delete(request, *args, **kwargs)
 
-@login_required
+@login_required 
 def get_razas_by_especie(request):
     especie_id = request.GET.get('especie_id')
     razas = Raza.objects.filter(especie_id=especie_id).values('id', 'nombre')

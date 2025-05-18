@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mascota: {{ mascota.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_clientes' %}">Clientes</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}">{{ mascota.cliente.nombre }}</a></li>
+            <li class="breadcrumb-item active">{{ mascota.nombre }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Foto</h5>
+                </div>
+                <div class="card-body text-center">
+                    {% if mascota.foto %}
+                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="img-fluid rounded" style="max-height: 250px;">
+                    {% else %}
+                    <img src="{% static 'img/mascota-default.png' %}" alt="Sin foto" class="img-fluid rounded" style="max-height: 250px;">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Datos de la Mascota</h5>
+                    <div>
+                        <a href="{% url 'clientes:editar_mascota' mascota.id %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a href="{% url 'clientes:eliminar_mascota' mascota.id %}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Nombre:</dt>
+                        <dd class="col-sm-8">{{ mascota.nombre }}</dd>
+
+                        <dt class="col-sm-4">Propietario:</dt>
+                        <dd class="col-sm-8">
+                            <a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}">
+                                {{ mascota.cliente.nombre }}
+                            </a>
+                        </dd>
+
+                        <dt class="col-sm-4">Especie:</dt>
+                        <dd class="col-sm-8">{{ mascota.especie.nombre }}</dd>
+
+                        <dt class="col-sm-4">Raza:</dt>
+                        <dd class="col-sm-8">{{ mascota.raza.nombre }}</dd>
+
+                        <dt class="col-sm-4">Sexo:</dt>
+                        <dd class="col-sm-8">{{ mascota.get_sexo_display }}</dd>
+
+                        <dt class="col-sm-4">Fecha de Nacimiento:</dt>
+                        <dd class="col-sm-8">{{ mascota.fecha_nacimiento|date:"d/m/Y" }}</dd>
+
+                        <dt class="col-sm-4">Edad:</dt>
+                        <dd class="col-sm-8">{{ mascota.edad }} años</dd>
+
+                        <dt class="col-sm-4">Estado:</dt>
+                        <dd class="col-sm-8">
+                            {% if mascota.activa %}
+                            <span class="badge bg-success">Activa</span>
+                            {% else %}
+                            <span class="badge bg-danger">Inactiva</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4">Fecha Registro:</dt>
+                        <dd class="col-sm-8">{{ mascota.fecha_registro|date:"d/m/Y H:i" }}</dd>
+                    </dl>
+                </div>
+            </div>
+            
+            <!-- Aquí podrías incluir enlaces a historiales clínicos, consultas, etc. -->
+            <div class="mt-3">
+                <a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Cliente
+                </a>
+                
+                <!-- Enlaces a otras secciones relacionadas con la mascota -->
+                <!-- Por ejemplo:
+                <a href="{% url 'consultas:historial_mascota' mascota.id %}" class="btn btn-info">
+                    <i class="fas fa-clipboard-list"></i> Historial Clínico
+                </a>
+                -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

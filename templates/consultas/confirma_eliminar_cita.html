@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Eliminación de Cita{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">¿Estás seguro de que deseas eliminar esta cita?</p>
+                    
+                    <div class="alert alert-warning">
+                        <h5>Detalles de la cita:</h5>
+                        <ul class="mb-0">
+                            <li><strong>Mascota:</strong> {{ cita.mascota.nombre }}</li>
+                            <li><strong>Propietario:</strong> {{ cita.mascota.propietario.nombre }}</li>
+                            <li><strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</li>
+                            <li><strong>Motivo:</strong> {{ cita.motivo|truncatechars:100 }}</li>
+                        </ul>
+                    </div>
+                    
+                    {% if cita.atendida %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <strong>¡Atención!</strong> Esta cita ya ha sido atendida y tiene una consulta asociada. 
+                        Si eliminas la cita, también se eliminará la consulta relacionada.
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'consultas:detalle_cita' cita.id %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i>Confirmar Eliminación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
