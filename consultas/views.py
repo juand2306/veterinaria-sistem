@@ -9,6 +9,8 @@ from django.db import transaction
 from clientes.models import Mascota
 from .models import Cita, Consulta, ImagenDiagnostica
 from .forms import CitaForm, ConsultaForm, ImagenDiagnosticaForm
+from inventario.models import VacunaAplicada, ProductoAplicado
+
 
 # Vistas para Citas
 class CitaListView(LoginRequiredMixin, ListView):
@@ -204,19 +206,70 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
     
     def get(self, request, mascota_id):
         mascota = get_object_or_404(Mascota, pk=mascota_id)
-        consultas = Consulta.objects.filter(cita__mascota=mascota).order_by('-cita__fecha')
         
-        # Podemos obtener vacunas y productos aplicados si hemos definido esos modelos
-        vacunas_aplicadas = []  # VacunaAplicada.objects.filter(mascota=mascota)
-        productos_aplicados = []  # ProductoAplicado.objects.filter(mascota=mascota)
+        # Obtener consultas con select_related para optimizar
+        consultas = Consulta.objects.filter(
+            cita__mascota=mascota
+        ).select_related('cita').order_by('-cita__fecha')
+        
+        # Obtener vacunas aplicadas
+        vacunas_aplicadas = VacunaAplicada.objects.filter(
+            mascota=mascota
+        ).select_related('vacuna').order_by('-fecha_aplicacion')
+        
+        # Obtener productos aplicados
+        productos_aplicados = ProductoAplicado.objects.filter(
+            mascota=mascota
+        ).select_related('producto').order_by('-fecha_aplicacion')
+        
+        # Obtener imágenes diagnósticas
+        imagenes_diagnosticas = ImagenDiagnostica.objects.filter(
+            mascota=mascota
+        ).order_by('-fecha')
         
         context = {
             'mascota': mascota,
             'consultas': consultas,
             'vacunas_aplicadas': vacunas_aplicadas,
             'productos_aplicados': productos_aplicados,
+            'imagenes_diagnosticas': imagenes_diagnosticas,
         }
         return render(request, self.template_name, context)
+    
+    def get_unified_timeline(self, mascota):
+    
+        events = []
+    
+        # Agregar consultas
+        for consulta in self.consultas:
+            events.append({
+                'fecha': consulta.cita.fecha,
+                'tipo': 'consulta',
+                'objeto': consulta,
+                'titulo': f'Consulta - {consulta.cita.fecha.strftime("%d/%m/%Y")}'
+            })
+        
+        # Agregar vacunas
+        for vacuna in self.vacunas_aplicadas:
+            events.append({
+                'fecha': vacuna.fecha_aplicacion,
+                'tipo': 'vacuna',
+                'objeto': vacuna,
+                'titulo': f'Vacuna: {vacuna.vacuna.nombre}'
+            })
+        
+        # Agregar productos
+        for producto in self.productos_aplicados:
+            events.append({
+                'fecha': producto.fecha_aplicacion,
+                'tipo': 'producto',
+                'objeto': producto,
+                'titulo': f'Producto: {producto.producto.nombre}'
+            })
+        
+        # Ordenar por fecha descendente
+        events.sort(key=lambda x: x['fecha'], reverse=True)
+        return events
     
 class ImagenDiagnosticaListView(LoginRequiredMixin, ListView):
     model = ImagenDiagnostica
