@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configurar Cuenta - Sistema Veterinario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .config-container {
+        min-height: 70vh;
+    }
+    .config-card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 15px;
+    }
+    .config-header {
+        background: linear-gradient(135deg, #fd7e14, #e83e8c);
+        color: white;
+        border-radius: 15px 15px 0 0;
+    }
+    .form-control:focus {
+        border-color: #fd7e14;
+        box-shadow: 0 0 0 0.2rem rgba(253, 126, 20, 0.25);
+    }
+    .btn-save {
+        background: linear-gradient(135deg, #fd7e14, #e83e8c);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-save:hover {
+        background: linear-gradient(135deg, #e83e8c, #6f42c1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #fd7e14;
+    }
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    .section-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #fd7e14, #e83e8c);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    .input-group-text {
+        background: linear-gradient(135deg, #fd7e14, #e83e8c);
+        color: white;
+        border: none;
+    }
+    .alert-info {
+        background: linear-gradient(135deg, rgba(253, 126, 20, 0.1), rgba(232, 62, 140, 0.1));
+        border: 1px solid rgba(253, 126, 20, 0.3);
+        border-radius: 12px;
+    }
+    .btn-cancel {
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container config-container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card config-card">
+                <div class="card-header config-header text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Configurar Cuenta
+                    </h3>
+                    <p class="mb-0">Actualiza tu información personal y profesional</p>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Información sobre los cambios -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Información:</strong> Los cambios realizados aquí se aplicarán inmediatamente a tu cuenta.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Sección: Información Personal -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <div class="section-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                Información Personal
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
+                                            <i class="fas fa-signature me-2"></i>Nombre
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-user"></i>
+                                            </span>
+                                            {{ user_form.first_name }}
+                                        </div>
+                                        {% if user_form.first_name.errors %}
+                                            <div class="text-danger mt-1">
+                                                {% for error in user_form.first_name.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
+                                            <i class="fas fa-signature me-2"></i>Apellido
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-user"></i>
+                                            </span>
+                                            {{ user_form.last_name }}
+                                        </div>
+                                        {% if user_form.last_name.errors %}
+                                            <div class="text-danger mt-1">
+                                                {% for error in user_form.last_name.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ user_form.email.id_for_label }}" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>Correo Electrónico
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-at"></i>
+                                    </span>
+                                    {{ user_form.email }}
+                                </div>
+                                {% if user_form.email.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in user_form.email.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Sección: Información Profesional -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <div class="section-icon">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                Información Profesional
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ perfil_form.cargo.id_for_label }}" class="form-label">
+                                            <i class="fas fa-user-tie me-2"></i>Cargo
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-briefcase"></i>
+                                            </span>
+                                            {{ perfil_form.cargo }}
+                                        </div>
+                                        {% if perfil_form.cargo.errors %}
+                                            <div class="text-danger mt-1">
+                                                {% for error in perfil_form.cargo.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ perfil_form.telefono.id_for_label }}" class="form-label">
+                                            <i class="fas fa-phone me-2"></i>Teléfono
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-phone"></i>
+                                            </span>
+                                            {{ perfil_form.telefono }}
+                                        </div>
+                                        {% if perfil_form.telefono.errors %}
+                                            <div class="text-danger mt-1">
+                                                {% for error in perfil_form.telefono.errors %}
+                                                    <small>{{ error }}</small>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Información de la cuenta (solo lectura) -->
+                        <div class="form-section">
+                            <h5 class="section-title">
+                                <div class="section-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                Información de la Cuenta
+                            </h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-user-circle me-2"></i>Nombre de Usuario
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-user-circle"></i>
+                                            </span>
+                                            <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-calendar-plus me-2"></i>Miembro desde
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-calendar"></i>
+                                            </span>
+                                            <input type="text" class="form-control" value="{{ user.date_joined|date:'d/m/Y' }}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'usuarios:perfil' %}" class="btn btn-outline-secondary btn-cancel me-md-2">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-save">
+                                <i class="fas fa-save me-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Enfocar el primer campo
+    $('#{{ user_form.first_name.id_for_label }}').focus();
+    
+    // Animación al cargar
+    $('.config-card').hide().fadeIn(800);
+    
+    // Validación del formulario
+    $('form').on('submit', function(e) {
+        const button = $(this).find('button[type="submit"]');
+        button.html('<i class="fas fa-spinner fa-spin me-2"></i>Guardando...').prop('disabled', true);
+    });
+    
+    // Formatear teléfono automáticamente
+    $('#{{ perfil_form.telefono.id_for_label }}').on('input', function() {
+        let value = $(this).val().replace(/\D/g, '');
+        if (value.length > 0) {
+            if (value.length <= 3) {
+                value = value;
+            } else if (value.length <= 6) {
+                value = value.substring(0, 3) + '-' + value.substring(3);
+            } else if (value.length <= 10) {
+                value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6);
+            } else {
+                value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6, 10);
+            }
+        }
+        $(this).val(value);
+    });
+    
+    // Validación de email en tiempo real
+    $('#{{ user_form.email.id_for_label }}').on('blur', function() {
+        const email = $(this).val();
+        if (email && !isValidEmail(email)) {
+            $(this).addClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+            $(this).after('<div class="invalid-feedback">Ingrese un email válido</div>');
+        } else {
+            $(this).removeClass('is-invalid');
+            $(this).next('.invalid-feedback').remove();
+        }
+    });
+    
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    // Efectos hover en secciones
+    $('.form-section').hover(
+        function() {
+            $(this).css('transform', 'translateY(-2px)');
+            $(this).css('box-shadow', '0 4px 8px rgba(0,0,0,0.1)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+            $(this).css('box-shadow', 'none');
+        }
+    );
+});
+</script>
+{% endblock %}
