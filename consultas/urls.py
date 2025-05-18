@@ -22,5 +22,10 @@ urlpatterns = [
     path('mascota/<int:mascota_id>/historia-clinica/', views.HistoriaClinicaView.as_view(), name='historia_clinica'),
     
     # URLs para Imágenes Diagnósticas
-    path('imagenes/nueva/<int:mascota_id>/', views.ImagenDiagnosticaCreateView.as_view(), name='imagen-create'),
+    path('imagenes/', views.ImagenDiagnosticaListView.as_view(), name='lista_imagenes_diagnosticas'),
+    path('mascota/<int:mascota_id>/imagenes/', views.ImagenDiagnosticaListView.as_view(), name='lista_imagenes_diagnosticas_mascota'),
+    path('mascota/<int:mascota_id>/imagenes/nueva/', views.ImagenDiagnosticaCreateView.as_view(), name='crear_imagen_diagnostica_mascota'),
+    path('imagen/<int:pk>/', views.ImagenDiagnosticaDetailView.as_view(), name='detalle_imagen_diagnostica'),
+    path('imagen/<int:pk>/editar/', views.ImagenDiagnosticaUpdateView.as_view(), name='editar_imagen_diagnostica'),
+    path('imagen/<int:pk>/eliminar/', views.ImagenDiagnosticaDeleteView.as_view(), name='eliminar_imagen_diagnostica'),
 ]

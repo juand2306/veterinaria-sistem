@@ -15,35 +15,49 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    {% if form.initial.mascota %}
+                    {% if mascota %}
                     <div class="alert alert-info mb-4">
-                        <strong>Mascota:</strong> {{ form.initial.mascota.nombre }} ({{ form.initial.mascota.especie }})
-                        <br>
-                        <strong>Propietario:</strong> {{ form.initial.mascota.propietario.nombre }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-paw me-1"></i>Mascota:</strong> {{ mascota.nombre }} ({{ mascota.especie }})
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="fas fa-user me-1"></i>Propietario:</strong> {{ mascota.propietario.nombre }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if form.instance.id and form.instance.archivo %}
+                    <div class="text-center mb-4">
+                        <img src="{{ form.instance.archivo.url }}" class="img-fluid rounded" alt="Imagen actual" style="max-height: 200px;">
+                        <p class="text-muted mt-2">Imagen actual</p>
                     </div>
                     {% endif %}
 
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         {{ form|crispy }}
+                        
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                             {% if form.instance.id %}
-                            <a href="{% url 'consultas:historia_clinica' form.instance.mascota.id %}" class="btn btn-outline-secondary me-md-2">
+                            <a href="{% url 'consultas:detalle_imagen_diagnostica' form.instance.pk %}" class="btn btn-outline-secondary me-md-2">
                                 <i class="fas fa-times me-1"></i>Cancelar
                             </a>
                             {% else %}
-                                {% if form.initial.mascota %}
-                                <a href="{% url 'consultas:historia_clinica' form.initial.mascota.id %}" class="btn btn-outline-secondary me-md-2">
+                                {% if mascota %}
+                                <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' mascota.pk %}" class="btn btn-outline-secondary me-md-2">
                                     <i class="fas fa-times me-1"></i>Cancelar
                                 </a>
                                 {% else %}
-                                <a href="{% url 'consultas:lista_citas' %}" class="btn btn-outline-secondary me-md-2">
+                                <a href="{% url 'consultas:lista_imagenes_diagnosticas' %}" class="btn btn-outline-secondary me-md-2">
                                     <i class="fas fa-times me-1"></i>Cancelar
                                 </a>
                                 {% endif %}
                             {% endif %}
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Guardar Imagen
+                                <i class="fas fa-save me-1"></i>
+                                {% if form.instance.id %}Actualizar Imagen{% else %}Guardar Imagen{% endif %}
                             </button>
                         </div>
                     </form>
@@ -52,4 +66,32 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+// Previsualización de imagen
+document.getElementById('id_archivo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // Crear o actualizar la previsualización
+            let preview = document.getElementById('image-preview');
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.id = 'image-preview';
+                preview.className = 'text-center mt-3 mb-3';
+                e.target.closest('form').insertBefore(preview, e.target.closest('form').querySelector('.d-grid'));
+            }
+            preview.innerHTML = `
+                <img src="${e.target.result}" class="img-fluid rounded" alt="Previsualización" style="max-height: 200px;">
+                <p class="text-muted mt-2">Previsualización de la nueva imagen</p>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}
+
 {% endblock %}

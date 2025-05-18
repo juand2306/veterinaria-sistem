@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Imagen Diagnóstica{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                    </div>
+                    
+                    <div class="text-center mb-4">
+                        <img src="{{ imagen.archivo.url }}" class="img-fluid rounded" alt="Imagen diagnóstica" style="max-height: 200px;">
+                    </div>
+                    
+                    <p class="text-center">
+                        ¿Estás seguro de que deseas eliminar esta imagen diagnóstica de <strong>{{ imagen.mascota.nombre }}</strong>?
+                    </p>
+                    
+                    <div class="mb-3">
+                        <strong>Descripción:</strong> {{ imagen.descripcion|truncatechars:100 }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Fecha:</strong> {{ imagen.fecha|date:"d/m/Y H:i" }}
+                    </div>
+                    
+                    <form method="post" class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        {% csrf_token %}
+                        <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' imagen.mascota.pk %}" 
+                           class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Eliminar Imagen
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -66,7 +66,8 @@ class ImagenDiagnosticaForm(forms.ModelForm):
         model = ImagenDiagnostica
         fields = ['mascota', 'archivo', 'descripcion']
         widgets = {
-            'descripcion': forms.Textarea(attrs={'rows': 3}),
+            'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describe la imagen diagnóstica...'}),
+            'archivo': forms.FileInput(attrs={'accept': 'image/*'}),
         }
     
     def __init__(self, *args, **kwargs):
@@ -75,14 +76,18 @@ class ImagenDiagnosticaForm(forms.ModelForm):
         self.helper.form_method = 'post'
         self.helper.form_enctype = 'multipart/form-data'
         
-        # Si se proporciona una mascota en la instancia, pre-establecerla
+        # Si se proporciona una mascota en initial, pre-establecerla y ocultarla
         if 'initial' in kwargs and 'mascota' in kwargs['initial']:
             self.fields['mascota'].initial = kwargs['initial']['mascota']
-            self.fields['mascota'].widget.attrs['readonly'] = True
+            self.fields['mascota'].widget = forms.HiddenInput()
+        
+        # Mejorar etiquetas y placeholder
+        self.fields['archivo'].label = 'Imagen diagnóstica'
+        self.fields['descripcion'].label = 'Descripción'
         
         self.helper.layout = Layout(
             'mascota',
             'archivo',
             'descripcion',
-            Submit('submit', 'Guardar')
+            Submit('submit', 'Guardar Imagen', css_class='btn btn-primary')
         )

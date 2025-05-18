@@ -218,6 +218,26 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
         }
         return render(request, self.template_name, context)
     
+class ImagenDiagnosticaListView(LoginRequiredMixin, ListView):
+    model = ImagenDiagnostica
+    template_name = 'consultas/lista_imagenes_diagnosticas.html'
+    context_object_name = 'imagenes'
+    
+    def get_queryset(self):
+        mascota_id = self.kwargs.get('mascota_id')
+        if mascota_id:
+            mascota = get_object_or_404(Mascota, pk=mascota_id)
+            return ImagenDiagnostica.objects.filter(mascota=mascota).order_by('-fecha')
+        return ImagenDiagnostica.objects.all().order_by('-fecha')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mascota_id = self.kwargs.get('mascota_id')
+        if mascota_id:
+            context['mascota'] = get_object_or_404(Mascota, pk=mascota_id)
+        return context
+
+
 class ImagenDiagnosticaCreateView(LoginRequiredMixin, CreateView):
     model = ImagenDiagnostica
     form_class = ImagenDiagnosticaForm
@@ -225,9 +245,69 @@ class ImagenDiagnosticaCreateView(LoginRequiredMixin, CreateView):
     
     def get_initial(self):
         initial = super().get_initial()
-        if 'mascota_id' in self.kwargs:
-            initial['mascota'] = self.kwargs['mascota_id']
+        mascota_id = self.kwargs.get('mascota_id')
+        if mascota_id:
+            mascota = get_object_or_404(Mascota, pk=mascota_id)
+            initial['mascota'] = mascota
         return initial
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mascota_id = self.kwargs.get('mascota_id')
+        if mascota_id:
+            context['mascota'] = get_object_or_404(Mascota, pk=mascota_id)
+        return context
+    
+    def form_valid(self, form):
+        mascota_id = self.kwargs.get('mascota_id')
+        if mascota_id:
+            mascota = get_object_or_404(Mascota, pk=mascota_id)
+            form.instance.mascota = mascota
+        
+        messages.success(self.request, "Imagen diagnóstica guardada exitosamente.")
+        return super().form_valid(form)
+    
     def get_success_url(self):
-        return reverse_lazy('mascota-detail', args=[self.object.mascota.pk])
+        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', kwargs={'mascota_id': self.object.mascota.pk})
+
+
+class ImagenDiagnosticaDetailView(LoginRequiredMixin, DetailView):
+    model = ImagenDiagnostica
+    template_name = 'consultas/detalle_imagen_diagnostica.html'
+    context_object_name = 'imagen'
+
+
+class ImagenDiagnosticaUpdateView(LoginRequiredMixin, UpdateView):
+    model = ImagenDiagnostica
+    form_class = ImagenDiagnosticaForm
+    template_name = 'consultas/imagen_diagnostica_form.html'
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['mascota'] = self.object.mascota
+        return initial
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['mascota'] = self.object.mascota
+        return context
+    
+    def form_valid(self, form):
+        messages.success(self.request, "Imagen diagnóstica actualizada exitosamente.")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', kwargs={'mascota_id': self.object.mascota.pk})
+
+
+class ImagenDiagnosticaDeleteView(LoginRequiredMixin, DeleteView):
+    model = ImagenDiagnostica
+    template_name = 'consultas/confirmar_eliminar_imagen.html'
+    context_object_name = 'imagen'
+    
+    def get_success_url(self):
+        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', kwargs={'mascota_id': self.object.mascota.pk})
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Imagen diagnóstica eliminada exitosamente.")
+        return super().delete(request, *args, **kwargs)
