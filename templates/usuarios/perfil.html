@@ -1,0 +1,368 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - Sistema Veterinario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .perfil-container {
+        min-height: 70vh;
+    }
+    .perfil-card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 15px;
+    }
+    .perfil-header {
+        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        color: white;
+        border-radius: 15px 15px 0 0;
+    }
+    .avatar-section {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    .avatar-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: white;
+        margin: 0 auto;
+        border: 4px solid white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .info-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #6f42c1;
+    }
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    .section-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+    }
+    .info-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        width: 150px;
+        flex-shrink: 0;
+    }
+    .info-value {
+        color: #6c757d;
+        flex-grow: 1;
+    }
+    .info-value.empty {
+        color: #adb5bd;
+        font-style: italic;
+    }
+    .action-buttons {
+        text-align: center;
+        margin-top: 2rem;
+    }
+    .btn-config {
+        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .btn-config:hover {
+        background: linear-gradient(135deg, #e83e8c, #fd7e14);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: white;
+    }
+    .btn-password {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    .btn-password:hover {
+        background: linear-gradient(135deg, #20c997, #17a2b8);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: white;
+    }
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #6f42c1;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #6f42c1;
+    }
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container perfil-container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card perfil-card">
+                <div class="card-header perfil-header text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>Mi Perfil
+                    </h3>
+                    <p class="mb-0">Información de tu cuenta personal</p>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Avatar y nombre principal -->
+                    <div class="avatar-section text-center">
+                        <div class="avatar-circle">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h4 class="mt-3 mb-1">
+                            {% if user.first_name and user.last_name %}
+                                {{ user.first_name }} {{ user.last_name }}
+                            {% else %}
+                                {{ user.username }}
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-stethoscope me-1"></i>
+                            {{ perfil.cargo|default:"Veterinario" }}
+                        </p>
+                    </div>
+                    
+                    <!-- Información personal -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            Información Personal
+                        </h5>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-user-circle me-2"></i>Usuario:
+                            </span>
+                            <span class="info-value">{{ user.username }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-signature me-2"></i>Nombre:
+                            </span>
+                            <span class="info-value {% if not user.first_name %}empty{% endif %}">
+                                {{ user.first_name|default:"No especificado" }}
+                            </span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-signature me-2"></i>Apellido:
+                            </span>
+                            <span class="info-value {% if not user.last_name %}empty{% endif %}">
+                                {{ user.last_name|default:"No especificado" }}
+                            </span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-envelope me-2"></i>Email:
+                            </span>
+                            <span class="info-value {% if not user.email %}empty{% endif %}">
+                                {{ user.email|default:"No especificado" }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Información profesional -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            Información Profesional
+                        </h5>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-user-tie me-2"></i>Cargo:
+                            </span>
+                            <span class="info-value {% if not perfil.cargo %}empty{% endif %}">
+                                {{ perfil.cargo|default:"No especificado" }}
+                            </span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-phone me-2"></i>Teléfono:
+                            </span>
+                            <span class="info-value {% if not perfil.telefono %}empty{% endif %}">
+                                {{ perfil.telefono|default:"No especificado" }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Información de la cuenta -->
+                    <div class="info-section">
+                        <h5 class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            Información de la Cuenta
+                        </h5>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-calendar-plus me-2"></i>Miembro desde:
+                            </span>
+                            <span class="info-value">{{ user.date_joined|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-clock me-2"></i>Último acceso:
+                            </span>
+                            <span class="info-value">
+                                {% if user.last_login %}
+                                    {{ user.last_login|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    Nunca
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">
+                                <i class="fas fa-check-circle me-2"></i>Estado:
+                            </span>
+                            <span class="info-value">
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Activo
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Estadísticas rápidas (opcional) -->
+                    <div class="row mt-4">
+                        <div class="col-md-4">
+                            <div class="stats-card text-center">
+                                <div class="stat-value">
+                                    <i class="fas fa-paw"></i>
+                                </div>
+                                <div class="stat-label">Sistema Veterinario</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card text-center">
+                                <div class="stat-value">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="stat-label">Cuenta Segura</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card text-center">
+                                <div class="stat-value">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="stat-label">Cuidando Mascotas</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de acción -->
+                    <div class="action-buttons">
+                        <a href="{% url 'usuarios:configurar_cuenta' %}" class="btn btn-config me-3">
+                            <i class="fas fa-cog me-2"></i>Configurar Cuenta
+                        </a>
+                        <a href="{% url 'usuarios:cambiar_password' %}" class="btn btn-password">
+                            <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animación al cargar
+    $('.perfil-card').hide().fadeIn(800);
+    
+    // Efectos hover en las tarjetas de estadísticas
+    $('.stats-card').hover(
+        function() {
+            $(this).css('transform', 'translateY(-5px)');
+            $(this).css('box-shadow', '0 8px 16px rgba(0,0,0,0.1)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+            $(this).css('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
+        }
+    );
+    
+    // Efectos hover en secciones de información
+    $('.info-section').hover(
+        function() {
+            $(this).css('transform', 'translateY(-2px)');
+            $(this).css('box-shadow', '0 4px 8px rgba(0,0,0,0.1)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+            $(this).css('box-shadow', 'none');
+        }
+    );
+    
+    // Efectos en el avatar
+    $('.avatar-circle').hover(
+        function() {
+            $(this).css('transform', 'scale(1.05)');
+        },
+        function() {
+            $(this).css('transform', 'scale(1)');
+        }
+    );
+});
+</script>
+{% endblock %}

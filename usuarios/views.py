@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.contrib.auth.models import User
 from django import forms
+from django.core.exceptions import ValidationError
+import re
 from .models import PerfilUsuario
 
 
@@ -17,23 +19,41 @@ class CustomUserForm(forms.ModelForm):
         max_length=30, 
         required=False,
         label='Nombre',
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingrese su nombre'
+        })
     )
     last_name = forms.CharField(
         max_length=30, 
         required=False,
         label='Apellido',
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingrese su apellido'
+        })
     )
     email = forms.EmailField(
         required=False,
         label='Correo Electrónico',
-        widget=forms.EmailInput(attrs={'class': 'form-control'})
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'correo@ejemplo.com'
+        })
     )
     
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            # Verificar que no exista otro usuario con el mismo email (excluyendo el actual)
+            existing_user = User.objects.filter(email=email).exclude(pk=self.instance.pk)
+            if existing_user.exists():
+                raise ValidationError("Ya existe un usuario con este correo electrónico.")
+        return email
 
 
 class PerfilUsuarioForm(forms.ModelForm):
@@ -42,18 +62,33 @@ class PerfilUsuarioForm(forms.ModelForm):
         max_length=15,
         required=False,
         label='Teléfono',
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: 123-456-7890'
+        })
     )
     cargo = forms.CharField(
         max_length=100,
         required=False,
         label='Cargo',
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ej: Veterinario Principal'
+        })
     )
     
     class Meta:
         model = PerfilUsuario
         fields = ['telefono', 'cargo']
+    
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if telefono:
+            # Limpiar el teléfono de caracteres no numéricos para validación
+            numeros_solo = re.sub(r'\D', '', telefono)
+            if len(numeros_solo) < 7 or len(numeros_solo) > 15:
+                raise ValidationError("El teléfono debe tener entre 7 y 15 números.")
+        return telefono
 
 
 class CustomLoginView(LoginView):
@@ -62,7 +97,7 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
     
     def form_valid(self, form):
-        messages.success(self.request, f"Bienvenido/a {form.get_user().username}!")
+        messages.success(self.request, f"¡Bienvenido/a {form.get_user().get_full_name() or form.get_user().username}!")
         return super().form_valid(form)
     
     def form_invalid(self, form):
@@ -70,6 +105,9 @@ class CustomLoginView(LoginView):
         return super().form_invalid(form)
     
     def get_success_url(self):
+        next_url = self.request.GET.get('next')
+        if next_url:
+            return next_url
         return reverse_lazy('reportes:dashboard')
 
 
@@ -77,18 +115,23 @@ class CustomLogoutView(LogoutView):
     next_page = 'usuarios:login'
     
     def dispatch(self, request, *args, **kwargs):
-        messages.success(request, "Has cerrado sesión exitosamente.")
+        if request.user.is_authenticated:
+            messages.success(request, f"Hasta luego, {request.user.get_full_name() or request.user.username}. Has cerrado sesión exitosamente.")
         return super().dispatch(request, *args, **kwargs)
 
 
 class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'usuarios/cambiar_password.html'
     form_class = PasswordChangeForm
-    success_url = reverse_lazy('reportes:dashboard')
+    success_url = reverse_lazy('usuarios:perfil')
     
     def form_valid(self, form):
         messages.success(self.request, "Tu contraseña ha sido actualizada exitosamente.")
         return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        messages.error(self.request, "Por favor, corrige los errores en el formulario.")
+        return super().form_invalid(form)
 
 
 class PerfilUsuarioView(LoginRequiredMixin, TemplateView):
@@ -98,11 +141,15 @@ class PerfilUsuarioView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
-        try:
-            context['perfil'] = self.request.user.perfil
-        except PerfilUsuario.DoesNotExist:
-            # Crear perfil si no existe
-            context['perfil'] = PerfilUsuario.objects.create(user=self.request.user)
+        
+        # Obtener o crear perfil si no existe
+        perfil, created = PerfilUsuario.objects.get_or_create(user=self.request.user)
+        context['perfil'] = perfil
+        
+        # Si se creó un nuevo perfil, informar al usuario
+        if created:
+            messages.info(self.request, "Se ha creado tu perfil. Puedes actualizarlo con tu información personal.")
+        
         return context
 
 
@@ -112,48 +159,60 @@ class ConfigurarCuentaView(LoginRequiredMixin, FormView):
     
     def get_initial(self):
         initial = super().get_initial()
+        user = self.request.user
         initial.update({
-            'first_name': self.request.user.first_name,
-            'last_name': self.request.user.last_name,
-            'email': self.request.user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
         })
-        try:
-            perfil = self.request.user.perfil
-            initial.update({
-                'telefono': perfil.telefono,
-                'cargo': perfil.cargo,
-            })
-        except PerfilUsuario.DoesNotExist:
-            pass
+        
+        # Obtener o crear perfil
+        perfil, created = PerfilUsuario.objects.get_or_create(user=user)
+        initial.update({
+            'telefono': perfil.telefono,
+            'cargo': perfil.cargo,
+        })
+        
         return initial
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Crear formularios si no existen
         if not hasattr(self, 'user_form'):
-            self.user_form = CustomUserForm(initial=self.get_initial())
+            self.user_form = CustomUserForm(instance=self.request.user, initial=self.get_initial())
         if not hasattr(self, 'perfil_form'):
-            self.perfil_form = PerfilUsuarioForm(initial=self.get_initial())
+            perfil, created = PerfilUsuario.objects.get_or_create(user=self.request.user)
+            self.perfil_form = PerfilUsuarioForm(instance=perfil, initial=self.get_initial())
         
         context['user_form'] = self.user_form
         context['perfil_form'] = self.perfil_form
         return context
     
     def post(self, request, *args, **kwargs):
+        # Crear formularios con datos del POST
         self.user_form = CustomUserForm(request.POST, instance=request.user)
         
         # Obtener o crear perfil
-        try:
-            perfil = request.user.perfil
-        except PerfilUsuario.DoesNotExist:
-            perfil = PerfilUsuario.objects.create(user=request.user)
-        
+        perfil, created = PerfilUsuario.objects.get_or_create(user=request.user)
         self.perfil_form = PerfilUsuarioForm(request.POST, instance=perfil)
         
+        # Validar ambos formularios
         if self.user_form.is_valid() and self.perfil_form.is_valid():
-            self.user_form.save()
-            self.perfil_form.save()
+            # Guardar información del usuario
+            user = self.user_form.save()
+            
+            # Guardar información del perfil
+            perfil = self.perfil_form.save(commit=False)
+            perfil.user = user
+            perfil.save()
+            
             messages.success(request, "Tu información ha sido actualizada exitosamente.")
             return redirect('usuarios:perfil')
         else:
+            # Si hay errores, mostrar mensaje y renderizar formulario con errores
             messages.error(request, "Por favor, corrige los errores en el formulario.")
             return self.render_to_response(self.get_context_data())
+    
+    def get_success_url(self):
+        return reverse_lazy('usuarios:perfil')
