@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Sistema Veterinario{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </h2>
+        </div>
+    </div>
+
+    <!-- Métricas principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Citas Hoy</h5>
+                            <h2 class="mb-0">{{ citas_hoy }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-day fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Citas Mañana</h5>
+                            <h2 class="mb-0">{{ citas_manana }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-plus fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Citas Esta Semana</h5>
+                            <h2 class="mb-0">{{ citas_semana }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calendar-week fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="card-title">Total Mascotas</h5>
+                            <h2 class="mb-0">{{ total_mascotas }}</h2>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-paw fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas importantes -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-syringe me-2"></i>Vacunas Próximas a Vencer
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if vacunas_proximas > 0 %}
+                        <div class="alert alert-warning">
+                            <strong>{{ vacunas_proximas }}</strong> vacunas próximas a vencer en los próximos 7 días.
+                        </div>
+                        <a href="{% url 'reportes:reporte_vacunas' %}" class="btn btn-warning">
+                            Ver Detalles
+                        </a>
+                    {% else %}
+                        <div class="text-muted">No hay vacunas próximas a vencer.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-pills me-2"></i>Antiparasitarios Próximos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if antiparasitarios_proximos > 0 %}
+                        <div class="alert alert-warning">
+                            <strong>{{ antiparasitarios_proximos }}</strong> antiparasitarios próximos a vencer en los próximos 7 días.
+                        </div>
+                        <a href="{% url 'reportes:reporte_productos' %}" class="btn btn-warning">
+                            Ver Detalles
+                        </a>
+                    {% else %}
+                        <div class="text-muted">No hay antiparasitarios próximos a vencer.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accesos rápidos a reportes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Reportes Disponibles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'reportes:reporte_citas' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-calendar-alt fa-2x d-block mb-2"></i>
+                                Reporte de Citas
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'reportes:reporte_vacunas' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-syringe fa-2x d-block mb-2"></i>
+                                Reporte de Vacunas
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'reportes:reporte_productos' %}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-pills fa-2x d-block mb-2"></i>
+                                Reporte de Productos
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'reportes:reporte_eutanasias' %}" class="btn btn-outline-dark w-100">
+                                <i class="fas fa-heart-broken fa-2x d-block mb-2"></i>
+                                Reporte de Eutanasias
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

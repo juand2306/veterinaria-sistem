@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reporte de Citas - Sistema Veterinario{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-calendar-alt me-2"></i>Reporte de Citas
+            </h2>
+        </div>
+    </div>
+
+    <!-- Formulario de filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                   value="{{ fecha_inicio|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                   value="{{ fecha_fin|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-1"></i>Filtrar
+                                </button>
+                                <a href="{% url 'reportes:reporte_citas' %}" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-undo me-1"></i>Limpiar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    <h5 class="mb-0">
+                        Resultados ({{ total_citas }} citas encontradas)
+                    </h5>
+                    {% if citas %}
+                    <button class="btn btn-sm btn-success" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i>Imprimir
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if citas %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Cliente</th>
+                                    <th>Mascota</th>
+                                    <th>Motivo</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cita in citas %}
+                                <tr>
+                                    <td>{{ cita.fecha|date:'d/m/Y' }}</td>
+                                    <td>{{ cita.fecha|time:'H:i' }}</td>
+                                    <td>{{ cita.mascota.cliente.nombre }} {{ cita.mascota.cliente.apellido }}</td>
+                                    <td>{{ cita.mascota.nombre }}</td>
+                                    <td>{{ cita.motivo|truncatechars:50 }}</td>
+                                    <td>
+                                        {% if cita.estado == 'completada' %}
+                                            <span class="badge bg-success">Completada</span>
+                                        {% elif cita.estado == 'cancelada' %}
+                                            <span class="badge bg-danger">Cancelada</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Programada</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No se encontraron citas en el rango de fechas seleccionado.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
