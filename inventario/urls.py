@@ -5,6 +5,7 @@ app_name = 'inventario'
 
 urlpatterns = [
     # URLs para Vacunas
+    path('', views.dashboard_inventario, name='dashboard_inventario'),
     path('vacunas/', views.VacunaListView.as_view(), name='lista_vacunas'),
     path('vacunas/crear/', views.VacunaCreateView.as_view(), name='crear_vacuna'),
     path('vacuna/<int:pk>/', views.VacunaDetailView.as_view(), name='detalle_vacuna'),

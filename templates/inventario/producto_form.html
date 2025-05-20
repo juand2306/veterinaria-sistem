@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.id %}Editar{% else %}Nuevo{% endif %} Producto | Sistema Veterinario{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'inventario:lista_productos' %}">Productos</a></li>
+            {% if form.instance.id %}
+            <li class="breadcrumb-item"><a href="{% url 'inventario:detalle_producto' form.instance.id %}">{{ form.instance.nombre }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Editar</li>
+            {% else %}
+            <li class="breadcrumb-item active" aria-current="page">Nuevo Producto</li>
+            {% endif %}
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h1 class="h5 card-title mb-0">
+                <i class="fas {% if form.instance.id %}fa-edit{% else %}fa-plus{% endif %} me-2"></i>
+                {% if form.instance.id %}
+                    Editar Producto
+                {% else %}
+                    Nuevo Producto
+                {% endif %}
+            </h1>
+        </div>
+        <div class="card-body">
+            {% crispy form %}
+        </div>
+    </div>
+</div>
+{% endblock %}

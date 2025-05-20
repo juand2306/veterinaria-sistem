@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Aplicación{% else %}Aplicar Vacuna{% endif %} | Sistema Veterinario
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_mascotas' %}">Mascotas</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' mascota.id %}">{{ mascota.nombre }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">
+                {% if form.instance.pk %}Editar Aplicación de Vacuna{% else %}Aplicar Vacuna{% endif %}
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h1 class="h5 card-title mb-0">
+                        {% if form.instance.pk %}
+                            <i class="fas fa-edit me-2"></i>Editar Aplicación de Vacuna
+                        {% else %}
+                            <i class="fas fa-syringe me-2"></i>Aplicar Vacuna a {{ mascota.nombre }}
+                        {% endif %}
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <!-- Información básica de la mascota -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-paw fa-2x text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h5 class="mb-1">{{ mascota.nombre }}</h5>
+                                    <p class="mb-0 text-muted">
+                                        {{ mascota.especie }} • {{ mascota.raza }} • {{ mascota.get_sexo_display }} • 
+                                        {% if mascota.fecha_nacimiento %}
+                                            {{ mascota.edad }} años
+                                        {% else %}
+                                            Edad desconocida
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Campo oculto para mascota -->
+                        {{ form.mascota }}
+                        
+                        <div class="mb-3">
+                            {{ form.vacuna|as_crispy_field }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.fecha_aplicacion|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.fecha_proxima|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.observaciones|as_crispy_field }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'clientes:detalle_mascota' mascota.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                            </a>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>
+                                {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

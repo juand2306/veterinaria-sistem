@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Dashboard de Inventario | Sistema Veterinario{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .card-icon {
+        height: 48px;
+        width: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    .upcoming-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="h3 mb-4">Dashboard de Inventario</h1>
+    
+    <!-- Tarjetas de resumen -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card h-100 border-left-primary shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon bg-primary bg-opacity-25 text-primary me-3">
+                            <i class="fas fa-syringe fa-fw"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Total Vacunas</h6>
+                            <h4 class="mb-0">{{ total_vacunas }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{% url 'inventario:lista_vacunas' %}" class="text-decoration-none">Ver detalles <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card h-100 border-left-success shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon bg-success bg-opacity-25 text-success me-3">
+                            <i class="fas fa-pills fa-fw"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Total Productos</h6>
+                            <h4 class="mb-0">{{ total_productos }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="{% url 'inventario:lista_productos' %}" class="text-decoration-none">Ver detalles <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card h-100 border-left-info shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon bg-info bg-opacity-25 text-info me-3">
+                            <i class="fas fa-calendar-check fa-fw"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Vacunaciones Próximas</h6>
+                            <h4 class="mb-0">{{ proximas_vacunaciones }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="#proximas-vacunaciones" class="text-decoration-none">Ver detalles <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card h-100 border-left-warning shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon bg-warning bg-opacity-25 text-warning me-3">
+                            <i class="fas fa-bug fa-fw"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-muted mb-0">Aplicaciones Próximas</h6>
+                            <h4 class="mb-0">{{ proximas_aplicaciones }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                    <a href="#proximas-aplicaciones" class="text-decoration-none">Ver detalles <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Accesos rápidos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'inventario:crear_vacuna' %}" class="btn btn-outline-primary d-flex align-items-center justify-content-between w-100 p-3">
+                                <span><i class="fas fa-plus-circle me-2"></i> Nueva Vacuna</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'inventario:crear_producto' %}" class="btn btn-outline-success d-flex align-items-center justify-content-between w-100 p-3">
+                                <span><i class="fas fa-plus-circle me-2"></i> Nuevo Producto</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'inventario:lista_vacunas' %}" class="btn btn-outline-info d-flex align-items-center justify-content-between w-100 p-3">
+                                <span><i class="fas fa-list me-2"></i> Ver Vacunas</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'inventario:lista_productos' %}" class="btn btn-outline-warning d-flex align-items-center justify-content-between w-100 p-3">
+                                <span><i class="fas fa-list me-2"></i> Ver Productos</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Próximas vacunaciones -->
+    <div class="row mb-4" id="proximas-vacunaciones">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-syringe me-2 text-primary"></i> Próximas Vacunaciones</h5>
+                    <span class="badge bg-primary">{{ proximas_vacunaciones }}</span>
+                </div>
+                <div class="card-body">
+                    {% if proximas_vacunas %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mascota</th>
+                                    <th>Vacuna</th>
+                                    <th>Última Aplicación</th>
+                                    <th>Próxima Aplicación</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vacuna in proximas_vacunas %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'clientes:detalle_mascota' vacuna.mascota.id %}">
+                                            {{ vacuna.mascota.nombre }}
+                                        </a>
+                                    </td>
+                                    <td>{{ vacuna.vacuna.nombre }}</td>
+                                    <td>{{ vacuna.fecha_aplicacion|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if vacuna.fecha_proxima %}
+                                            <span class="badge bg-{% if vacuna.fecha_proxima|date:'Y-m-d' <= hoy %}danger{% elif vacuna.dias_restantes <= 7 %}warning{% else %}success{% endif %}">
+                                                {{ vacuna.fecha_proxima|date:"d/m/Y" }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No programada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'inventario:detalle_vacuna_aplicada' vacuna.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'inventario:aplicar_vacuna' vacuna.mascota.id %}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-plus"></i> Aplicar
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-check-circle fa-3x text-success"></i>
+                        </div>
+                        <h5>No hay vacunaciones próximas pendientes</h5>
+                        <p class="text-muted">Todas las mascotas están al día con sus vacunas</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Próximas aplicaciones de productos -->
+    <div class="row mb-4" id="proximas-aplicaciones">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-pills me-2 text-warning"></i> Próximas Aplicaciones de Productos</h5>
+                    <span class="badge bg-warning text-dark">{{ proximas_aplicaciones }}</span>
+                </div>
+                <div class="card-body">
+                    {% if proximos_productos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mascota</th>
+                                    <th>Producto</th>
+                                    <th>Tipo</th>
+                                    <th>Última Aplicación</th>
+                                    <th>Próxima Aplicación</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for producto in proximos_productos %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'clientes:detalle_mascota' producto.mascota.id %}">
+                                            {{ producto.mascota.nombre }}
+                                        </a>
+                                    </td>
+                                    <td>{{ producto.producto.nombre }}</td>
+                                    <td>{{ producto.producto.get_tipo_display }}</td>
+                                    <td>{{ producto.fecha_aplicacion|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if producto.fecha_proxima %}
+                                            <span class="badge bg-{% if producto.fecha_proxima|date:'Y-m-d' <= hoy %}danger{% elif producto.dias_restantes <= 7 %}warning{% else %}success{% endif %}">
+                                                {{ producto.fecha_proxima|date:"d/m/Y" }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No programada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="{% url 'inventario:detalle_producto_aplicado' producto.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'inventario:aplicar_producto' producto.mascota.id %}" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-plus"></i> Aplicar
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <div class="mb-3">
+                            <i class="fas fa-check-circle fa-3x text-success"></i>
+                        </div>
+                        <h5>No hay aplicaciones de productos próximas pendientes</h5>
+                        <p class="text-muted">Todas las mascotas están al día con sus tratamientos</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Vacunas más Aplicadas</h5>
+                </div>
+                <div class="card-body">
+                    {% if vacunas_populares %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Vacuna</th>
+                                    <th>Aplicaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vacuna in vacunas_populares %}
+                                <tr>
+                                    <td>{{ vacuna.nombre }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ vacuna.porcentaje }}%"></div>
+                                            </div>
+                                            <span>{{ vacuna.count }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No hay datos suficientes</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Productos más Aplicados</h5>
+                </div>
+                <div class="card-body">
+                    {% if productos_populares %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Tipo</th>
+                                    <th>Aplicaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for producto in productos_populares %}
+                                <tr>
+                                    <td>{{ producto.nombre }}</td>
+                                    <td>{{ producto.get_tipo_display }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: {{ producto.porcentaje }}%"></div>
+                                            </div>
+                                            <span>{{ producto.count }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No hay datos suficientes</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // JavaScript para manejar la animación y filtros si fuera necesario
+    document.addEventListener('DOMContentLoaded', function() {
+        // Código adicional si es necesario
+    });
+</script>
+{% endblock %}

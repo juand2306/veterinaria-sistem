@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Count
 
 from clientes.models import Mascota
 from .models import Vacuna, VacunaAplicada, Producto, ProductoAplicado
@@ -269,3 +272,97 @@ class ProductoAplicadoDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Registro de producto eliminado exitosamente.")
         return super().delete(request, *args, **kwargs)
+    
+    
+    
+@login_required
+def dashboard_inventario(request):
+    """Vista para el dashboard de inventario que muestra resúmenes y estadísticas."""
+    
+    # Fecha actual para comparaciones
+    hoy = timezone.now().date()
+    
+    # Próximos 30 días para alertas
+    fecha_limite = hoy + timedelta(days=30)
+    
+    # Contadores básicos
+    total_vacunas = Vacuna.objects.count()
+    total_productos = Producto.objects.count()
+    
+    # Próximas vacunaciones (con fecha_proxima en los próximos 30 días o vencidas)
+    proximas_vacunas = VacunaAplicada.objects.filter(
+        fecha_proxima__lte=fecha_limite
+    ).select_related('mascota', 'vacuna').order_by('fecha_proxima')
+    
+    # Agregar días restantes a cada vacuna
+    for vacuna in proximas_vacunas:
+        if vacuna.fecha_proxima:
+            delta = vacuna.fecha_proxima - hoy
+            vacuna.dias_restantes = delta.days
+        else:
+            vacuna.dias_restantes = None
+    
+    # Próximas aplicaciones de productos
+    proximos_productos = ProductoAplicado.objects.filter(
+        fecha_proxima__lte=fecha_limite
+    ).select_related('mascota', 'producto').order_by('fecha_proxima')
+    
+    # Agregar días restantes a cada producto
+    for producto in proximos_productos:
+        if producto.fecha_proxima:
+            delta = producto.fecha_proxima - hoy
+            producto.dias_restantes = delta.days
+        else:
+            producto.dias_restantes = None
+    
+    # Estadísticas: Vacunas más aplicadas
+    vacunas_aplicadas = VacunaAplicada.objects.values(
+        'vacuna__nombre', 'vacuna_id'
+    ).annotate(count=Count('id')).order_by('-count')[:5]
+    
+    # Calcular porcentajes para las vacunas más aplicadas
+    total_aplicaciones_vacunas = sum(item['count'] for item in vacunas_aplicadas)
+    vacunas_populares = []
+    
+    if total_aplicaciones_vacunas > 0:
+        for item in vacunas_aplicadas:
+            porcentaje = (item['count'] / total_aplicaciones_vacunas) * 100
+            vacunas_populares.append({
+                'nombre': item['vacuna__nombre'],
+                'count': item['count'],
+                'porcentaje': porcentaje
+            })
+    
+    # Estadísticas: Productos más aplicados
+    productos_aplicados = ProductoAplicado.objects.values(
+        'producto__nombre', 'producto__tipo', 'producto_id'
+    ).annotate(count=Count('id')).order_by('-count')[:5]
+    
+    # Calcular porcentajes para los productos más aplicados
+    total_aplicaciones_productos = sum(item['count'] for item in productos_aplicados)
+    productos_populares = []
+    
+    if total_aplicaciones_productos > 0:
+        for item in productos_aplicados:
+            porcentaje = (item['count'] / total_aplicaciones_productos) * 100
+            productos_populares.append({
+                'nombre': item['producto__nombre'],
+                'tipo': item['producto__tipo'],
+                'count': item['count'],
+                'porcentaje': porcentaje,
+                'get_tipo_display': 'Vermífugo' if item['producto__tipo'] == 'V' else 'Antiparasitario'
+            })
+    
+    context = {
+        'total_vacunas': total_vacunas,
+        'total_productos': total_productos,
+        'proximas_vacunaciones': proximas_vacunas.count(),
+        'proximas_aplicaciones': proximos_productos.count(),
+        'proximas_vacunas': proximas_vacunas,
+        'proximos_productos': proximos_productos,
+        'vacunas_populares': vacunas_populares,
+        'productos_populares': productos_populares,
+        'hoy': hoy.strftime('%Y-%m-%d')
+    }
+    
+    return render(request, 'inventario/dashboard_inventario.html', context)

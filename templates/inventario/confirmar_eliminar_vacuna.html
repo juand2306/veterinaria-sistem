@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Vacuna | Sistema Veterinario{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'inventario:lista_vacunas' %}">Vacunas</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'inventario:detalle_vacuna' vacuna.id %}">{{ vacuna.nombre }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Eliminar</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white py-3">
+                    <h1 class="h5 card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar eliminación
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        {% if vacuna.vacunaaplicada_set.count > 0 %}
+                            <strong>Advertencia:</strong> Esta vacuna tiene registros de aplicación asociados. Si la elimina, 
+                            no se perderán los registros históricos, pero no podrá usar esta vacuna en nuevas aplicaciones.
+                        {% else %}
+                            <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+                        {% endif %}
+                    </div>
+
+                    <p class="mb-4">¿Está seguro que desea eliminar la vacuna <strong>{{ vacuna.nombre }}</strong>?</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                            </a>
+                            
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i>Eliminar Vacuna
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

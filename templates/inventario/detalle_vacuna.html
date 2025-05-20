@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ vacuna.nombre }} | Sistema Veterinario{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'inventario:lista_vacunas' %}">Vacunas</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ vacuna.nombre }}</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h2 mb-0">{{ vacuna.nombre }}</h1>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="{% url 'inventario:editar_vacuna' vacuna.id %}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-edit me-1"></i>Editar
+            </a>
+            <a href="{% url 'inventario:eliminar_vacuna' vacuna.id %}" class="btn btn-outline-danger">
+                <i class="fas fa-trash me-1"></i>Eliminar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información de la vacuna -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">Información de la Vacuna</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Nombre:</strong>
+                        <div>{{ vacuna.nombre }}</div>
+                    </div>
+                    <div>
+                        <strong>Descripción:</strong>
+                        <div class="mt-2">{{ vacuna.descripcion|linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="col-md-7 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="card-title mb-0">Estadísticas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="h2 text-primary mb-0">{{ aplicaciones.count }}</h3>
+                                <p class="mb-0 text-muted">Total de aplicaciones</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <h3 class="h2 text-success mb-0">
+                                    {% with recientes=aplicaciones|slice:":30" %}
+                                        {{ recientes|length }}
+                                    {% endwith %}
+                                </h3>
+                                <p class="mb-0 text-muted">Aplicaciones (último mes)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de aplicaciones -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="card-title mb-0">Historial de Aplicaciones</h5>
+        </div>
+        <div class="card-body">
+            {% if aplicaciones %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Mascota</th>
+                                <th>Cliente</th>
+                                <th>Próxima Aplicación</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for aplicacion in aplicaciones %}
+                            <tr>
+                                <td>{{ aplicacion.fecha_aplicacion }}</td>
+                                <td>
+                                    <a href="{% url 'clientes:detalle_mascota' aplicacion.mascota.id %}" class="text-decoration-none">
+                                        {{ aplicacion.mascota.nombre }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'clientes:detalle_cliente' aplicacion.mascota.propietario.id %}" class="text-decoration-none">
+                                        {{ aplicacion.mascota.propietario.nombre }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if aplicacion.fecha_proxima %}
+                                        {{ aplicacion.fecha_proxima }}
+                                    {% else %}
+                                        <span class="text-muted">No programada</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'inventario:detalle_vacuna_aplicada' aplicacion.id %}" class="btn btn-sm btn-outline-primary me-1" title="Ver detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'inventario:editar_vacuna_aplicada' aplicacion.id %}" class="btn btn-sm btn-outline-secondary me-1" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'inventario:eliminar_vacuna_aplicada' aplicacion.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                    <p class="lead">Esta vacuna aún no ha sido aplicada a ninguna mascota.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

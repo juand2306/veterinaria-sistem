@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Eliminación de Producto | Sistema Veterinario{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'inventario:lista_productos' %}">Productos</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'inventario:detalle_producto' producto.id %}">{{ producto.nombre }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Eliminar</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white py-3">
+            <h1 class="h5 card-title mb-0">
+                <i class="fas fa-trash me-2"></i>Confirmar Eliminación
+            </h1>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert alert-warning mb-4">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+            </div>
+            
+            <p class="mb-4">¿Estás seguro que deseas eliminar el siguiente producto?</p>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{{ producto.nombre }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        <span class="badge {% if producto.tipo == 'V' %}bg-success{% else %}bg-info{% endif %}">
+                            {{ producto.get_tipo_display }}
+                        </span>
+                    </h6>
+                    <p class="card-text">
+                        <strong>Descripción:</strong> {{ producto.descripcion|default:"Sin descripción" }}
+                    </p>
+                </div>
+            </div>
+            
+            {% if aplicaciones_count > 0 %}
+            <div class="alert alert-danger mb-4">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Advertencia:</strong> Este producto tiene {{ aplicaciones_count }} aplicaciones registradas.
+                Si lo eliminas, se perderá el vínculo con estas aplicaciones.
+            </div>
+            {% endif %}
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'inventario:detalle_producto' producto.id %}" class="btn btn-secondary me-2">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Eliminar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

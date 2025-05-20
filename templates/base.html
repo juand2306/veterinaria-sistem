@@ -42,7 +42,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'inventario' %}active{% endif %}" href="#">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'inventario' %}active{% endif %}" href="{% url 'inventario:dashboard_inventario' %}">
                             <i class="fas fa-box me-1"></i>Inventario
                         </a>
                     </li>
@@ -57,7 +57,12 @@
                             <i class="fas fa-cog me-1"></i>Configuración
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">Especies y Razas</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'configuracion:lista_especies' %}">Especies</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'configuracion:lista_razas' %}">Razas</a>
+                            </li>
                             <li><a class="dropdown-item" href="#">Medicamentos</a></li>
                             <li><a class="dropdown-item" href="#">Tratamientos</a></li>
                             <li><hr class="dropdown-divider"></li>

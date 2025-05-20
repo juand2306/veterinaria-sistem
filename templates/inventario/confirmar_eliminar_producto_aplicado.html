@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Confirmar Eliminación de Producto Aplicado | Sistema Veterinario{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_mascotas' %}">Mascotas</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' object.mascota.id %}">{{ object.mascota.nombre }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Eliminar Producto Aplicado</li>
+        </ol>
+    </nav>
+    
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h1 class="h5 card-title mb-0 text-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Confirmar Eliminación
+            </h1>
+        </div>
+        
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <p class="mb-0">
+                    <strong>¿Estás seguro de que deseas eliminar este registro de producto aplicado?</strong>
+                </p>
+                <p class="mt-2 mb-0">
+                    Esta acción no se puede deshacer y eliminará permanentemente el siguiente registro:
+                </p>
+            </div>
+            
+            <div class="card mb-4 mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Detalles del registro:</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Producto:</strong> {{ object.producto.nombre }} ({{ object.producto.get_tipo_display }})
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Mascota:</strong> {{ object.mascota.nombre }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Fecha de Aplicación:</strong> {{ object.fecha_aplicacion|date:"d/m/Y" }}
+                        </li>
+                        {% if object.fecha_proxima %}
+                        <li class="list-group-item">
+                            <strong>Próxima Aplicación:</strong> {{ object.fecha_proxima|date:"d/m/Y" }}
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'inventario:detalle_producto_aplicado' object.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i> Confirmar Eliminación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
