@@ -40,14 +40,24 @@ class MascotaForm(forms.ModelForm):
         }
     
     def __init__(self, *args, **kwargs):
+        # Obtener cliente_id de initial si existe
+        initial = kwargs.get('initial', {})
+        cliente_id = initial.get('cliente')
+        
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_enctype = 'multipart/form-data'
-        # Si se proporciona un cliente en la instancia, pre-establecerlo
-        if 'instance' in kwargs and kwargs['instance'] is not None:
-            self.fields['cliente'].initial = kwargs['instance'].cliente
-            self.fields['cliente'].widget.attrs['readonly'] = True
+        
+        # Si hay una instancia con cliente, o se pasó un cliente_id en initial
+        if ('instance' in kwargs and kwargs['instance'] is not None and kwargs['instance'].cliente) or cliente_id:
+            if 'instance' in kwargs and kwargs['instance'] is not None:
+                self.fields['cliente'].initial = kwargs['instance'].cliente
+            elif cliente_id:
+                self.fields['cliente'].initial = cliente_id
+                
+            # Ocultar el campo de cliente si ya tenemos uno
+            self.fields['cliente'].widget = forms.HiddenInput()
         
         # Filtrar las razas basadas en la especie seleccionada
         if 'instance' in kwargs and kwargs['instance'] is not None and kwargs['instance'].especie:

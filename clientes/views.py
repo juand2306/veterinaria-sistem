@@ -97,8 +97,14 @@ class MascotaCreateView(LoginRequiredMixin, CreateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['cliente_id'] = self.kwargs.get('cliente_id')
         return kwargs
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        cliente_id = self.kwargs.get('cliente_id')
+        if cliente_id:
+            initial['cliente'] = cliente_id
+        return initial
     
     def form_valid(self, form):
         form.instance.cliente_id = self.kwargs.get('cliente_id')
@@ -121,8 +127,13 @@ class MascotaUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['cliente_id'] = self.object.cliente_id
         return kwargs
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        # No necesitamos establecer el cliente inicial, 
+        # ya que la instancia ya tiene un cliente asociado
+        return initial
     
     def form_valid(self, form):
         messages.success(self.request, "Mascota actualizada exitosamente.")
@@ -130,6 +141,11 @@ class MascotaUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': self.object.pk})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cliente'] = self.object.cliente
+        return context
 
 
 class MascotaDeleteView(LoginRequiredMixin, DeleteView):
