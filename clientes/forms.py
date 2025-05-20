@@ -59,11 +59,20 @@ class MascotaForm(forms.ModelForm):
             # Ocultar el campo de cliente si ya tenemos uno
             self.fields['cliente'].widget = forms.HiddenInput()
         
-        # Filtrar las razas basadas en la especie seleccionada
+        # Configurar el campo de raza inicialmente vacío
+        self.fields['raza'].queryset = Raza.objects.none()
+        
+        # Si ya hay una especie seleccionada, cargar sus razas
         if 'instance' in kwargs and kwargs['instance'] is not None and kwargs['instance'].especie:
             self.fields['raza'].queryset = Raza.objects.filter(especie=kwargs['instance'].especie)
-        else:
-            self.fields['raza'].queryset = Raza.objects.none()
+        
+        # Si hay datos POST con especie, cargar sus razas
+        if 'data' in kwargs and kwargs['data'].get('especie'):
+            try:
+                especie_id = int(kwargs['data'].get('especie'))
+                self.fields['raza'].queryset = Raza.objects.filter(especie_id=especie_id)
+            except (ValueError, TypeError):
+                pass
         
         self.helper.layout = Layout(
             Row(

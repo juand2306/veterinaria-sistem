@@ -42,7 +42,6 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
-        // Función para cargar las razas según la especie seleccionada
         function cargarRazas() {
             const especieId = $('#id_especie').val();
             if (especieId) {
@@ -69,10 +68,7 @@
             }
         }
 
-        // Cargar razas al cambiar la especie
         $('#id_especie').change(cargarRazas);
-        
-        // Cargar razas al cargar la página (para edición)
         cargarRazas();
     });
 </script>
