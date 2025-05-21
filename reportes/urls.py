@@ -4,6 +4,7 @@ from . import views
 app_name = 'reportes'
 
 urlpatterns = [
+    #Estan bien pero aun no toman datos reales
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('citas/', views.ReporteCitasView.as_view(), name='reporte_citas'),
     path('vacunas/', views.ReporteVacunasView.as_view(), name='reporte_vacunas'),

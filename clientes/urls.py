@@ -13,7 +13,7 @@ urlpatterns = [
     
     # URLs para Mascotas
     path('mascotas/', views.MascotaListView.as_view(), name='lista_mascotas'),
-    path('cliente/<int:cliente_id>/mascotas/', views.MascotaListView.as_view(), name='mascotas_por_cliente'), #falta integracion
+    path('cliente/<int:cliente_id>/mascotas/', views.MascotaListView.as_view(), name='mascotas_por_cliente'), #falta integracion # No es necesario
     path('cliente/<int:cliente_id>/mascota/crear/', views.MascotaCreateView.as_view(), name='crear_mascota'),
     path('mascota/<int:pk>/', views.MascotaDetailView.as_view(), name='detalle_mascota'),
     path('mascota/<int:pk>/editar/', views.MascotaUpdateView.as_view(), name='editar_mascota'),
