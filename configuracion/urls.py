@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 
 app_name = 'configuracion'
-
+#Completa 99%
 urlpatterns = [
     # URLs para Especies
     path('especies/', views.EspecieListView.as_view(), name='lista_especies'),
