@@ -17,9 +17,10 @@ class CitaForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         
-        # Si se proporciona una mascota en la instancia, pre-establecerla
-        if 'initial' in kwargs and 'mascota' in kwargs['initial']:
-            self.fields['mascota'].initial = kwargs['initial']['mascota']
+        # Si se proporciona una mascota en initial, pre-establecerla
+        if self.initial and 'mascota' in self.initial:
+            self.fields['mascota'].initial = self.initial['mascota']
+            # Solo hacer readonly si ya hay una mascota seleccionada
             self.fields['mascota'].widget.attrs['readonly'] = True
         
         self.helper.layout = Layout(
@@ -35,7 +36,7 @@ class CitaForm(forms.ModelForm):
     
     def clean_mascota(self):
         mascota = self.cleaned_data.get('mascota')
-        if not mascota.activa:
+        if mascota and not mascota.activa:
             raise forms.ValidationError("No se pueden agendar citas para mascotas inactivas.")
         return mascota
 
@@ -44,21 +45,28 @@ class ConsultaForm(forms.ModelForm):
         model = Consulta
         fields = ['diagnostico', 'tratamiento', 'notas', 'es_eutanasia']
         widgets = {
-            'diagnostico': forms.Textarea(attrs={'rows': 3}),
-            'tratamiento': forms.Textarea(attrs={'rows': 3}),
-            'notas': forms.Textarea(attrs={'rows': 3}),
+            'diagnostico': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe el diagnóstico realizado...'}),
+            'tratamiento': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe el tratamiento aplicado...'}),
+            'notas': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Notas adicionales...'}),
         }
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_method = 'post'
+        
+        # Mejorar etiquetas
+        self.fields['diagnostico'].label = 'Diagnóstico'
+        self.fields['tratamiento'].label = 'Tratamiento'
+        self.fields['notas'].label = 'Notas adicionales'
+        self.fields['es_eutanasia'].label = 'Es un procedimiento de eutanasia'
+        
         self.helper.layout = Layout(
             'diagnostico',
             'tratamiento',
             'notas',
             'es_eutanasia',
-            Submit('submit', 'Guardar')
+            Submit('submit', 'Guardar Consulta', css_class='btn btn-success')
         )
 
 class ImagenDiagnosticaForm(forms.ModelForm):
@@ -67,7 +75,7 @@ class ImagenDiagnosticaForm(forms.ModelForm):
         fields = ['mascota', 'archivo', 'descripcion']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describe la imagen diagnóstica...'}),
-            'archivo': forms.FileInput(attrs={'accept': 'image/*'}),
+            'archivo': forms.FileInput(attrs={'accept': 'image/*,.pdf,.doc,.docx'}),
         }
     
     def __init__(self, *args, **kwargs):
@@ -77,13 +85,14 @@ class ImagenDiagnosticaForm(forms.ModelForm):
         self.helper.form_enctype = 'multipart/form-data'
         
         # Si se proporciona una mascota en initial, pre-establecerla y ocultarla
-        if 'initial' in kwargs and 'mascota' in kwargs['initial']:
-            self.fields['mascota'].initial = kwargs['initial']['mascota']
+        if self.initial and 'mascota' in self.initial:
+            self.fields['mascota'].initial = self.initial['mascota']
             self.fields['mascota'].widget = forms.HiddenInput()
         
         # Mejorar etiquetas y placeholder
-        self.fields['archivo'].label = 'Imagen diagnóstica'
+        self.fields['archivo'].label = 'Archivo diagnóstico'
         self.fields['descripcion'].label = 'Descripción'
+        self.fields['archivo'].help_text = 'Formatos permitidos: imágenes, PDF, documentos de Word'
         
         self.helper.layout = Layout(
             'mascota',
@@ -91,3 +100,11 @@ class ImagenDiagnosticaForm(forms.ModelForm):
             'descripcion',
             Submit('submit', 'Guardar Imagen', css_class='btn btn-primary')
         )
+        
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo')
+        if archivo:
+            # Validar tamaño del archivo (máximo 10MB)
+            if archivo.size > 10 * 1024 * 1024:
+                raise forms.ValidationError("El archivo no puede ser mayor a 10MB.")
+        return archivo

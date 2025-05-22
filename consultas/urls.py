@@ -13,7 +13,7 @@ urlpatterns = [
     path('cita/<int:pk>/eliminar/', views.CitaDeleteView.as_view(), name='eliminar_cita'), #Falla al regresar 
     
     # URLs para Consultas # Aun no esta integrada / Huerfana
-    path('cita/<int:cita_id>/consulta/crear/', views.ConsultaCreateView.as_view(), name='crear_consulta'), # Falla
+    path('cita/<int:cita_id>/consulta/crear/', views.ConsultaCreateView.as_view(), name='crear_consulta'), #Conectada, pero falla al enviar #Falla
     path('consulta/<int:pk>/', views.ConsultaDetailView.as_view(), name='detalle_consulta'), #Falta integrar
     path('consulta/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='editar_consulta'), #Falla
     path('consulta/<int:pk>/eliminar/', views.ConsultaDeleteView.as_view(), name='eliminar_consulta'),

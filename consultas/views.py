@@ -23,8 +23,16 @@ class CitaListView(LoginRequiredMixin, ListView):
         queryset = super().get_queryset()
         # Filtrar por fecha si se proporciona en la URL
         fecha_filtro = self.request.GET.get('fecha')
+        estado_filtro = self.request.GET.get('estado')
+        
         if fecha_filtro:
             queryset = queryset.filter(fecha__date=fecha_filtro)
+            
+        if estado_filtro == 'atendida':
+            queryset = queryset.filter(atendida=True)
+        elif estado_filtro == 'pendiente':
+            queryset = queryset.filter(atendida=False)
+            
         return queryset
 
 
@@ -36,8 +44,11 @@ class CitaDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Comprobar si hay una consulta asociada a esta cita
-        consulta = Consulta.objects.filter(cita=self.object).first()
-        context['consulta'] = consulta
+        try:
+            consulta = Consulta.objects.get(cita=self.object)
+            context['consulta'] = consulta
+        except Consulta.DoesNotExist:
+            context['consulta'] = None
         return context
 
 
@@ -47,13 +58,13 @@ class CitaCreateView(LoginRequiredMixin, CreateView):
     template_name = 'consultas/cita_form.html'
     success_url = reverse_lazy('consultas:lista_citas')
     
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Si se proporciona un id de mascota en la URL, lo pasamos al formulario
+    def get_initial(self):
+        initial = super().get_initial()
         mascota_id = self.kwargs.get('mascota_id')
         if mascota_id:
-            kwargs['mascota_id'] = mascota_id
-        return kwargs
+            mascota = get_object_or_404(Mascota, pk=mascota_id)
+            initial['mascota'] = mascota
+        return initial
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -76,12 +87,6 @@ class CitaUpdateView(LoginRequiredMixin, UpdateView):
     model = Cita
     form_class = CitaForm
     template_name = 'consultas/cita_form.html'
-    
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Pasamos el id de la mascota al formulario
-        kwargs['mascota_id'] = self.object.mascota.id
-        return kwargs
     
     def get_success_url(self):
         return reverse_lazy('consultas:detalle_cita', kwargs={'pk': self.object.pk})
@@ -107,12 +112,6 @@ class ConsultaCreateView(LoginRequiredMixin, CreateView):
     form_class = ConsultaForm
     template_name = 'consultas/consulta_form.html'
     
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Pasamos la cita al formulario
-        kwargs['cita_id'] = self.kwargs.get('cita_id')
-        return kwargs
-    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         cita_id = self.kwargs.get('cita_id')
@@ -124,13 +123,13 @@ class ConsultaCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         cita_id = self.kwargs.get('cita_id')
         cita = get_object_or_404(Cita, pk=cita_id)
-        form.instance.cita = cita
         
-        # Si la consulta es una eutanasia, marcar la mascota como inactiva
-        if form.cleaned_data.get('es_eutanasia'):
-            mascota = cita.mascota
-            mascota.activa = False
-            mascota.save()
+        # Verificar que no exista ya una consulta para esta cita
+        if hasattr(cita, 'consulta'):
+            messages.error(self.request, "Esta cita ya tiene una consulta registrada.")
+            return redirect('consultas:detalle_cita', pk=cita.id)
+            
+        form.instance.cita = cita
         
         messages.success(self.request, "Consulta registrada exitosamente.")
         return super().form_valid(form)
@@ -150,10 +149,10 @@ class ConsultaUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ConsultaForm
     template_name = 'consultas/consulta_form.html'
     
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['cita_id'] = self.object.cita.id
-        return kwargs
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cita'] = self.object.cita
+        return context
     
     @transaction.atomic
     def form_valid(self, form):
@@ -196,6 +195,10 @@ class ConsultaDeleteView(LoginRequiredMixin, DeleteView):
             mascota.activa = True
             mascota.save()
         
+        # Marcar la cita como no atendida
+        cita.atendida = False
+        cita.save()
+        
         messages.success(self.request, "Consulta eliminada exitosamente.")
         return super().delete(request, *args, **kwargs)
 
@@ -227,22 +230,25 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
             mascota=mascota
         ).order_by('-fecha')
         
+        # Crear línea de tiempo unificada
+        eventos = self.get_unified_timeline(consultas, vacunas_aplicadas, productos_aplicados, imagenes_diagnosticas)
+        
         context = {
             'mascota': mascota,
             'consultas': consultas,
             'vacunas_aplicadas': vacunas_aplicadas,
             'productos_aplicados': productos_aplicados,
             'imagenes_diagnosticas': imagenes_diagnosticas,
+            'eventos': eventos,
         }
         return render(request, self.template_name, context)
     
-    def get_unified_timeline(self, mascota):
-    
-        events = []
+    def get_unified_timeline(self, consultas, vacunas_aplicadas, productos_aplicados, imagenes_diagnosticas):
+        eventos = []
     
         # Agregar consultas
-        for consulta in self.consultas:
-            events.append({
+        for consulta in consultas:
+            eventos.append({
                 'fecha': consulta.cita.fecha,
                 'tipo': 'consulta',
                 'objeto': consulta,
@@ -250,8 +256,8 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
             })
         
         # Agregar vacunas
-        for vacuna in self.vacunas_aplicadas:
-            events.append({
+        for vacuna in vacunas_aplicadas:
+            eventos.append({
                 'fecha': vacuna.fecha_aplicacion,
                 'tipo': 'vacuna',
                 'objeto': vacuna,
@@ -259,18 +265,29 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
             })
         
         # Agregar productos
-        for producto in self.productos_aplicados:
-            events.append({
+        for producto in productos_aplicados:
+            eventos.append({
                 'fecha': producto.fecha_aplicacion,
                 'tipo': 'producto',
                 'objeto': producto,
                 'titulo': f'Producto: {producto.producto.nombre}'
             })
+            
+        # Agregar imágenes diagnósticas
+        for imagen in imagenes_diagnosticas:
+            eventos.append({
+                'fecha': imagen.fecha,
+                'tipo': 'imagen',
+                'objeto': imagen,
+                'titulo': f'Imagen diagnóstica: {imagen.descripcion[:50]}...'
+            })
         
         # Ordenar por fecha descendente
-        events.sort(key=lambda x: x['fecha'], reverse=True)
-        return events
-    
+        eventos.sort(key=lambda x: x['fecha'], reverse=True)
+        return eventos
+
+
+# Vistas para Imágenes Diagnósticas
 class ImagenDiagnosticaListView(LoginRequiredMixin, ListView):
     model = ImagenDiagnostica
     template_name = 'consultas/lista_imagenes_diagnosticas.html'
@@ -321,7 +338,10 @@ class ImagenDiagnosticaCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', kwargs={'mascota_id': self.object.mascota.pk})
+        mascota_id = self.kwargs.get('mascota_id')
+        if mascota_id:
+            return reverse_lazy('consultas:lista_imagenes_diagnosticas', kwargs={'mascota_id': mascota_id})
+        return reverse_lazy('consultas:lista_imagenes_diagnosticas')
 
 
 class ImagenDiagnosticaDetailView(LoginRequiredMixin, DetailView):
@@ -350,7 +370,8 @@ class ImagenDiagnosticaUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', kwargs={'mascota_id': self.object.mascota.pk})
+        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', 
+                          kwargs={'mascota_id': self.object.mascota.pk})
 
 
 class ImagenDiagnosticaDeleteView(LoginRequiredMixin, DeleteView):
@@ -359,7 +380,8 @@ class ImagenDiagnosticaDeleteView(LoginRequiredMixin, DeleteView):
     context_object_name = 'imagen'
     
     def get_success_url(self):
-        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', kwargs={'mascota_id': self.object.mascota.pk})
+        return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', 
+                          kwargs={'mascota_id': self.object.mascota.pk})
     
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Imagen diagnóstica eliminada exitosamente.")

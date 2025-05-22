@@ -60,11 +60,17 @@
             </thead>
             <tbody>
                 {% for cita in citas %}
-                <tr>
-                    <td>{{ cita.mascota.nombre }}</td>
+                <tr class="{% if not cita.atendida %}table-warning{% endif %}">
+                    <td>
+                        <strong>{{ cita.mascota.nombre }}</strong>
+                        <br><small class="text-muted">{{ cita.mascota.especie }} - {{ cita.mascota.raza }}</small>
+                    </td>
                     <td>{{ cita.mascota.propietario.nombre }}</td>
-                    <td>{{ cita.fecha|date:"d/m/Y H:i" }}</td>
-                    <td>{{ cita.motivo|truncatechars:30 }}</td>
+                    <td>
+                        {{ cita.fecha|date:"d/m/Y" }}<br>
+                        <small class="text-muted">{{ cita.fecha|date:"H:i" }}</small>
+                    </td>
+                    <td>{{ cita.motivo|truncatechars:40 }}</td>
                     <td>
                         {% if cita.programada %}
                         <span class="badge bg-primary">Programada</span>
@@ -81,14 +87,52 @@
                     </td>
                     <td>
                         <div class="btn-group" role="group">
-                            <a href="{% url 'consultas:detalle_cita' cita.id %}" class="btn btn-sm btn-outline-primary">
+                            <a href="{% url 'consultas:detalle_cita' cita.id %}" 
+                               class="btn btn-sm btn-outline-primary" 
+                               title="Ver detalle">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{% url 'consultas:editar_cita' cita.id %}" class="btn btn-sm btn-outline-secondary">
+                            
+                            {% if not cita.atendida %}
+                            <!-- Botón para atender la cita (crear consulta) -->
+                            <a href="{% url 'consultas:crear_consulta' cita.id %}" 
+                               class="btn btn-sm btn-success" 
+                               title="Atender cita">
+                                <i class="fas fa-stethoscope"></i> Atender
+                            </a>
+                            {% else %}
+                            <!-- Si ya está atendida, mostrar botón para ver consulta -->
+                            <a href="{% url 'consultas:detalle_consulta' cita.consulta.id %}" 
+                               class="btn btn-sm btn-info" 
+                               title="Ver consulta">
+                                <i class="fas fa-file-medical"></i> Ver Consulta
+                            </a>
+                            {% endif %}
+                            
+                            <a href="{% url 'consultas:editar_cita' cita.id %}" 
+                               class="btn btn-sm btn-outline-secondary" 
+                               title="Editar">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{% url 'consultas:eliminar_cita' cita.id %}" class="btn btn-sm btn-outline-danger">
+                            
+                            <a href="{% url 'consultas:eliminar_cita' cita.id %}" 
+                               class="btn btn-sm btn-outline-danger" 
+                               title="Eliminar">
                                 <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                        
+                        <!-- Enlaces adicionales -->
+                        <div class="mt-1">
+                            <a href="{% url 'consultas:historia_clinica' cita.mascota.id %}" 
+                               class="btn btn-sm btn-outline-info" 
+                               title="Historia clínica">
+                                <i class="fas fa-file-medical-alt"></i> Historia
+                            </a>
+                            <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' cita.mascota.id %}" 
+                               class="btn btn-sm btn-outline-secondary" 
+                               title="Subir imagen diagnóstica">
+                                <i class="fas fa-image"></i> Imagen
                             </a>
                         </div>
                     </td>
@@ -97,10 +141,5 @@
             </tbody>
         </table>
     </div>
-    {% else %}
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>No hay citas registradas o que coincidan con los filtros.
-    </div>
     {% endif %}
-</div>
 {% endblock %}
