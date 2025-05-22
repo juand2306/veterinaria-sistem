@@ -36,14 +36,26 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Mascota:</strong> 
+                        {% comment %}
+                        Temporal: solo mostrar el nombre hasta que se corrijan las URLs de clientes
                         <a href="{% url 'clientes:detalle_mascota' cita.mascota.id %}">
                             {{ cita.mascota.nombre }}
                         </a>
+                        {% endcomment %}
+                        <span class="text-primary">{{ cita.mascota.nombre }}</span>
+                        <small class="text-muted d-block">{{ cita.mascota.especie }} - {{ cita.mascota.raza }}</small>
                     </p>
                     <p><strong>Propietario:</strong> 
+                        {% comment %}
+                        Temporal: solo mostrar el nombre hasta que se corrijan las URLs de clientes
                         <a href="{% url 'clientes:detalle_cliente' cita.mascota.propietario.id %}">
                             {{ cita.mascota.propietario.nombre }}
                         </a>
+                        {% endcomment %}
+                        <span class="text-primary">{{ cita.mascota.propietario.nombre }}</span>
+                        {% if cita.mascota.propietario.telefono %}
+                        <small class="text-muted d-block">Tel: {{ cita.mascota.propietario.telefono }}</small>
+                        {% endif %}
                     </p>
                     <p><strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
                     <p><strong>Tipo:</strong> 
@@ -110,6 +122,13 @@
                     </div>
                 </div>
                 {% endif %}
+                
+                <div class="col-md-12 mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        Fecha de registro: {{ consulta.fecha_registro|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
             </div>
             
             <div class="text-end mt-3">
@@ -137,14 +156,28 @@
             </a>
         </div>
     </div>
+    {% else %}
+    <!-- Caso especial: cita marcada como atendida pero sin consulta -->
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-1"></i>
+        Esta cita está marcada como atendida pero no tiene consulta registrada.
+        <a href="{% url 'consultas:crear_consulta' cita.id %}" class="btn btn-sm btn-outline-primary ms-2">
+            Registrar Consulta
+        </a>
+    </div>
     {% endif %}
     {% endif %}
 
     <!-- Enlace a la historia clínica de la mascota -->
     <div class="text-center mt-4">
-        <a href="{% url 'consultas:historia_clinica' cita.mascota.id %}" class="btn btn-info">
-            <i class="fas fa-file-medical me-1"></i>Ver Historia Clínica Completa
-        </a>
+        <div class="btn-group" role="group">
+            <a href="{% url 'consultas:historia_clinica' cita.mascota.id %}" class="btn btn-info">
+                <i class="fas fa-file-medical me-1"></i>Ver Historia Clínica Completa
+            </a>
+            <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' cita.mascota.id %}" class="btn btn-outline-secondary">
+                <i class="fas fa-image me-1"></i>Subir Imagen Diagnóstica
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

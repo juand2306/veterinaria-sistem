@@ -7,15 +7,15 @@ urlpatterns = [
     # URLs para Citas
     path('citas/', views.CitaListView.as_view(), name='lista_citas'),
     path('citas/crear/', views.CitaCreateView.as_view(), name='crear_cita'),
-    path('mascota/<int:mascota_id>/cita/crear/', views.CitaCreateView.as_view(), name='crear_cita_mascota'), #No implementada
-    path('cita/<int:pk>/', views.CitaDetailView.as_view(), name='detalle_cita'), #Falla
-    path('cita/<int:pk>/editar/', views.CitaUpdateView.as_view(), name='editar_cita'), #Falla
-    path('cita/<int:pk>/eliminar/', views.CitaDeleteView.as_view(), name='eliminar_cita'), #Falla al regresar 
+    path('mascota/<int:mascota_id>/cita/crear/', views.CitaCreateView.as_view(), name='crear_cita_mascota'), #No hace falta #No implementada 
+    path('cita/<int:pk>/', views.CitaDetailView.as_view(), name='detalle_cita'), 
+    path('cita/<int:pk>/editar/', views.CitaUpdateView.as_view(), name='editar_cita'),
+    path('cita/<int:pk>/eliminar/', views.CitaDeleteView.as_view(), name='eliminar_cita'),
     
     # URLs para Consultas # Aun no esta integrada / Huerfana
-    path('cita/<int:cita_id>/consulta/crear/', views.ConsultaCreateView.as_view(), name='crear_consulta'), #Conectada, pero falla al enviar #Falla
-    path('consulta/<int:pk>/', views.ConsultaDetailView.as_view(), name='detalle_consulta'), #Falta integrar
-    path('consulta/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='editar_consulta'), #Falla
+    path('cita/<int:cita_id>/consulta/crear/', views.ConsultaCreateView.as_view(), name='crear_consulta'),
+    path('consulta/<int:pk>/', views.ConsultaDetailView.as_view(), name='detalle_consulta'),
+    path('consulta/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='editar_consulta'),
     path('consulta/<int:pk>/eliminar/', views.ConsultaDeleteView.as_view(), name='eliminar_consulta'),
     
     # URL para Historia Clínica
