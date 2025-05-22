@@ -8,9 +8,9 @@ urlpatterns = [
     path('', views.dashboard_inventario, name='dashboard_inventario'),
     path('vacunas/', views.VacunaListView.as_view(), name='lista_vacunas'),
     path('vacunas/crear/', views.VacunaCreateView.as_view(), name='crear_vacuna'),
-    path('vacuna/<int:pk>/', views.VacunaDetailView.as_view(), name='detalle_vacuna'), #Falla
-    path('vacuna/<int:pk>/editar/', views.VacunaUpdateView.as_view(), name='editar_vacuna'), #Falla al enviar
-    path('vacuna/<int:pk>/eliminar/', views.VacunaDeleteView.as_view(), name='eliminar_vacuna'), #Falla al regresar 
+    path('vacuna/<int:pk>/', views.VacunaDetailView.as_view(), name='detalle_vacuna'),
+    path('vacuna/<int:pk>/editar/', views.VacunaUpdateView.as_view(), name='editar_vacuna'), 
+    path('vacuna/<int:pk>/eliminar/', views.VacunaDeleteView.as_view(), name='eliminar_vacuna'),
     
     # URLs para Vacunas Aplicadas #Desconectada
     path('mascota/<int:mascota_id>/vacuna/aplicar/', views.VacunaAplicadaCreateView.as_view(), name='aplicar_vacuna'), #Falla
