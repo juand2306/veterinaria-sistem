@@ -12,7 +12,7 @@ urlpatterns = [
     path('cita/<int:pk>/editar/', views.CitaUpdateView.as_view(), name='editar_cita'),
     path('cita/<int:pk>/eliminar/', views.CitaDeleteView.as_view(), name='eliminar_cita'),
     
-    # URLs para Consultas # Aun no esta integrada / Huerfana
+    # URLs para Consultas
     path('cita/<int:cita_id>/consulta/crear/', views.ConsultaCreateView.as_view(), name='crear_consulta'),
     path('consulta/<int:pk>/', views.ConsultaDetailView.as_view(), name='detalle_consulta'),
     path('consulta/<int:pk>/editar/', views.ConsultaUpdateView.as_view(), name='editar_consulta'),
@@ -21,11 +21,11 @@ urlpatterns = [
     # URL para Historia Clínica
     path('mascota/<int:mascota_id>/historia-clinica/', views.HistoriaClinicaView.as_view(), name='historia_clinica'),
     
-    # URLs para Imágenes Diagnósticas # Aun no esta integrada / Huerfana
-    path('imagenes/', views.ImagenDiagnosticaListView.as_view(), name='lista_imagenes_diagnosticas'),# Falla
+    # URLs para Imágenes Diagnósticas
+    path('imagenes/', views.ImagenDiagnosticaListView.as_view(), name='lista_imagenes_diagnosticas'),# No hace falta #Falla
     path('mascota/<int:mascota_id>/imagenes/', views.ImagenDiagnosticaListView.as_view(), name='lista_imagenes_diagnosticas_mascota'),
     path('mascota/<int:mascota_id>/imagenes/nueva/', views.ImagenDiagnosticaCreateView.as_view(), name='crear_imagen_diagnostica_mascota'),
-    path('imagen/<int:pk>/', views.ImagenDiagnosticaDetailView.as_view(), name='detalle_imagen_diagnostica'), #Desconectado
+    path('imagen/<int:pk>/', views.ImagenDiagnosticaDetailView.as_view(), name='detalle_imagen_diagnostica'),
     path('imagen/<int:pk>/editar/', views.ImagenDiagnosticaUpdateView.as_view(), name='editar_imagen_diagnostica'),
     path('imagen/<int:pk>/eliminar/', views.ImagenDiagnosticaDeleteView.as_view(), name='eliminar_imagen_diagnostica'),
 ]

@@ -75,7 +75,10 @@ class ImagenDiagnosticaForm(forms.ModelForm):
         fields = ['mascota', 'archivo', 'descripcion']
         widgets = {
             'descripcion': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Describe la imagen diagnóstica...'}),
-            'archivo': forms.FileInput(attrs={'accept': 'image/*,.pdf,.doc,.docx'}),
+            'archivo': forms.FileInput(attrs={
+                'accept': 'image/*,.pdf,.doc,.docx',
+                'class': 'form-control'
+            }),
         }
     
     def __init__(self, *args, **kwargs):
@@ -92,7 +95,7 @@ class ImagenDiagnosticaForm(forms.ModelForm):
         # Mejorar etiquetas y placeholder
         self.fields['archivo'].label = 'Archivo diagnóstico'
         self.fields['descripcion'].label = 'Descripción'
-        self.fields['archivo'].help_text = 'Formatos permitidos: imágenes, PDF, documentos de Word'
+        self.fields['archivo'].help_text = 'Formatos permitidos: imágenes (JPG, PNG, GIF), PDF, documentos de Word. Máximo 10MB'
         
         self.helper.layout = Layout(
             'mascota',
@@ -107,4 +110,19 @@ class ImagenDiagnosticaForm(forms.ModelForm):
             # Validar tamaño del archivo (máximo 10MB)
             if archivo.size > 10 * 1024 * 1024:
                 raise forms.ValidationError("El archivo no puede ser mayor a 10MB.")
+            
+            # Validar extensión de archivo
+            allowed_extensions = [
+                'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp',  # Imágenes
+                'pdf',  # PDF
+                'doc', 'docx'  # Documentos Word
+            ]
+            
+            file_extension = archivo.name.lower().split('.')[-1]
+            if file_extension not in allowed_extensions:
+                raise forms.ValidationError(
+                    f"Tipo de archivo no permitido. "
+                    f"Extensiones permitidas: {', '.join(allowed_extensions)}"
+                )
+                
         return archivo

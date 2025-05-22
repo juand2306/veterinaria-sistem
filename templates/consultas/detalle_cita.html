@@ -36,27 +36,12 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Mascota:</strong> 
-                        {% comment %}
-                        Temporal: solo mostrar el nombre hasta que se corrijan las URLs de clientes
                         <a href="{% url 'clientes:detalle_mascota' cita.mascota.id %}">
                             {{ cita.mascota.nombre }}
                         </a>
-                        {% endcomment %}
-                        <span class="text-primary">{{ cita.mascota.nombre }}</span>
                         <small class="text-muted d-block">{{ cita.mascota.especie }} - {{ cita.mascota.raza }}</small>
                     </p>
-                    <p><strong>Propietario:</strong> 
-                        {% comment %}
-                        Temporal: solo mostrar el nombre hasta que se corrijan las URLs de clientes
-                        <a href="{% url 'clientes:detalle_cliente' cita.mascota.propietario.id %}">
-                            {{ cita.mascota.propietario.nombre }}
-                        </a>
-                        {% endcomment %}
-                        <span class="text-primary">{{ cita.mascota.propietario.nombre }}</span>
-                        {% if cita.mascota.propietario.telefono %}
-                        <small class="text-muted d-block">Tel: {{ cita.mascota.propietario.telefono }}</small>
-                        {% endif %}
-                    </p>
+                    
                     <p><strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
                     <p><strong>Tipo:</strong> 
                         {% if cita.programada %}

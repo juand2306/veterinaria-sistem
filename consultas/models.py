@@ -56,12 +56,30 @@ class Consulta(models.Model):
         
 class ImagenDiagnostica(models.Model):
     mascota = models.ForeignKey('clientes.Mascota', on_delete=models.CASCADE, related_name='imagenes')
-    archivo = models.ImageField(upload_to='imagenes_diagnosticas/%Y/%m/%d/')
+    archivo = models.FileField(upload_to='imagenes_diagnosticas/%Y/%m/%d/')  # Cambiado de ImageField a FileField
     descripcion = models.TextField()
     fecha = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"Imagen de {self.mascota.nombre} - {self.fecha.strftime('%d/%m/%Y')}"
+    
+    def get_file_type(self):
+        """Determina el tipo de archivo basado en la extensión"""
+        if self.archivo and self.archivo.name:
+            extension = self.archivo.name.lower().split('.')[-1]
+            if extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']:
+                return 'image'
+            elif extension == 'pdf':
+                return 'pdf'
+            elif extension in ['doc', 'docx']:
+                return 'document'
+            else:
+                return 'other'
+        return 'unknown'
+    
+    def is_image(self):
+        """Verifica si el archivo es una imagen"""
+        return self.get_file_type() == 'image'
     
     class Meta:
         verbose_name = "Imagen Diagnóstica"

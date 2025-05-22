@@ -292,13 +292,18 @@ class ImagenDiagnosticaListView(LoginRequiredMixin, ListView):
     model = ImagenDiagnostica
     template_name = 'consultas/lista_imagenes_diagnosticas.html'
     context_object_name = 'imagenes'
+    paginate_by = 12  # Mostrar 12 imágenes por página
     
     def get_queryset(self):
         mascota_id = self.kwargs.get('mascota_id')
         if mascota_id:
             mascota = get_object_or_404(Mascota, pk=mascota_id)
+            # No necesitamos select_related aquí ya que tenemos la mascota
             return ImagenDiagnostica.objects.filter(mascota=mascota).order_by('-fecha')
-        return ImagenDiagnostica.objects.all().order_by('-fecha')
+        # Para la vista general, sí necesitamos select_related
+        return ImagenDiagnostica.objects.select_related(
+            'mascota__propietario'
+        ).order_by('-fecha')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -340,7 +345,8 @@ class ImagenDiagnosticaCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         mascota_id = self.kwargs.get('mascota_id')
         if mascota_id:
-            return reverse_lazy('consultas:lista_imagenes_diagnosticas', kwargs={'mascota_id': mascota_id})
+            return reverse_lazy('consultas:lista_imagenes_diagnosticas_mascota', kwargs={'mascota_id': mascota_id})
+        # Si no hay mascota_id, redirigir a la lista general
         return reverse_lazy('consultas:lista_imagenes_diagnosticas')
 
 

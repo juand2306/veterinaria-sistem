@@ -121,20 +121,6 @@
                                 <i class="fas fa-trash"></i>
                             </a>
                         </div>
-                        
-                        <!-- Enlaces adicionales -->
-                        <div class="mt-1">
-                            <a href="{% url 'consultas:historia_clinica' cita.mascota.id %}" 
-                               class="btn btn-sm btn-outline-info" 
-                               title="Historia clínica">
-                                <i class="fas fa-file-medical-alt"></i> Historia
-                            </a>
-                            <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' cita.mascota.id %}" 
-                               class="btn btn-sm btn-outline-secondary" 
-                               title="Subir imagen diagnóstica">
-                                <i class="fas fa-image"></i> Imagen
-                            </a>
-                        </div>
                     </td>
                 </tr>
                 {% endfor %}

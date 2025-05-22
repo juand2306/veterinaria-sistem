@@ -210,29 +210,75 @@
 
                             <!-- Imágenes Diagnósticas -->
                             {% if imagenes_diagnosticas %}
-                            <div class="timeline-item mb-3">
-                                <div class="card border-info">
-                                    <div class="card-header bg-info text-white">
-                                        <strong>
-                                            <i class="fas fa-images"></i>
-                                            Imágenes Diagnósticas
-                                        </strong>
+                            <!-- Sección de Imágenes Diagnósticas en Historia Clínica -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas fa-images me-1"></i>
+                                        Imágenes Diagnósticas ({{ imagenes_diagnosticas.count }})
                                     </div>
-                                    <div class="card-body">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' mascota.id %}" 
+                                        class="btn btn-sm btn-light">
+                                            <i class="fas fa-list me-1"></i>Ver Todas
+                                        </a>
+                                        <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' mascota.id %}" 
+                                        class="btn btn-sm btn-light">
+                                            <i class="fas fa-plus me-1"></i>Nueva
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    {% if imagenes_diagnosticas %}
+                                        <!-- Mostrar las últimas 3 imágenes -->
                                         <div class="row">
-                                            {% for imagen in imagenes_diagnosticas %}
+                                            {% for imagen in imagenes_diagnosticas|slice:":3" %}
                                             <div class="col-md-4 mb-3">
-                                                <div class="card">
-                                                    <img src="{{ imagen.archivo.url }}" class="card-img-top" alt="Imagen diagnóstica" style="height: 200px; object-fit: cover;">
-                                                    <div class="card-body">
-                                                        <p class="card-text small">{{ imagen.descripcion }}</p>
-                                                        <small class="text-muted">{{ imagen.fecha|date:'d/m/Y' }}</small>
+                                                <div class="card border-0 bg-light">
+                                                    <div class="card-body p-2 text-center">
+                                                        {% if imagen.archivo %}
+                                                            {% if imagen.archivo.name|lower|slice:"-4:" == ".pdf" %}
+                                                                <i class="fas fa-file-pdf fa-2x text-danger"></i>
+                                                                <p class="mt-1 mb-0 small">PDF</p>
+                                                            {% elif imagen.archivo.name|lower|slice:"-4:" == ".doc" or imagen.archivo.name|lower|slice:"-5:" == ".docx" %}
+                                                                <i class="fas fa-file-word fa-2x text-primary"></i>
+                                                                <p class="mt-1 mb-0 small">DOC</p>
+                                                            {% else %}
+                                                                <img src="{{ imagen.archivo.url }}" 
+                                                                    alt="Imagen diagnóstica" 
+                                                                    class="img-fluid rounded"
+                                                                    style="max-height: 200px; object-fit: cover;">
+                                                            {% endif %}
+                                                        {% endif %}
+                                                        <small class="text-muted d-block">
+                                                            {{ imagen.fecha|date:"d/m/Y" }}
+                                                        </small>
+                                                        <small class="text-muted">
+                                                            {{ imagen.descripcion|truncatechars:30 }}
+                                                        </small>
                                                     </div>
                                                 </div>
                                             </div>
                                             {% endfor %}
                                         </div>
-                                    </div>
+                                        
+                                        {% if imagenes_diagnosticas.count > 3 %}
+                                        <div class="text-center mt-2">
+                                            <small class="text-muted">
+                                                Mostrando las 3 más recientes de {{ imagenes_diagnosticas.count }} imágenes.
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="text-center py-3">
+                                            <i class="fas fa-images fa-2x text-muted mb-2"></i>
+                                            <p class="text-muted mb-2">No hay imágenes diagnósticas registradas</p>
+                                            <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' mascota.id %}" 
+                                            class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-plus me-1"></i>Subir Primera Imagen
+                                            </a>
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}

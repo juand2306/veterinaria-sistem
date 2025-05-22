@@ -84,12 +84,43 @@
                 </div>
             </div>
             
-            <!-- Aquí podrías incluir enlaces a historiales clínicos, consultas, etc. -->
-            <div class="mt-3">
-                <a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver al Cliente
-                </a>
-                
+            <!-- Botones para Historial medico -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-stethoscope me-1"></i>Historial Médico
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'consultas:historia_clinica' mascota.id %}" 
+                            class="btn btn-outline-info w-100">
+                                <i class="fas fa-file-medical me-1"></i>
+                                Historia Clínica Completa
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' mascota.id %}" 
+                            class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-images me-1"></i>
+                                Imágenes Diagnósticas
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'consultas:crear_cita_mascota' mascota.id %}" 
+                            class="btn btn-outline-success w-100">
+                                <i class="fas fa-calendar-plus me-1"></i>
+                                Agendar Nueva Cita
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' mascota.id %}" 
+                            class="btn btn-outline-warning w-100">
+                                <i class="fas fa-upload me-1"></i>
+                                Subir Imagen Diagnóstica
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
