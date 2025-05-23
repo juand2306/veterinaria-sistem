@@ -122,6 +122,173 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Nueva sección: Vacunas y Productos -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-syringe me-1"></i>Vacunas y Productos
+                </div>
+                <div class="card-body">
+                    {% if mascota.activa %}
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'inventario:aplicar_vacuna' mascota.id %}" 
+                            class="btn btn-outline-primary w-100">
+                                <i class="fas fa-syringe me-1"></i>
+                                Aplicar Vacuna
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'inventario:aplicar_producto' mascota.id %}" 
+                            class="btn btn-outline-info w-100">
+                                <i class="fas fa-pills me-1"></i>
+                                Aplicar Producto
+                            </a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        No se pueden aplicar vacunas o productos a mascotas inactivas.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Historial de Vacunas y Productos aplicados -->
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="historialTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="vacunas-tab" data-bs-toggle="tab" data-bs-target="#vacunas" type="button" role="tab">
+                                <i class="fas fa-syringe me-1"></i>Vacunas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="productos-tab" data-bs-toggle="tab" data-bs-target="#productos" type="button" role="tab">
+                                <i class="fas fa-pills me-1"></i>Productos
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="historialTabsContent">
+                        <!-- Tab de Vacunas -->
+                        <div class="tab-pane fade show active" id="vacunas" role="tabpanel">
+                            {% if mascota.vacunas_aplicadas.all %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Vacuna</th>
+                                            <th>Fecha Aplicación</th>
+                                            <th>Próxima Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for vacuna_aplicada in mascota.vacunas_aplicadas.all %}
+                                        <tr>
+                                            <td>{{ vacuna_aplicada.vacuna.nombre }}</td>
+                                            <td>{{ vacuna_aplicada.fecha_aplicacion|date:"d/m/Y" }}</td>
+                                            <td>
+                                                {% if vacuna_aplicada.fecha_proxima %}
+                                                    {{ vacuna_aplicada.fecha_proxima|date:"d/m/Y" }}
+                                                {% else %}
+                                                    <span class="text-muted">No programada</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if vacuna_aplicada.fecha_proxima %}
+                                                    {% now "Y-m-d" as today %}
+                                                    {% if vacuna_aplicada.fecha_proxima|date:"Y-m-d" <= today %}
+                                                        <span class="badge bg-danger">Vencida</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">Al día</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'inventario:detalle_vacuna_aplicada' vacuna_aplicada.id %}" class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-syringe fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No hay vacunas aplicadas para esta mascota.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tab de Productos -->
+                        <div class="tab-pane fade" id="productos" role="tabpanel">
+                            {% if mascota.productos_aplicados.all %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Tipo</th>
+                                            <th>Fecha Aplicación</th>
+                                            <th>Próxima Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for producto_aplicado in mascota.productos_aplicados.all %}
+                                        <tr>
+                                            <td>{{ producto_aplicado.producto.nombre }}</td>
+                                            <td>{{ producto_aplicado.producto.get_tipo_display }}</td>
+                                            <td>{{ producto_aplicado.fecha_aplicacion|date:"d/m/Y" }}</td>
+                                            <td>
+                                                {% if producto_aplicado.fecha_proxima %}
+                                                    {{ producto_aplicado.fecha_proxima|date:"d/m/Y" }}
+                                                {% else %}
+                                                    <span class="text-muted">No programada</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if producto_aplicado.fecha_proxima %}
+                                                    {% now "Y-m-d" as today %}
+                                                    {% if producto_aplicado.fecha_proxima|date:"Y-m-d" <= today %}
+                                                        <span class="badge bg-danger">Vencida</span>
+                                                    {% else %}
+                                                        <span class="badge bg-success">Al día</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge bg-secondary">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'inventario:detalle_producto_aplicado' producto_aplicado.id %}" class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-pills fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">No hay productos aplicados para esta mascota.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -84,6 +84,8 @@ class VacunaAplicadaCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         mascota_id = self.kwargs.get('mascota_id')
         context['mascota'] = get_object_or_404(Mascota, pk=mascota_id)
+        # Verificar si viene desde una consulta
+        context['from_consulta'] = self.request.GET.get('from_consulta', False)
         return context
     
     def form_valid(self, form):
@@ -99,6 +101,10 @@ class VacunaAplicadaCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
     
     def get_success_url(self):
+        # Si viene desde consulta, redirigir de vuelta al perfil de la mascota
+        if self.request.GET.get('from_consulta'):
+            messages.info(self.request, "Puedes continuar con la consulta desde el perfil de la mascota.")
+            return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': self.kwargs.get('mascota_id')})
         return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': self.kwargs.get('mascota_id')})
 
 
@@ -225,6 +231,8 @@ class ProductoAplicadoCreateView(LoginRequiredMixin, CreateView):
         context = super().get_context_data(**kwargs)
         mascota_id = self.kwargs.get('mascota_id')
         context['mascota'] = get_object_or_404(Mascota, pk=mascota_id)
+        # Verificar si viene desde una consulta
+        context['from_consulta'] = self.request.GET.get('from_consulta', False)
         return context
     
     def form_valid(self, form):
@@ -240,6 +248,10 @@ class ProductoAplicadoCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
     
     def get_success_url(self):
+        # Si viene desde consulta, redirigir de vuelta al perfil de la mascota
+        if self.request.GET.get('from_consulta'):
+            messages.info(self.request, "Puedes continuar con la consulta desde el perfil de la mascota.")
+            return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': self.kwargs.get('mascota_id')})
         return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': self.kwargs.get('mascota_id')})
 
 

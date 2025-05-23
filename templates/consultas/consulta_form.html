@@ -6,8 +6,33 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card">
+        <div class="col-md-10 offset-md-1">
+            <!-- Información de la cita -->
+            {% if cita %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Información de la Cita
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Mascota:</strong> {{ cita.mascota.nombre }} ({{ cita.mascota.especie }})</p>
+                            <p><strong>Propietario:</strong> {{ cita.mascota.cliente.nombre }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Fecha de la Cita:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Motivo:</strong> {{ cita.motivo }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Formulario de consulta -->
+            <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
                         <i class="fas fa-stethoscope me-2"></i>
@@ -15,18 +40,6 @@
                     </h4>
                 </div>
                 <div class="card-body">
-                    {% if cita %}
-                    <div class="alert alert-info mb-4">
-                        <strong>Información de la Cita:</strong>
-                        <div class="mt-2">
-                            <p><strong>Mascota:</strong> {{ cita.mascota.nombre }} ({{ cita.mascota.especie }})</p>
-                            <p><strong>Propietario:</strong> {{ cita.mascota.propietario.nombre }}</p>
-                            <p><strong>Fecha de la Cita:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
-                            <p><strong>Motivo:</strong> {{ cita.motivo }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
-
                     <form method="post">
                         {% csrf_token %}
                         {{ form|crispy }}
@@ -36,9 +49,11 @@
                                 <i class="fas fa-times me-1"></i>Cancelar
                             </a>
                             {% else %}
+                            {% if cita %}
                             <a href="{% url 'consultas:detalle_cita' cita.id %}" class="btn btn-outline-secondary me-md-2">
                                 <i class="fas fa-times me-1"></i>Cancelar
                             </a>
+                            {% endif %}
                             {% endif %}
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save me-1"></i>Guardar Consulta
@@ -47,6 +62,95 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Acciones rápidas: Aplicar vacunas/productos -->
+            {% if cita or form.instance.id %}
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-syringe me-2"></i>
+                        Aplicar Vacunas y Productos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <strong>Nota:</strong> Puedes aplicar vacunas y productos durante esta consulta. 
+                        Los registros quedarán asociados a la mascota y la fecha de aplicación será registrada.
+                    </div>
+                    
+                    {% if cita %}
+                        {% if cita.mascota.activa %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="d-grid">
+                                    <a href="{% url 'inventario:aplicar_vacuna' cita.mascota.id %}?from_consulta=1" 
+                                    class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-syringe me-2"></i>
+                                        <div>
+                                            <strong>Aplicar Vacuna</strong>
+                                            <br><small>A {{ cita.mascota.nombre }}</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-grid">
+                                    <a href="{% url 'inventario:aplicar_producto' cita.mascota.id %}?from_consulta=1" 
+                                    class="btn btn-outline-info btn-lg">
+                                        <i class="fas fa-pills me-2"></i>
+                                        <div>
+                                            <strong>Aplicar Producto</strong>
+                                            <br><small>A {{ cita.mascota.nombre }}</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            No se pueden aplicar vacunas o productos porque la mascota {{ cita.mascota.nombre }} está inactiva.
+                        </div>
+                        {% endif %}
+                    {% elif form.instance.id %}
+                        {% if form.instance.mascota.activa %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="d-grid">
+                                    <a href="{% url 'inventario:aplicar_vacuna' form.instance.mascota.id %}?from_consulta=1" 
+                                    class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-syringe me-2"></i>
+                                        <div>
+                                            <strong>Aplicar Vacuna</strong>
+                                            <br><small>A {{ form.instance.mascota.nombre }}</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-grid">
+                                    <a href="{% url 'inventario:aplicar_producto' form.instance.mascota.id %}?from_consulta=1" 
+                                    class="btn btn-outline-info btn-lg">
+                                        <i class="fas fa-pills me-2"></i>
+                                        <div>
+                                            <strong>Aplicar Producto</strong>
+                                            <br><small>A {{ form.instance.mascota.nombre }}</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            No se pueden aplicar vacunas o productos porque la mascota {{ form.instance.mascota.nombre }} está inactiva.
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
