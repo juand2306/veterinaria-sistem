@@ -74,9 +74,10 @@ class VacunaAplicadaCreateView(LoginRequiredMixin, CreateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Pasamos la mascota al formulario
+        # Corregir: pasar la mascota en initial, no como mascota_id
         mascota_id = self.kwargs.get('mascota_id')
-        kwargs['mascota_id'] = mascota_id
+        mascota = get_object_or_404(Mascota, pk=mascota_id)
+        kwargs['initial'] = {'mascota': mascota}
         return kwargs
     
     def get_context_data(self, **kwargs):
@@ -90,8 +91,12 @@ class VacunaAplicadaCreateView(LoginRequiredMixin, CreateView):
         mascota = get_object_or_404(Mascota, pk=mascota_id)
         form.instance.mascota = mascota
         
-        messages.success(self.request, "Vacuna aplicada exitosamente.")
-        return super().form_valid(form)
+        try:
+            messages.success(self.request, f"Vacuna aplicada exitosamente a {mascota.nombre}.")
+            return super().form_valid(form)
+        except ValueError as e:
+            messages.error(self.request, str(e))
+            return self.form_invalid(form)
     
     def get_success_url(self):
         return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': self.kwargs.get('mascota_id')})
@@ -110,7 +115,8 @@ class VacunaAplicadaUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['mascota_id'] = self.object.mascota.id
+        # Corregir: pasar la mascota en initial
+        kwargs['initial'] = {'mascota': self.object.mascota}
         return kwargs
     
     def get_context_data(self, **kwargs):
@@ -209,9 +215,10 @@ class ProductoAplicadoCreateView(LoginRequiredMixin, CreateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Pasamos la mascota al formulario
+        # Corregir: pasar la mascota en initial, no como mascota_id
         mascota_id = self.kwargs.get('mascota_id')
-        kwargs['mascota_id'] = mascota_id
+        mascota = get_object_or_404(Mascota, pk=mascota_id)
+        kwargs['initial'] = {'mascota': mascota}
         return kwargs
     
     def get_context_data(self, **kwargs):
@@ -225,8 +232,12 @@ class ProductoAplicadoCreateView(LoginRequiredMixin, CreateView):
         mascota = get_object_or_404(Mascota, pk=mascota_id)
         form.instance.mascota = mascota
         
-        messages.success(self.request, "Producto aplicado exitosamente.")
-        return super().form_valid(form)
+        try:
+            messages.success(self.request, f"Producto aplicado exitosamente a {mascota.nombre}.")
+            return super().form_valid(form)
+        except ValueError as e:
+            messages.error(self.request, str(e))
+            return self.form_invalid(form)
     
     def get_success_url(self):
         return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': self.kwargs.get('mascota_id')})
@@ -245,7 +256,8 @@ class ProductoAplicadoUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['mascota_id'] = self.object.mascota.id
+        # Corregir: pasar la mascota en initial
+        kwargs['initial'] = {'mascota': self.object.mascota}
         return kwargs
     
     def get_context_data(self, **kwargs):

@@ -36,10 +36,10 @@ class VacunaAplicadaForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         
-        # Si se proporciona una mascota en la instancia, pre-establecerla
+        # Si se proporciona una mascota en initial, pre-establecerla y ocultarla
         if 'initial' in kwargs and 'mascota' in kwargs['initial']:
             self.fields['mascota'].initial = kwargs['initial']['mascota']
-            self.fields['mascota'].widget.attrs['readonly'] = True
+            self.fields['mascota'].widget = forms.HiddenInput()
         
         self.helper.layout = Layout(
             'mascota',
@@ -87,10 +87,10 @@ class ProductoAplicadoForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         
-        # Si se proporciona una mascota en la instancia, pre-establecerla
+        # Si se proporciona una mascota en initial, pre-establecerla y ocultarla
         if 'initial' in kwargs and 'mascota' in kwargs['initial']:
             self.fields['mascota'].initial = kwargs['initial']['mascota']
-            self.fields['mascota'].widget.attrs['readonly'] = True
+            self.fields['mascota'].widget = forms.HiddenInput()
         
         self.helper.layout = Layout(
             'mascota',
