@@ -55,9 +55,13 @@
                             <div class="mt-3">
                                 <strong>Propietario:</strong>
                                 <div>
-                                    <a href="{% url 'clientes:detalle_cliente' vacuna_aplicada.mascota.propietario.id %}" class="text-decoration-none">
-                                        {{ vacuna_aplicada.mascota.propietario.nombre }}
-                                    </a>
+                                    {% if vacuna_aplicada.mascota.propietario %}
+                                        <a href="{% url 'clientes:detalle_cliente' vacuna_aplicada.mascota.propietario.id %}" class="text-decoration-none">
+                                            {{ vacuna_aplicada.mascota.propietario.nombre }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">Sin propietario asignado</span>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -93,20 +97,24 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <strong>Fecha de Aplicación:</strong>
-                            <div>{{ vacuna_aplicada.fecha_aplicacion }}</div>
+                            <div>{{ vacuna_aplicada.fecha_aplicacion|date:"d/m/Y" }}</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <strong>Próxima Aplicación:</strong>
                             <div>
                                 {% if vacuna_aplicada.fecha_proxima %}
-                                    {{ vacuna_aplicada.fecha_proxima }}
+                                    {{ vacuna_aplicada.fecha_proxima|date:"d/m/Y" }}
                                     
                                     <!-- Alerta si la fecha próxima está cercana o pasada -->
                                     {% now "Y-m-d" as today %}
                                     {% if vacuna_aplicada.fecha_proxima|date:"Y-m-d" < today %}
                                         <span class="badge bg-danger ms-2">Vencida</span>
-                                    {% elif vacuna_aplicada.fecha_proxima|date:"Y-m-d" <= today|date:"Y-m-d"|add:"+30 days" %}
-                                        <span class="badge bg-warning ms-2">Próxima</span>
+                                    {% elif vacuna_aplicada.fecha_proxima|timeuntil %}
+                                        {% with days_until=vacuna_aplicada.fecha_proxima|timeuntil %}
+                                            {% if "day" in days_until and "30" in days_until or "week" in days_until %}
+                                                <span class="badge bg-warning ms-2">Próxima</span>
+                                            {% endif %}
+                                        {% endwith %}
                                     {% endif %}
                                 {% else %}
                                     <span class="text-muted">No programada</span>

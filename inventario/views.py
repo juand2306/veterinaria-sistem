@@ -141,13 +141,41 @@ class VacunaAplicadaUpdateView(LoginRequiredMixin, UpdateView):
 class VacunaAplicadaDeleteView(LoginRequiredMixin, DeleteView):
     model = VacunaAplicada
     template_name = 'inventario/confirmar_eliminar_vacuna_aplicada.html'
+    context_object_name = 'vacuna_aplicada'  # Agregar esto para asegurar el contexto
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Debug: verificar que la mascota existe y tiene ID
+        vacuna_aplicada = self.get_object()
+        print(f"Debug - Vacuna aplicada ID: {vacuna_aplicada.id}")
+        print(f"Debug - Mascota: {vacuna_aplicada.mascota}")
+        print(f"Debug - Mascota ID: {vacuna_aplicada.mascota.id if vacuna_aplicada.mascota else 'None'}")
+        
+        # Asegurar que tenemos el objeto correcto en el contexto
+        context['vacuna_aplicada'] = vacuna_aplicada
+        return context
     
     def get_success_url(self):
-        mascota_id = self.object.mascota.id
+        # Obtener el objeto antes de eliminarlo
+        vacuna_aplicada = self.get_object()
+        mascota_id = vacuna_aplicada.mascota.id
+        
+        # Verificar que tenemos un ID válido
+        if not mascota_id:
+            # Si no hay ID, redirigir a la lista de mascotas como fallback
+            return reverse_lazy('clientes:lista_mascotas')
+        
         return reverse_lazy('clientes:detalle_mascota', kwargs={'pk': mascota_id})
     
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "Registro de vacuna eliminado exitosamente.")
+        # Obtener información antes de eliminar
+        vacuna_aplicada = self.get_object()
+        mascota_nombre = vacuna_aplicada.mascota.nombre if vacuna_aplicada.mascota else "mascota desconocida"
+        
+        messages.success(
+            self.request, 
+            f"Registro de vacuna eliminado exitosamente para {mascota_nombre}."
+        )
         return super().delete(request, *args, **kwargs)
 
 

@@ -14,9 +14,9 @@ urlpatterns = [
     
     # URLs para Vacunas Aplicadas #Desconectada
     path('mascota/<int:mascota_id>/vacuna/aplicar/', views.VacunaAplicadaCreateView.as_view(), name='aplicar_vacuna'),
-    path('vacuna-aplicada/<int:pk>/', views.VacunaAplicadaDetailView.as_view(), name='detalle_vacuna_aplicada'), #Falla
-    path('vacuna-aplicada/<int:pk>/editar/', views.VacunaAplicadaUpdateView.as_view(), name='editar_vacuna_aplicada'), #Falta implementar
-    path('vacuna-aplicada/<int:pk>/eliminar/', views.VacunaAplicadaDeleteView.as_view(), name='eliminar_vacuna_aplicada'), #Falta implementar
+    path('vacuna-aplicada/<int:pk>/', views.VacunaAplicadaDetailView.as_view(), name='detalle_vacuna_aplicada'),
+    path('vacuna-aplicada/<int:pk>/editar/', views.VacunaAplicadaUpdateView.as_view(), name='editar_vacuna_aplicada'),
+    path('vacuna-aplicada/<int:pk>/eliminar/', views.VacunaAplicadaDeleteView.as_view(), name='eliminar_vacuna_aplicada'),
     
     # URLs para Productos 
     path('productos/', views.ProductoListView.as_view(), name='lista_productos'),

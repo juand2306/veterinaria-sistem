@@ -7,7 +7,15 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'clientes:lista_mascotas' %}">Mascotas</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}">{{ vacuna_aplicada.mascota.nombre }}</a></li>
+            {% if vacuna_aplicada.mascota and vacuna_aplicada.mascota.id %}
+                <li class="breadcrumb-item">
+                    <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}">
+                        {{ vacuna_aplicada.mascota.nombre|default:"Mascota" }}
+                    </a>
+                </li>
+            {% else %}
+                <li class="breadcrumb-item">Mascota no disponible</li>
+            {% endif %}
             <li class="breadcrumb-item active" aria-current="page">Eliminar Vacuna Aplicada</li>
         </ol>
     </nav>
@@ -28,15 +36,30 @@
             
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">{{ vacuna_aplicada.vacuna.nombre }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Aplicada a: {{ vacuna_aplicada.mascota.nombre }}</h6>
+                    <h5 class="card-title">
+                        {% if vacuna_aplicada.vacuna %}
+                            {{ vacuna_aplicada.vacuna.nombre }}
+                        {% else %}
+                            Vacuna no disponible
+                        {% endif %}
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Aplicada a: 
+                        {% if vacuna_aplicada.mascota %}
+                            {{ vacuna_aplicada.mascota.nombre }}
+                        {% else %}
+                            Mascota no disponible
+                        {% endif %}
+                    </h6>
                     <p class="card-text">
-                        <strong>Fecha de aplicación:</strong> {{ vacuna_aplicada.fecha_aplicacion|date:"d/m/Y" }}<br>
+                        {% if vacuna_aplicada.fecha_aplicacion %}
+                            <strong>Fecha de aplicación:</strong> {{ vacuna_aplicada.fecha_aplicacion|date:"d/m/Y" }}<br>
+                        {% endif %}
                         {% if vacuna_aplicada.fecha_proxima %}
-                        <strong>Próxima aplicación:</strong> {{ vacuna_aplicada.fecha_proxima|date:"d/m/Y" }}<br>
+                            <strong>Próxima aplicación:</strong> {{ vacuna_aplicada.fecha_proxima|date:"d/m/Y" }}<br>
                         {% endif %}
                         {% if vacuna_aplicada.observaciones %}
-                        <strong>Observaciones:</strong> {{ vacuna_aplicada.observaciones }}<br>
+                            <strong>Observaciones:</strong> {{ vacuna_aplicada.observaciones }}<br>
                         {% endif %}
                     </p>
                 </div>
@@ -45,9 +68,15 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="d-flex justify-content-end">
-                    <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}" class="btn btn-secondary me-2">
-                        <i class="fas fa-times me-1"></i>Cancelar
-                    </a>
+                    {% if vacuna_aplicada.mascota and vacuna_aplicada.mascota.id %}
+                        <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </a>
+                    {% else %}
+                        <a href="{% url 'clientes:lista_mascotas' %}" class="btn btn-secondary me-2">
+                            <i class="fas fa-times me-1"></i>Cancelar
+                        </a>
+                    {% endif %}
                     <button type="submit" class="btn btn-danger">
                         <i class="fas fa-trash me-1"></i>Eliminar
                     </button>
@@ -56,4 +85,18 @@
         </div>
     </div>
 </div>
+
+<!-- Debug info (remover en producción) -->
+{% if debug %}
+<div class="container mt-4">
+    <div class="alert alert-info">
+        <h6>Debug Info:</h6>
+        <p>
+            <strong>Vacuna Aplicada ID:</strong> {{ vacuna_aplicada.id|default:"No disponible" }}<br>
+            <strong>Mascota:</strong> {{ vacuna_aplicada.mascota|default:"No disponible" }}<br>
+            <strong>Mascota ID:</strong> {{ vacuna_aplicada.mascota.id|default:"No disponible" }}<br>
+        </p>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

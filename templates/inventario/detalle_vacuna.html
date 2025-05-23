@@ -104,9 +104,13 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{% url 'clientes:detalle_cliente' aplicacion.mascota.propietario.id %}" class="text-decoration-none">
+                                    {% if aplicacion.mascota.propietario %}
+                                    <a href="{% url 'clientes:detalle_cliente' aplicacion.mascota.propietario.pk %}" class="text-decoration-none">
                                         {{ aplicacion.mascota.propietario.nombre }}
                                     </a>
+                                    {% else %}
+                                    <span class="text-muted">Sin propietario</span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     {% if aplicacion.fecha_proxima %}
