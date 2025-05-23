@@ -49,6 +49,18 @@
         </div>
     </div>
 
+    <!-- Mensaje informativo -->
+    {% if es_filtro_defecto %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Mostrando vacunas del mes actual. Use los filtros arriba para cambiar el rango de fechas.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Estadísticas por tipo de vacuna -->
     {% if stats_vacunas %}
     <div class="row mb-4">
@@ -115,8 +127,8 @@
                                 <tr>
                                     <td>{{ vacuna.fecha_aplicacion|date:'d/m/Y' }}</td>
                                     <td>{{ vacuna.vacuna.nombre }}</td>
-                                    <td>{{ vacuna.consulta.cita.mascota.nombre }}</td>
-                                    <td>{{ vacuna.consulta.cita.mascota.cliente.nombre }} {{ vacuna.consulta.cita.mascota.cliente.apellido }}</td>
+                                    <td>{{ vacuna.mascota.nombre }}</td>
+                                    <td>{{ vacuna.mascota.cliente.nombre }} {{ vacuna.mascota.cliente.apellido }}</td>
                                     <td>{{ vacuna.observaciones|default:"—"|truncatechars:50 }}</td>
                                     <td>
                                         {% if vacuna.fecha_proxima %}

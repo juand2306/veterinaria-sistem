@@ -102,44 +102,47 @@ class ReporteVacunasView(LoginRequiredMixin, View):
         fecha_inicio_str = request.GET.get('fecha_inicio')
         fecha_fin_str = request.GET.get('fecha_fin')
         
-        if fecha_inicio_str and fecha_fin_str:
-            try:
-                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
-                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
-                
-                # Obtener vacunas aplicadas en el rango de fechas
-                vacunas = VacunaAplicada.objects.filter(
-                    fecha_aplicacion__date__gte=fecha_inicio,
-                    fecha_aplicacion__date__lte=fecha_fin
-                ).order_by('-fecha_aplicacion')
-                
-                # Estadísticas por tipo de vacuna
-                stats_vacunas = VacunaAplicada.objects.filter(
-                    fecha_aplicacion__date__gte=fecha_inicio,
-                    fecha_aplicacion__date__lte=fecha_fin
-                ).values('vacuna__nombre').annotate(total=Count('id')).order_by('-total')
-                
-                return render(request, self.template_name, {
-                    'vacunas': vacunas,
-                    'stats_vacunas': stats_vacunas,
-                    'fecha_inicio': fecha_inicio,
-                    'fecha_fin': fecha_fin,
-                    'total_vacunas': vacunas.count(),
-                })
-            except ValueError:
-                pass
-        
-        # Si no hay fechas válidas, mostrar el formulario vacío
+        # Calcular fechas por defecto (mes actual)
         hoy = timezone.now().date()
         primer_dia_mes = hoy.replace(day=1)
         ultimo_dia_mes = (primer_dia_mes + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
+        # Usar fechas del formulario o fechas por defecto
+        if fecha_inicio_str and fecha_fin_str:
+            try:
+                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            except ValueError:
+                # Si hay error en las fechas, usar fechas por defecto
+                fecha_inicio = primer_dia_mes
+                fecha_fin = ultimo_dia_mes
+        else:
+            # Si no hay fechas en el formulario, usar fechas por defecto
+            fecha_inicio = primer_dia_mes
+            fecha_fin = ultimo_dia_mes
+        
+        # Obtener vacunas aplicadas en el rango de fechas con select_related para optimizar
+        vacunas = VacunaAplicada.objects.filter(
+            fecha_aplicacion__gte=fecha_inicio,
+            fecha_aplicacion__lte=fecha_fin
+        ).select_related(
+            'vacuna', 
+            'mascota__cliente'
+        ).order_by('-fecha_aplicacion')
+        
+        # Estadísticas por tipo de vacuna
+        stats_vacunas = VacunaAplicada.objects.filter(
+            fecha_aplicacion__gte=fecha_inicio,
+            fecha_aplicacion__lte=fecha_fin
+        ).values('vacuna__nombre').annotate(total=Count('id')).order_by('-total')
+        
         return render(request, self.template_name, {
-            'vacunas': [],
-            'stats_vacunas': [],
-            'fecha_inicio': primer_dia_mes,
-            'fecha_fin': ultimo_dia_mes,
-            'total_vacunas': 0,
+            'vacunas': vacunas,
+            'stats_vacunas': stats_vacunas,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
+            'total_vacunas': vacunas.count(),
+            'es_filtro_defecto': not (fecha_inicio_str and fecha_fin_str),  # Para mostrar un mensaje informativo
         })
 
 
