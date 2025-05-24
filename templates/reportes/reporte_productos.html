@@ -72,12 +72,12 @@
                                 <tr>
                                     <td>{{ stat.producto__nombre }}</td>
                                     <td>
-                                        {% if stat.producto__tipo == 'antiparasitario' %}
+                                        {% if stat.producto__tipo == 'A' %}
                                             <span class="badge bg-info">Antiparasitario</span>
-                                        {% elif stat.producto__tipo == 'medicamento' %}
-                                            <span class="badge bg-primary">Medicamento</span>
+                                        {% elif stat.producto__tipo == 'V' %}
+                                            <span class="badge bg-primary">Vermífugo</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">{{ stat.producto__tipo|capfirst }}</span>
+                                            <span class="badge bg-secondary">{{ stat.producto__tipo }}</span>
                                         {% endif %}
                                     </td>
                                     <td><strong>{{ stat.total }}</strong></td>
@@ -127,16 +127,16 @@
                                     <td>{{ producto.fecha_aplicacion|date:'d/m/Y' }}</td>
                                     <td>{{ producto.producto.nombre }}</td>
                                     <td>
-                                        {% if producto.producto.tipo == 'antiparasitario' %}
+                                        {% if producto.producto.tipo == 'A' %}
                                             <span class="badge bg-info">Antiparasitario</span>
-                                        {% elif producto.producto.tipo == 'vermífugo' %}
-                                            <span class="badge bg-primary">Vermifugo</span>
+                                        {% elif producto.producto.tipo == 'V' %}
+                                            <span class="badge bg-primary">Vermífugo</span>
                                         {% else %}
-                                            <span class="badge bg-secondary">{{ producto.producto.tipo|capfirst }}</span>
+                                            <span class="badge bg-secondary">{{ producto.producto.get_tipo_display }}</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ producto.consulta.cita.mascota.nombre }}</td>
-                                    <td>{{ producto.consulta.cita.mascota.cliente.nombre }} {{ producto.consulta.cita.mascota.cliente.apellido }}</td>
+                                    <td>{{ producto.mascota.nombre }}</td>
+                                    <td>{{ producto.mascota.cliente.nombre }} {{ producto.mascota.cliente.apellido }}</td>
                                     <td>{{ producto.observaciones|default:"—"|truncatechars:50 }}</td>
                                     <td>
                                         {% if producto.fecha_proxima %}
