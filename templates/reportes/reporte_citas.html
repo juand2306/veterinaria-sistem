@@ -49,6 +49,18 @@
         </div>
     </div>
 
+    <!-- Mensaje informativo -->
+    {% if es_filtro_defecto %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Mostrando vacunas del mes actual. Use los filtros arriba para cambiar el rango de fechas.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Resultados -->
     <div class="row">
         <div class="col-12">

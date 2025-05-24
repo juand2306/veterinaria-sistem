@@ -115,7 +115,6 @@
                                     <th>Fecha Aplicación</th>
                                     <th>Producto</th>
                                     <th>Tipo</th>
-                                    <th>Dosis</th>
                                     <th>Mascota</th>
                                     <th>Cliente</th>
                                     <th>Observaciones</th>
@@ -130,13 +129,12 @@
                                     <td>
                                         {% if producto.producto.tipo == 'antiparasitario' %}
                                             <span class="badge bg-info">Antiparasitario</span>
-                                        {% elif producto.producto.tipo == 'medicamento' %}
-                                            <span class="badge bg-primary">Medicamento</span>
+                                        {% elif producto.producto.tipo == 'vermífugo' %}
+                                            <span class="badge bg-primary">Vermifugo</span>
                                         {% else %}
                                             <span class="badge bg-secondary">{{ producto.producto.tipo|capfirst }}</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ producto.dosis|default:"—" }}</td>
                                     <td>{{ producto.consulta.cita.mascota.nombre }}</td>
                                     <td>{{ producto.consulta.cita.mascota.cliente.nombre }} {{ producto.consulta.cita.mascota.cliente.apellido }}</td>
                                     <td>{{ producto.observaciones|default:"—"|truncatechars:50 }}</td>

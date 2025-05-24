@@ -61,36 +61,37 @@ class ReporteCitasView(LoginRequiredMixin, View):
         fecha_inicio_str = request.GET.get('fecha_inicio')
         fecha_fin_str = request.GET.get('fecha_fin')
         
-        if fecha_inicio_str and fecha_fin_str:
-            try:
-                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
-                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
-                
-                # Obtener citas en el rango de fechas
-                citas = Cita.objects.filter(
-                    fecha__date__gte=fecha_inicio,
-                    fecha__date__lte=fecha_fin
-                ).order_by('fecha')
-                
-                return render(request, self.template_name, {
-                    'citas': citas,
-                    'fecha_inicio': fecha_inicio,
-                    'fecha_fin': fecha_fin,
-                    'total_citas': citas.count(),
-                })
-            except ValueError:
-                pass
-        
-        # Si no hay fechas válidas, mostrar el formulario vacío
+        # Calcular fechas por defecto (mes actual)
         hoy = timezone.now().date()
         primer_dia_mes = hoy.replace(day=1)
         ultimo_dia_mes = (primer_dia_mes + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
+        # Usar fechas del formulario o fechas por defecto
+        if fecha_inicio_str and fecha_fin_str:
+            try:
+                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            except ValueError:
+                # Si hay error en las fechas, usar fechas por defecto
+                fecha_inicio = primer_dia_mes
+                fecha_fin = ultimo_dia_mes
+        else:
+            # Si no hay fechas en el formulario, usar fechas por defecto
+            fecha_inicio = primer_dia_mes
+            fecha_fin = ultimo_dia_mes
+        
+        # Obtener citas en el rango de fechas (siempre se ejecuta)
+        citas = Cita.objects.filter(
+            fecha__date__gte=fecha_inicio,
+            fecha__date__lte=fecha_fin
+        ).select_related('mascota__cliente').order_by('fecha')
+        
         return render(request, self.template_name, {
-            'citas': [],
-            'fecha_inicio': primer_dia_mes,
-            'fecha_fin': ultimo_dia_mes,
-            'total_citas': 0,
+            'citas': citas,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
+            'total_citas': citas.count(),
+            'es_filtro_defecto': not (fecha_inicio_str and fecha_fin_str),  # Para mostrar un mensaje informativo
         })
 
 
@@ -154,44 +155,45 @@ class ReporteProductosView(LoginRequiredMixin, View):
         fecha_inicio_str = request.GET.get('fecha_inicio')
         fecha_fin_str = request.GET.get('fecha_fin')
         
-        if fecha_inicio_str and fecha_fin_str:
-            try:
-                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
-                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
-                
-                # Obtener productos aplicados en el rango de fechas
-                productos = ProductoAplicado.objects.filter(
-                    fecha_aplicacion__date__gte=fecha_inicio,
-                    fecha_aplicacion__date__lte=fecha_fin
-                ).order_by('-fecha_aplicacion')
-                
-                # Estadísticas por tipo de producto
-                stats_productos = ProductoAplicado.objects.filter(
-                    fecha_aplicacion__date__gte=fecha_inicio,
-                    fecha_aplicacion__date__lte=fecha_fin
-                ).values('producto__nombre', 'producto__tipo').annotate(total=Count('id')).order_by('-total')
-                
-                return render(request, self.template_name, {
-                    'productos': productos,
-                    'stats_productos': stats_productos,
-                    'fecha_inicio': fecha_inicio,
-                    'fecha_fin': fecha_fin,
-                    'total_productos': productos.count(),
-                })
-            except ValueError:
-                pass
-        
-        # Si no hay fechas válidas, mostrar el formulario vacío
+        # Calcular fechas por defecto (mes actual)
         hoy = timezone.now().date()
         primer_dia_mes = hoy.replace(day=1)
         ultimo_dia_mes = (primer_dia_mes + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
+        # Usar fechas del formulario o fechas por defecto
+        if fecha_inicio_str and fecha_fin_str:
+            try:
+                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            except ValueError:
+                # Si hay error en las fechas, usar fechas por defecto
+                fecha_inicio = primer_dia_mes
+                fecha_fin = ultimo_dia_mes
+        else:
+            # Si no hay fechas en el formulario, usar fechas por defecto
+            fecha_inicio = primer_dia_mes
+            fecha_fin = ultimo_dia_mes
+        
+        # Obtener productos aplicados en el rango de fechas (siempre se ejecuta)
+        # Removido __date porque fecha_aplicacion ya es DateField
+        productos = ProductoAplicado.objects.filter(
+            fecha_aplicacion__gte=fecha_inicio,
+            fecha_aplicacion__lte=fecha_fin
+        ).select_related('producto', 'mascota__cliente').order_by('-fecha_aplicacion')
+        
+        # Estadísticas por tipo de producto
+        stats_productos = ProductoAplicado.objects.filter(
+            fecha_aplicacion__gte=fecha_inicio,
+            fecha_aplicacion__lte=fecha_fin
+        ).values('producto__nombre', 'producto__tipo').annotate(total=Count('id')).order_by('-total')
+        
         return render(request, self.template_name, {
-            'productos': [],
-            'stats_productos': [],
-            'fecha_inicio': primer_dia_mes,
-            'fecha_fin': ultimo_dia_mes,
-            'total_productos': 0,
+            'productos': productos,
+            'stats_productos': stats_productos,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
+            'total_productos': productos.count(),
+            'es_filtro_defecto': not (fecha_inicio_str and fecha_fin_str),  # Para mostrar un mensaje informativo
         })
 
 
