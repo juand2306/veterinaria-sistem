@@ -205,44 +205,44 @@ class ReporteEutanasiasView(LoginRequiredMixin, View):
         fecha_inicio_str = request.GET.get('fecha_inicio')
         fecha_fin_str = request.GET.get('fecha_fin')
         
-        if fecha_inicio_str and fecha_fin_str:
-            try:
-                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
-                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
-                
-                # Obtener eutanasias en el rango de fechas
-                eutanasias = Consulta.objects.filter(
-                    es_eutanasia=True,
-                    cita__fecha__date__gte=fecha_inicio,
-                    cita__fecha__date__lte=fecha_fin
-                ).order_by('-cita__fecha')
-                
-                # Estadísticas por especie
-                stats_especies = Consulta.objects.filter(
-                    es_eutanasia=True,
-                    cita__fecha__date__gte=fecha_inicio,
-                    cita__fecha__date__lte=fecha_fin
-                ).values('cita__mascota__especie__nombre').annotate(total=Count('id')).order_by('-total')
-                
-                return render(request, self.template_name, {
-                    'eutanasias': eutanasias,
-                    'stats_especies': stats_especies,
-                    'fecha_inicio': fecha_inicio,
-                    'fecha_fin': fecha_fin,
-                    'total_eutanasias': eutanasias.count(),
-                })
-            except ValueError:
-                pass
-        
-        # Si no hay fechas válidas, mostrar el formulario vacío
+        # Calcular fechas por defecto (mes actual)
         hoy = timezone.now().date()
         primer_dia_mes = hoy.replace(day=1)
         ultimo_dia_mes = (primer_dia_mes + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         
+        # Usar fechas del formulario o fechas por defecto
+        if fecha_inicio_str and fecha_fin_str:
+            try:
+                fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+                fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            except ValueError:
+                # Si hay error en las fechas, usar fechas por defecto
+                fecha_inicio = primer_dia_mes
+                fecha_fin = ultimo_dia_mes
+        else:
+            # Si no hay fechas en el formulario, usar fechas por defecto
+            fecha_inicio = primer_dia_mes
+            fecha_fin = ultimo_dia_mes
+        
+        # Obtener eutanasias en el rango de fechas (siempre se ejecuta)
+        eutanasias = Consulta.objects.filter(
+            es_eutanasia=True,
+            cita__fecha__date__gte=fecha_inicio,
+            cita__fecha__date__lte=fecha_fin
+        ).select_related('cita__mascota__cliente', 'cita__mascota__especie').order_by('-cita__fecha')
+        
+        # Estadísticas por especie
+        stats_especies = Consulta.objects.filter(
+            es_eutanasia=True,
+            cita__fecha__date__gte=fecha_inicio,
+            cita__fecha__date__lte=fecha_fin
+        ).values('cita__mascota__especie__nombre').annotate(total=Count('id')).order_by('-total')
+        
         return render(request, self.template_name, {
-            'eutanasias': [],
-            'stats_especies': [],
-            'fecha_inicio': primer_dia_mes,
-            'fecha_fin': ultimo_dia_mes,
-            'total_eutanasias': 0,
+            'eutanasias': eutanasias,
+            'stats_especies': stats_especies,
+            'fecha_inicio': fecha_inicio,
+            'fecha_fin': fecha_fin,
+            'total_eutanasias': eutanasias.count(),
+            'es_filtro_defecto': not (fecha_inicio_str and fecha_fin_str),  # Para mostrar un mensaje informativo
         })
