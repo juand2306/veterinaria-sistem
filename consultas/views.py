@@ -245,11 +245,13 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
     
     def get_unified_timeline(self, consultas, vacunas_aplicadas, productos_aplicados, imagenes_diagnosticas):
         eventos = []
-    
+
         # Agregar consultas
         for consulta in consultas:
+            # Convertir datetime a date para comparación consistente
+            fecha = consulta.cita.fecha.date() if hasattr(consulta.cita.fecha, 'date') else consulta.cita.fecha
             eventos.append({
-                'fecha': consulta.cita.fecha,
+                'fecha': fecha,
                 'tipo': 'consulta',
                 'objeto': consulta,
                 'titulo': f'Consulta - {consulta.cita.fecha.strftime("%d/%m/%Y")}'
@@ -257,8 +259,10 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
         
         # Agregar vacunas
         for vacuna in vacunas_aplicadas:
+            # fecha_aplicacion ya debería ser date, pero verificamos por seguridad
+            fecha = vacuna.fecha_aplicacion.date() if hasattr(vacuna.fecha_aplicacion, 'date') else vacuna.fecha_aplicacion
             eventos.append({
-                'fecha': vacuna.fecha_aplicacion,
+                'fecha': fecha,
                 'tipo': 'vacuna',
                 'objeto': vacuna,
                 'titulo': f'Vacuna: {vacuna.vacuna.nombre}'
@@ -266,8 +270,10 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
         
         # Agregar productos
         for producto in productos_aplicados:
+            # fecha_aplicacion ya debería ser date, pero verificamos por seguridad
+            fecha = producto.fecha_aplicacion.date() if hasattr(producto.fecha_aplicacion, 'date') else producto.fecha_aplicacion
             eventos.append({
-                'fecha': producto.fecha_aplicacion,
+                'fecha': fecha,
                 'tipo': 'producto',
                 'objeto': producto,
                 'titulo': f'Producto: {producto.producto.nombre}'
@@ -275,8 +281,10 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
             
         # Agregar imágenes diagnósticas
         for imagen in imagenes_diagnosticas:
+            # Manejar tanto date como datetime
+            fecha = imagen.fecha.date() if hasattr(imagen.fecha, 'date') else imagen.fecha
             eventos.append({
-                'fecha': imagen.fecha,
+                'fecha': fecha,
                 'tipo': 'imagen',
                 'objeto': imagen,
                 'titulo': f'Imagen diagnóstica: {imagen.descripcion[:50]}...'

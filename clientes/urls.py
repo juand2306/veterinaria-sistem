@@ -11,7 +11,7 @@ urlpatterns = [
     path('<int:pk>/editar/', views.ClienteUpdateView.as_view(), name='editar_cliente'),
     path('<int:pk>/eliminar/', views.ClienteDeleteView.as_view(), name='eliminar_cliente'),
     
-    # URLs para Mascotas
+    # URLs para Mascotas #Check
     path('mascotas/', views.MascotaListView.as_view(), name='lista_mascotas'),
     path('cliente/<int:cliente_id>/mascotas/', views.MascotaListView.as_view(), name='mascotas_por_cliente'), #falta integracion # No es necesario
     path('cliente/<int:cliente_id>/mascota/crear/', views.MascotaCreateView.as_view(), name='crear_mascota'),
@@ -19,6 +19,6 @@ urlpatterns = [
     path('mascota/<int:pk>/editar/', views.MascotaUpdateView.as_view(), name='editar_mascota'),
     path('mascota/<int:pk>/eliminar/', views.MascotaDeleteView.as_view(), name='eliminar_mascota'),
     
-    # API endpoint para obtener razas por especie
+    # API endpoint para obtener razas por especie #Check
     path('get_razas_by_especie/', views.get_razas_by_especie, name='get_razas_by_especie'),
 ]
