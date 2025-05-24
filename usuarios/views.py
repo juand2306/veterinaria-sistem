@@ -153,57 +153,37 @@ class PerfilUsuarioView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class ConfigurarCuentaView(LoginRequiredMixin, FormView):
+class ConfigurarCuentaView(LoginRequiredMixin, TemplateView):
     """Vista para configurar la cuenta del usuario"""
     template_name = 'usuarios/configurar_cuenta.html'
-    
-    def get_initial(self):
-        initial = super().get_initial()
-        user = self.request.user
-        initial.update({
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'email': user.email,
-        })
-        
-        # Obtener o crear perfil
-        perfil, created = PerfilUsuario.objects.get_or_create(user=user)
-        initial.update({
-            'telefono': perfil.telefono,
-            'cargo': perfil.cargo,
-        })
-        
-        return initial
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Crear formularios si no existen
-        if not hasattr(self, 'user_form'):
-            self.user_form = CustomUserForm(instance=self.request.user, initial=self.get_initial())
-        if not hasattr(self, 'perfil_form'):
-            perfil, created = PerfilUsuario.objects.get_or_create(user=self.request.user)
-            self.perfil_form = PerfilUsuarioForm(instance=perfil, initial=self.get_initial())
+        # Obtener o crear perfil
+        perfil, created = PerfilUsuario.objects.get_or_create(user=self.request.user)
         
-        context['user_form'] = self.user_form
-        context['perfil_form'] = self.perfil_form
+        # Crear formularios
+        context['user_form'] = CustomUserForm(instance=self.request.user)
+        context['perfil_form'] = PerfilUsuarioForm(instance=perfil)
+        
         return context
     
     def post(self, request, *args, **kwargs):
-        # Crear formularios con datos del POST
-        self.user_form = CustomUserForm(request.POST, instance=request.user)
-        
         # Obtener o crear perfil
         perfil, created = PerfilUsuario.objects.get_or_create(user=request.user)
-        self.perfil_form = PerfilUsuarioForm(request.POST, instance=perfil)
+        
+        # Crear formularios con datos del POST
+        user_form = CustomUserForm(request.POST, instance=request.user)
+        perfil_form = PerfilUsuarioForm(request.POST, instance=perfil)
         
         # Validar ambos formularios
-        if self.user_form.is_valid() and self.perfil_form.is_valid():
+        if user_form.is_valid() and perfil_form.is_valid():
             # Guardar información del usuario
-            user = self.user_form.save()
+            user = user_form.save()
             
             # Guardar información del perfil
-            perfil = self.perfil_form.save(commit=False)
+            perfil = perfil_form.save(commit=False)
             perfil.user = user
             perfil.save()
             
@@ -212,7 +192,10 @@ class ConfigurarCuentaView(LoginRequiredMixin, FormView):
         else:
             # Si hay errores, mostrar mensaje y renderizar formulario con errores
             messages.error(request, "Por favor, corrige los errores en el formulario.")
-            return self.render_to_response(self.get_context_data())
-    
-    def get_success_url(self):
-        return reverse_lazy('usuarios:perfil')
+            
+            # Preparar context con formularios que contienen errores
+            context = self.get_context_data(**kwargs)
+            context['user_form'] = user_form
+            context['perfil_form'] = perfil_form
+            
+            return self.render_to_response(context)
