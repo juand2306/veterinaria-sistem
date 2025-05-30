@@ -12,130 +12,625 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Custom CSS -->
-    {% comment %} <link href="{% static 'css/style.css' %}" rel="stylesheet"> {% endcomment %}
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #16a085;
+            --primary-dark: #138d75;
+            --secondary-color: #3498db;
+            --accent-color: #f39c12;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #5dade2;
+            
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --bg-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --bg-warning: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-light: #ffffff;
+            
+            --bg-light: #f8f9fa;
+            --bg-white: #ffffff;
+            --bg-sidebar: #2c3e50;
+            --bg-sidebar-hover: #34495e;
+            
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --box-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .main-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-sidebar);
+            color: var(--text-light);
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+            overflow-y: auto;
+            box-shadow: var(--box-shadow-lg);
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sidebar-header .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-header .logo i {
+            font-size: 2rem;
+            background: linear-gradient(45deg, var(--accent-color), var(--primary-color));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-toggle {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--border-radius-sm);
+            transition: var(--transition);
+            margin-left: auto;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--bg-sidebar-hover);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            background: none;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--accent-color);
+            transform: scaleY(0);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--bg-sidebar-hover);
+            color: var(--accent-color);
+            transform: translateX(8px);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 0.875rem;
+            font-size: 1.1rem;
+        }
+
+        .nav-text {
+            font-weight: 500;
+        }
+
+        /* Dropdown Styles */
+        .nav-dropdown {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            width: 100%;
+        }
+
+        .nav-dropdown:hover {
+            background: var(--bg-sidebar-hover);
+        }
+
+        .dropdown-menu {
+            background: var(--bg-sidebar-hover);
+            border: none;
+            box-shadow: var(--box-shadow);
+            border-radius: var(--border-radius-sm);
+            margin-left: 1rem;
+        }
+
+        .dropdown-item {
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            transition: var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-color);
+            color: var(--text-light);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            transition: var(--transition);
+            background: transparent;
+        }
+
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+
+        /* Top Header */
+        .top-header {
+            background: var(--bg-white);
+            padding: 1rem 2rem;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .header-left h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            color: var(--text-primary);
+        }
+
+        .user-btn:hover {
+            background: var(--bg-light);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Messages */
+        .alert {
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin: 1rem 2rem;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.1) 0%, rgba(39, 174, 96, 0.05) 100%);
+            border-left: 4px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(243, 156, 18, 0.05) 100%);
+            border-left: 4px solid var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(231, 76, 60, 0.05) 100%);
+            border-left: 4px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(93, 173, 226, 0.1) 0%, rgba(93, 173, 226, 0.05) 100%);
+            border-left: 4px solid var(--info-color);
+            color: var(--info-color);
+        }
+
+        /* Content Area */
+        .content-area {
+            padding: 2rem;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-white);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .main-content.expanded {
+                margin-left: 0;
+            }
+
+            .top-header {
+                padding: 1rem;
+            }
+
+            .content-area {
+                padding: 1rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animation Classes */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hover Effects */
+        .hover-lift {
+            transition: var(--transition);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-lg);
+        }
+    </style>
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'index' %}">
-                <i class="fas fa-paw me-2"></i>Sistema Veterinario
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <div class="main-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="{% url 'index' %}" class="logo">
+                    <i class="fas fa-paw"></i>
+                    <span class="nav-text">VetSystem</span>
+                </a>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
             
-            <div class="collapse navbar-collapse" id="navbarMain">
-                {% if user.is_authenticated %}
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="clientesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-users"></i> Clientes
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="clientesDropdown">
-                            <li><a class="dropdown-item" href="{% url 'clientes:lista_clientes' %}">Ver Clientes</a></li>
-                            <li><a class="dropdown-item" href="{% url 'clientes:crear_cliente' %}">Nuevo Cliente</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'clientes:lista_mascotas' %}">Ver Todas las Mascotas</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'consultas' %}active{% endif %}" href="{% url 'consultas:lista_citas' %}">
-                            <i class="fas fa-stethoscope me-1"></i>Citas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'inventario' %}active{% endif %}" href="{% url 'inventario:dashboard_inventario' %}">
-                            <i class="fas fa-box me-1"></i>Inventario
-                        </a>
-                    </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'reportes' %}active{% endif %}"  href="{% url 'reportes:dashboard' %}">
-                            <i class="fas fa-chart-bar me-1"></i>Reportes
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'configuracion' %}active{% endif %}"  href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-cog me-1"></i>Configuración
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" href="{% url 'configuracion:lista_especies' %}">Especies</a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'configuracion:lista_razas' %}">Razas</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+            {% if user.is_authenticated %}
+            <div class="sidebar-nav">
+                <!-- Dashboard -->
+                <div class="nav-item">
+                    <a href="{% url 'reportes:dashboard' %}" class="nav-link {% if request.resolver_match.app_name == 'reportes' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <!-- Clientes -->
+                <div class="nav-item dropdown">
+                    <button class="nav-link nav-dropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Clientes</span>
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'clientes:lista_clientes' %}">
+                            <i class="fas fa-list me-2"></i>Ver Clientes
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'clientes:crear_cliente' %}">
+                            <i class="fas fa-plus me-2"></i>Nuevo Cliente
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'clientes:lista_mascotas' %}">
+                            <i class="fas fa-paw me-2"></i>Todas las Mascotas
+                        </a></li>
+                    </ul>
+                </div>
+
+                <!-- Citas -->
+                <div class="nav-item">
+                    <a href="{% url 'consultas:lista_citas' %}" class="nav-link {% if request.resolver_match.app_name == 'consultas' %}active{% endif %}">
+                        <i class="fas fa-stethoscope"></i>
+                        <span class="nav-text">Citas</span>
+                    </a>
+                </div>
+
+                <!-- Inventario -->
+                <div class="nav-item">
+                    <a href="{% url 'inventario:dashboard_inventario' %}" class="nav-link {% if request.resolver_match.app_name == 'inventario' %}active{% endif %}">
+                        <i class="fas fa-boxes"></i>
+                        <span class="nav-text">Inventario</span>
+                    </a>
+                </div>
+
+                <!-- Reportes -->
+                <div class="nav-item">
+                    <a href="{% url 'reportes:dashboard' %}" class="nav-link {% if request.resolver_match.app_name == 'reportes' %}active{% endif %}">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">Reportes</span>
+                    </a>
+                </div>
+
+                <!-- Configuración -->
+                <div class="nav-item dropdown">
+                    <button class="nav-link nav-dropdown {% if request.resolver_match.app_name == 'configuracion' %}active{% endif %}" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog"></i>
+                        <span class="nav-text">Configuración</span>
+                        <i class="fas fa-chevron-down ms-auto"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'configuracion:lista_especies' %}">
+                            <i class="fas fa-dna me-2"></i>Especies
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'configuracion:lista_razas' %}">
+                            <i class="fas fa-tags me-2"></i>Razas
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Top Header -->
+            <div class="top-header">
+                <div class="header-left">
+                    <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                </div>
                 
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i>{{ user.username }}
-                        </a>
+                {% if user.is_authenticated %}
+                <div class="header-right">
+                    <div class="user-dropdown dropdown">
+                        <button class="user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar">
+                                {{ user.username|first|upper }}
+                            </div>
+                            <span class="nav-text">{{ user.username }}</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">Mi Perfil</a></li>
-                            <li><a class="dropdown-item" href="{% url 'usuarios:configurar_cuenta' %}">Configurar Cuenta</a></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                                <i class="fas fa-user me-2"></i>Mi Perfil
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:configurar_cuenta' %}">
+                                <i class="fas fa-cog me-2"></i>Configurar Cuenta
+                            </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="post" action="{% url 'usuarios:logout' %}">
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item">
-                                        <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                                        <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
                                     </button>
                                 </form>
                             </li>
                         </ul>
-                    </li>
-                </ul>
+                    </div>
+                </div>
                 {% else %}
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'usuarios:login' %}">
-                            <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
-                        </a>
-                    </li>
-                </ul>
+                <div class="header-right">
+                    <a href="{% url 'usuarios:login' %}" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                    </a>
+                </div>
                 {% endif %}
             </div>
-        </div>
-    </nav>
 
-    <!-- Mensajes -->
-    {% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <!-- Messages -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show fade-in" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Main Content Area -->
+            <div class="content-area">
+                {% block content %}{% endblock %}
+            </div>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="container-fluid">
+                    <span>© {% now "Y" %} Sistema Veterinario VetSystem. Todos los derechos reservados.</span>
+                </div>
+            </footer>
         </div>
-        {% endfor %}
     </div>
-    {% endif %}
 
-    <!-- Contenido principal -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer mt-auto py-3 bg-light">
-        <div class="container text-center">
-            <span class="text-muted">© {% now "Y" %} Sistema Veterinario. Todos los derechos reservados.</span>
-        </div>
-    </footer>
-
-    <!-- JavaScript de Bootstrap y jQuery -->
+    <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- JavaScript personalizado -->
-    {% comment %} <script src="{% static 'js/main.js' %}"></script> {% endcomment %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            
+            // Sidebar toggle functionality
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                
+                // Store preference
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            });
+            
+            // Restore sidebar state
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            }
+            
+            // Mobile sidebar toggle
+            function handleResize() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            
+            // Add smooth scroll behavior
+            document.documentElement.style.scrollBehavior = 'smooth';
+            
+            // Add loading animation to buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (!this.classList.contains('no-loading')) {
+                        this.style.opacity = '0.7';
+                        setTimeout(() => {
+                            this.style.opacity = '1';
+                        }, 300);
+                    }
+                });
+            });
+        });
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>
