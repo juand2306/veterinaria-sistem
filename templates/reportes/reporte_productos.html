@@ -3,162 +3,729 @@
 
 {% block title %}Reporte de Productos - Sistema Veterinario{% endblock %}
 
+{% block page_title %}Reporte de Productos{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables específicas para reportes */
+    :root {
+        --report-bg: rgba(255, 255, 255, 0.95);
+        --report-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        --filter-bg: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+        --stats-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --card-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .report-container {
+        padding: 2rem 0;
+    }
+
+    .page-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .page-header h2 {
+        color: var(--text-primary);
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .page-header h2 i {
+        background: var(--stats-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5rem;
+    }
+
+    .filters-card {
+        background: var(--filter-bg);
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--report-shadow);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .filters-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-hover);
+    }
+
+    .filters-card .card-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+        border: none;
+        padding: 1.5rem;
+        color: white;
+    }
+
+    .filters-card .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filters-card .card-header h5::before {
+        content: '🔍';
+        font-size: 1.2rem;
+    }
+
+    .filters-card .card-body {
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control {
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1rem;
+        transition: var(--transition);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(22, 160, 133, 0.15);
+        background: white;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .btn {
+        border-radius: var(--border-radius-sm);
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: var(--transition);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: var(--transition);
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(22, 160, 133, 0.3);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success-color) 0%, #1e8449 100%);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+    }
+
+    .stats-card {
+        background: white;
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--report-shadow);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-hover);
+    }
+
+    .stats-card .card-header {
+        background: var(--stats-gradient);
+        border: none;
+        padding: 1.5rem;
+        color: white;
+        position: relative;
+    }
+
+    .stats-card .card-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--accent-color), var(--primary-color), var(--secondary-color));
+    }
+
+    .stats-card .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stats-card .card-header h5::before {
+        content: '📊';
+        font-size: 1.2rem;
+    }
+
+    .stats-table {
+        margin: 0;
+    }
+
+    .stats-table thead th {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border: none;
+        font-weight: 600;
+        color: var(--text-primary);
+        padding: 1rem;
+        position: relative;
+    }
+
+    .stats-table tbody tr {
+        transition: var(--transition);
+        border: none;
+    }
+
+    .stats-table tbody tr:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: scale(1.01);
+    }
+
+    .stats-table td {
+        padding: 1rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+
+    .badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .badge::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: var(--transition);
+    }
+
+    .badge:hover::before {
+        left: 100%;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #5dade2 0%, #3498db 100%) !important;
+        border: 1px solid rgba(93, 173, 226, 0.3);
+    }
+
+    .badge.bg-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+        border: 1px solid rgba(22, 160, 133, 0.3);
+    }
+
+    .badge.bg-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+        border: 1px solid rgba(108, 117, 125, 0.3);
+    }
+
+    .main-report-card {
+        background: white;
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--report-shadow);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .main-report-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--card-hover);
+    }
+
+    .main-report-card .card-header {
+        background: linear-gradient(135deg, var(--text-primary) 0%, #34495e 100%);
+        border: none;
+        padding: 1.5rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .main-report-card .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .main-report-card .card-header h5::before {
+        content: '📋';
+        font-size: 1.2rem;
+    }
+
+    .report-table {
+        margin: 0;
+    }
+
+    .report-table thead th {
+        background: linear-gradient(135deg, var(--text-primary) 0%, #34495e 100%);
+        color: white;
+        border: none;
+        font-weight: 600;
+        padding: 1rem;
+        position: relative;
+        text-align: center;
+    }
+
+    .report-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent-color);
+    }
+
+    .report-table tbody tr {
+        transition: var(--transition);
+        border: none;
+    }
+
+    .report-table tbody tr:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        transform: scale(1.005);
+    }
+
+    .report-table td {
+        padding: 1rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: var(--border-radius);
+        margin: 2rem 0;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .quantity-highlight {
+        background: linear-gradient(135deg, var(--accent-color) 0%, #e67e22 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    /* Animaciones */
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .fade-in-left {
+        animation: fadeInLeft 0.6s ease-out;
+    }
+
+    .fade-in-right {
+        animation: fadeInRight 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filters-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+
+        .report-table td {
+            padding: 0.75rem 0.5rem;
+        }
+    }
+
+    /* Print Styles */
+    @media print {
+        .filters-card,
+        .btn,
+        .page-header {
+            display: none !important;
+        }
+
+        .main-report-card {
+            box-shadow: none;
+            border: 1px solid #000;
+        }
+
+        .report-table thead th {
+            background: #f8f9fa !important;
+            color: #000 !important;
+        }
+
+        body {
+            background: white !important;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-12">
-            <h2 class="mb-4">
-                <i class="fas fa-pills me-2"></i>Reporte de Productos
+<div class="report-container">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="page-header fade-in-up">
+            <h2>
+                <i class="fas fa-pills"></i>
+                Reporte de Productos Aplicados
             </h2>
         </div>
-    </div>
 
-    <!-- Formulario de filtros -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Filtros</h5>
-                </div>
-                <div class="card-body">
-                    <form method="GET" class="row g-3">
-                        <div class="col-md-4">
-                            <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
-                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
-                                   value="{{ fecha_inicio|date:'Y-m-d' }}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="fecha_fin" class="form-label">Fecha Fin</label>
-                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
-                                   value="{{ fecha_fin|date:'Y-m-d' }}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">&nbsp;</label>
-                            <div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search me-1"></i>Filtrar
-                                </button>
-                                <a href="{% url 'reportes:reporte_productos' %}" class="btn btn-secondary ms-2">
-                                    <i class="fas fa-undo me-1"></i>Limpiar
-                                </a>
+        <!-- Formulario de filtros -->
+        <div class="row fade-in-left">
+            <div class="col-12">
+                <div class="filters-card">
+                    <div class="card-header">
+                        <h5>Filtros de Búsqueda</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" class="row g-4">
+                            <div class="col-md-5">
+                                <label for="fecha_inicio" class="form-label">
+                                    <i class="fas fa-calendar-alt me-2"></i>Fecha de Inicio
+                                </label>
+                                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                       value="{{ fecha_inicio|date:'Y-m-d' }}" required>
                             </div>
+                            <div class="col-md-5">
+                                <label for="fecha_fin" class="form-label">
+                                    <i class="fas fa-calendar-check me-2"></i>Fecha de Fin
+                                </label>
+                                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                       value="{{ fecha_fin|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex flex-column gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-2"></i>Filtrar
+                                    </button>
+                                    <a href="{% url 'reportes:reporte_productos' %}" class="btn btn-secondary">
+                                        <i class="fas fa-undo me-2"></i>Limpiar
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas por tipo de producto -->
+        {% if stats_productos %}
+        <div class="row fade-in-up">
+            <div class="col-12">
+                <div class="stats-card">
+                    <div class="card-header">
+                        <h5>Estadísticas por Tipo de Producto</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="stats-table table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-pills me-2"></i>Producto</th>
+                                        <th><i class="fas fa-tags me-2"></i>Tipo</th>
+                                        <th><i class="fas fa-calculator me-2"></i>Cantidad Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in stats_productos %}
+                                    <tr>
+                                        <td><strong>{{ stat.producto__nombre }}</strong></td>
+                                        <td>
+                                            {% if stat.producto__tipo == 'A' %}
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-shield-alt me-1"></i>Antiparasitario
+                                                </span>
+                                            {% elif stat.producto__tipo == 'V' %}
+                                                <span class="badge bg-primary">
+                                                    <i class="fas fa-bug me-1"></i>Vermífugo
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-vial me-1"></i>{{ stat.producto__tipo }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td><span class="quantity-highlight">{{ stat.total }}</span></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Estadísticas por tipo de producto -->
-    {% if stats_productos %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Estadísticas por Tipo de Producto</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Producto</th>
-                                    <th>Tipo</th>
-                                    <th>Cantidad</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for stat in stats_productos %}
-                                <tr>
-                                    <td>{{ stat.producto__nombre }}</td>
-                                    <td>
-                                        {% if stat.producto__tipo == 'A' %}
-                                            <span class="badge bg-info">Antiparasitario</span>
-                                        {% elif stat.producto__tipo == 'V' %}
-                                            <span class="badge bg-primary">Vermífugo</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">{{ stat.producto__tipo }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><strong>{{ stat.total }}</strong></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% endif %}
+        {% endif %}
 
-    <!-- Listado detallado -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <h5 class="mb-0">
-                        Productos Aplicados ({{ total_productos }} registros)
-                    </h5>
-                    {% if productos %}
-                    <button class="btn btn-sm btn-success" onclick="window.print()">
-                        <i class="fas fa-print me-1"></i>Imprimir
-                    </button>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    {% if productos %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Fecha Aplicación</th>
-                                    <th>Producto</th>
-                                    <th>Tipo</th>
-                                    <th>Mascota</th>
-                                    <th>Cliente</th>
-                                    <th>Observaciones</th>
-                                    <th>Próxima Fecha</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for producto in productos %}
-                                <tr>
-                                    <td>{{ producto.fecha_aplicacion|date:'d/m/Y' }}</td>
-                                    <td>{{ producto.producto.nombre }}</td>
-                                    <td>
-                                        {% if producto.producto.tipo == 'A' %}
-                                            <span class="badge bg-info">Antiparasitario</span>
-                                        {% elif producto.producto.tipo == 'V' %}
-                                            <span class="badge bg-primary">Vermífugo</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">{{ producto.producto.get_tipo_display }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ producto.mascota.nombre }}</td>
-                                    <td>{{ producto.mascota.cliente.nombre }} {{ producto.mascota.cliente.apellido }}</td>
-                                    <td>{{ producto.observaciones|default:"—"|truncatechars:50 }}</td>
-                                    <td>
-                                        {% if producto.fecha_proxima %}
-                                            {{ producto.fecha_proxima|date:'d/m/Y' }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+        <!-- Listado detallado -->
+        <div class="row fade-in-right">
+            <div class="col-12">
+                <div class="main-report-card">
+                    <div class="card-header">
+                        <h5>
+                            Productos Aplicados 
+                            <span class="badge bg-light text-dark ms-2">{{ total_productos }} registros</span>
+                        </h5>
+                        {% if productos %}
+                        <button class="btn btn-success" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Imprimir Reporte
+                        </button>
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="fas fa-pills fa-3x text-muted mb-3"></i>
-                        <p class="text-muted">No se encontraron productos aplicados en el rango de fechas seleccionado.</p>
+                    <div class="card-body p-0">
+                        {% if productos %}
+                        <div class="table-responsive">
+                            <table class="report-table table">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar me-2"></i>Fecha Aplicación</th>
+                                        <th><i class="fas fa-pills me-2"></i>Producto</th>
+                                        <th><i class="fas fa-tags me-2"></i>Tipo</th>
+                                        <th><i class="fas fa-paw me-2"></i>Mascota</th>
+                                        <th><i class="fas fa-user me-2"></i>Cliente</th>
+                                        <th><i class="fas fa-sticky-note me-2"></i>Observaciones</th>
+                                        <th><i class="fas fa-clock me-2"></i>Próxima Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for producto in productos %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ producto.fecha_aplicacion|date:'d/m/Y' }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>{{ producto.producto.nombre }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if producto.producto.tipo == 'A' %}
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-shield-alt me-1"></i>Antiparasitario
+                                                </span>
+                                            {% elif producto.producto.tipo == 'V' %}
+                                                <span class="badge bg-primary">
+                                                    <i class="fas fa-bug me-1"></i>Vermífugo
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-vial me-1"></i>{{ producto.producto.get_tipo_display }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong>{{ producto.mascota.nombre }}</strong>
+                                        </td>
+                                        <td>
+                                            {{ producto.mascota.cliente.nombre }} {{ producto.mascota.cliente.apellido }}
+                                        </td>
+                                        <td>
+                                            {% if producto.observaciones %}
+                                                <span title="{{ producto.observaciones }}">
+                                                    {{ producto.observaciones|truncatechars:50 }}
+                                                </span>
+                                            {% else %}
+                                                <em class="text-muted">Sin observaciones</em>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if producto.fecha_proxima %}
+                                                <strong class="text-warning">
+                                                    {{ producto.fecha_proxima|date:'d/m/Y' }}
+                                                </strong>
+                                            {% else %}
+                                                <em class="text-muted">No programada</em>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-pills"></i>
+                            <p>No se encontraron productos aplicados en el rango de fechas seleccionado.</p>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada escalonada para las filas de la tabla
+    const tableRows = document.querySelectorAll('.report-table tbody tr, .stats-table tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.1}s`;
+        row.classList.add('fade-in-up');
+    });
+
+    // Efecto de hover mejorado para badges
+    const badges = document.querySelectorAll('.badge');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.1)';
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+
+    // Validación de fechas
+    const fechaInicio = document.getElementById('fecha_inicio');
+    const fechaFin = document.getElementById('fecha_fin');
+    
+    fechaInicio.addEventListener('change', function() {
+        fechaFin.min = this.value;
+    });
+    
+    fechaFin.addEventListener('change', function() {
+        fechaInicio.max = this.value;
+    });
+
+    // Efecto de carga para botones
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (this.type === 'submit') {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cargando...';
+                this.disabled = true;
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
