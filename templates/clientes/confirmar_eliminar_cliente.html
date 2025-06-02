@@ -3,29 +3,560 @@
 
 {% block title %}Eliminar Cliente{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_clientes' %}">Clientes</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_cliente' cliente.id %}">{{ cliente.nombre }}</a></li>
-            <li class="breadcrumb-item active">Eliminar</li>
-        </ol>
-    </nav>
+{% block page_title %}Eliminar Cliente{% endblock %}
 
-    <div class="card">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0">Confirmar Eliminación</h5>
+{% block extra_css %}
+<style>
+    .confirm-delete-header {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(231, 76, 60, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .confirm-delete-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(231, 76, 60, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .confirm-delete-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .confirm-delete-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--danger-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .confirm-delete-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--danger-color), #c0392b);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .confirm-delete-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .breadcrumb-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb {
+        margin-bottom: 0;
+        background: none;
+        padding: 0;
+    }
+
+    .breadcrumb-item {
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--danger-color);
+        font-weight: 600;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "/";
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    .confirmation-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-lg);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .confirmation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--danger-color), #c0392b);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .card-header h5 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-header .icon {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .warning-content {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .warning-icon {
+        font-size: 4rem;
+        color: var(--danger-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    .warning-message {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .client-name {
+        color: var(--danger-color);
+        font-weight: 700;
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        display: inline-block;
+    }
+
+    .danger-warning {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(231, 76, 60, 0.05) 100%);
+        border: 1px solid rgba(231, 76, 60, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .danger-warning::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--danger-color);
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    .danger-warning .warning-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--danger-color);
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .danger-warning .warning-text {
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        min-width: 140px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+    }
+
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 180px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-delete::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-delete:hover::before {
+        left: 100%;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #c0392b 0%, var(--danger-color) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    .client-info-box {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.02) 100%);
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .client-info-box::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--secondary-color);
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    .client-info-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .client-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .client-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .client-detail-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--secondary-color);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .client-detail-content {
+        flex: 1;
+    }
+
+    .client-detail-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .client-detail-value {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .confirm-delete-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-cancel,
+        .btn-delete {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .client-details {
+            grid-template-columns: 1fr;
+        }
+
+        .breadcrumb-container {
+            padding: 0.75rem 1rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="confirm-delete-header">
+        <div class="confirm-delete-header-content">
+            <h1 class="confirm-delete-title">
+                <i class="fas fa-exclamation-triangle icon"></i>
+                Confirmar Eliminación
+            </h1>
+            <p class="confirm-delete-subtitle">
+                Confirma la eliminación del cliente del sistema
+            </p>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container slide-up">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'clientes:lista_clientes' %}">
+                        <i class="fas fa-users me-1"></i>Clientes
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'clientes:detalle_cliente' cliente.id %}">{{ cliente.nombre }}</a>
+                </li>
+                <li class="breadcrumb-item active">Eliminar</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Confirmation Card -->
+    <div class="confirmation-card slide-up">
+        <div class="card-header">
+            <h5>
+                <i class="fas fa-trash-alt icon"></i>
+                Confirmar Eliminación de Cliente
+            </h5>
         </div>
         <div class="card-body">
-            <p class="lead">¿Estás seguro de que deseas eliminar al cliente <strong>{{ cliente.nombre }}</strong>?</p>
-            <p class="text-danger">Esta acción no se puede deshacer. También se eliminarán todas las mascotas asociadas a este cliente.</p>
-            
+            <!-- Warning Content -->
+            <div class="warning-content">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p class="warning-message">
+                    ¿Estás seguro de que deseas eliminar al cliente 
+                    <span class="client-name">{{ cliente.nombre }}</span>?
+                </p>
+            </div>
+
+            <!-- Client Information -->
+            <div class="client-info-box">
+                <div class="client-info-title">
+                    <i class="fas fa-user"></i>
+                    Información del Cliente
+                </div>
+                <div class="client-details">
+                    <div class="client-detail-item">
+                        <div class="client-detail-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="client-detail-content">
+                            <div class="client-detail-label">Nombre</div>
+                            <div class="client-detail-value">{{ cliente.nombre }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if cliente.telefono %}
+                    <div class="client-detail-item">
+                        <div class="client-detail-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="client-detail-content">
+                            <div class="client-detail-label">Teléfono</div>
+                            <div class="client-detail-value">{{ cliente.telefono }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if cliente.correo %}
+                    <div class="client-detail-item">
+                        <div class="client-detail-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="client-detail-content">
+                            <div class="client-detail-label">Correo</div>
+                            <div class="client-detail-value">{{ cliente.correo }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="client-detail-item">
+                        <div class="client-detail-icon">
+                            <i class="fas fa-paw"></i>
+                        </div>
+                        <div class="client-detail-content">
+                            <div class="client-detail-label">Mascotas</div>
+                            <div class="client-detail-value">{{ cliente.mascotas.count }} mascota{{ cliente.mascotas.count|pluralize:"s" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Warning -->
+            <div class="danger-warning">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    ¡Advertencia Importante!
+                </div>
+                <p class="warning-text">
+                    Esta acción no se puede deshacer. Al eliminar este cliente también se eliminarán permanentemente:
+                </p>
+                <ul class="mt-2 ps-3">
+                    <li>Todas las mascotas asociadas ({{ cliente.mascotas.count }})</li>
+                    <li>Todo el historial médico y consultas</li>
+                    <li>Registros de citas y tratamientos</li>
+                    <li>Cualquier información relacionada</li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
             <form method="post">
                 {% csrf_token %}
-                <div class="d-flex justify-content-end mt-3">
-                    <a href="{% url 'clientes:detalle_cliente' cliente.id %}" class="btn btn-secondary me-2">Cancelar</a>
-                    <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+                <div class="action-buttons">
+                    <a href="{% url 'clientes:detalle_cliente' cliente.id %}" class="btn-cancel hover-lift">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-delete hover-lift">
+                        <i class="fas fa-trash-alt"></i>
+                        Confirmar Eliminación
+                    </button>
                 </div>
             </form>
         </div>

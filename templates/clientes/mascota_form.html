@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% csrf_token %}
 
 {% block title %}
 {% if form.instance.id %}
@@ -10,66 +11,1157 @@
 {% endif %}
 {% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_clientes' %}">Clientes</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_cliente' cliente.id %}">{{ cliente.nombre }}</a></li>
-            <li class="breadcrumb-item active">
-                {% if form.instance.id %}Editar{% else %}Nueva{% endif %} Mascota
-            </li>
-        </ol>
-    </nav>
+{% block page_title %}
+{% if form.instance.id %}
+    Editar Mascota
+{% else %}
+    Nueva Mascota
+{% endif %}
+{% endblock %}
 
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">
-                {% if form.instance.id %}
-                    Editar Mascota: {{ form.instance.nombre }}
-                {% else %}
-                    Nueva Mascota para {{ cliente.nombre }}
-                {% endif %}
-            </h5>
+{% block extra_css %}
+<style>
+        /* Root variables para consistencia */
+        :root {
+            --primary-color: #16a085;
+            --secondary-color: #3498db;
+            --primary-dark: #138d75;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #17a2b8;
+            --pet-accent: #e67e22;
+            --pet-secondary: #f39c12;
+            --text-primary: #2c3e50;
+            --text-light: #ffffff;
+            --bg-white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+        }
+        
+        .form-container {
+            background: var(--bg-white);
+            border-radius: 24px;
+            box-shadow: 
+                0 32px 64px -12px rgba(22, 160, 133, 0.15),
+                0 16px 32px -8px rgba(52, 152, 219, 0.1),
+                0 8px 16px -4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(22, 160, 133, 0.1);
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.02) 0%, 
+                rgba(230, 126, 34, 0.02) 50%, 
+                rgba(155, 89, 182, 0.02) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, 
+                var(--primary-color) 0%, 
+                var(--pet-accent) 50%, 
+                var(--primary-dark) 100%);
+            color: var(--text-light);
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .form-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .form-header-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header .icon {
+            width: 70px;
+            height: 70px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-body {
+            padding: 3rem;
+            position: relative;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 2;
+        }
+
+        .client-info-banner {
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.08) 0%, 
+                rgba(230, 126, 34, 0.06) 100%);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2.5rem;
+            border-left: 4px solid var(--pet-accent);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .client-info-banner h4 {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .client-info-banner p {
+            color: #64748b;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* INPUTS COMPLETAMENTE REDISEÑADOS - SIN RECUADROS NEGROS */
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-label i {
+            color: var(--primary-color);
+            width: 18px;
+            font-size: 1.1rem;
+        }
+
+        /* NUEVO DISEÑO DE INPUT - LIMPIO Y MODERNO */
+        .form-control {
+            /* Resetear todos los estilos problemáticos */
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            background-color: var(--input-bg);
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+            
+            /* Eliminar cualquier decoración no deseada */
+            box-shadow: none;
+            text-decoration: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* ELIMINAR PSEUDO-ELEMENTOS PROBLEMÁTICOS */
+        .form-control::before,
+        .form-control::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        /* Estados del input mejorados */
+        .form-control:hover {
+            border-color: rgba(22, 160, 133, 0.4);
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(22, 160, 133, 0.08);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+            box-shadow: 
+                0 0 0 3px rgba(22, 160, 133, 0.1),
+                0 4px 12px rgba(22, 160, 133, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        /* SELECTS específicamente */
+        select.form-control {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 3rem;
+        }
+
+        /* TEXTAREAS específicamente */
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Estados de validación limpios */
+        .form-control.is-valid {
+            border-color: var(--success-color);
+            background-color: rgba(39, 174, 96, 0.02);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+            background-color: rgba(231, 76, 60, 0.02);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Feedback de validación mejorado */
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, 
+                rgba(231, 76, 60, 0.08) 0%, 
+                rgba(231, 76, 60, 0.05) 100%);
+            border-radius: 12px;
+            border-left: 3px solid var(--danger-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .invalid-feedback::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--danger-color);
+        }
+
+        .valid-feedback {
+            color: var(--success-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, 
+                rgba(39, 174, 96, 0.08) 0%, 
+                rgba(39, 174, 96, 0.05) 100%);
+            border-radius: 12px;
+            border-left: 3px solid var(--success-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .valid-feedback::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--success-color);
+        }
+
+        /* Botones premium */
+        .btn-submit-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: flex-end;
+            align-items: center;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(22, 160, 133, 0.1);
+            margin-top: 2.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, 
+                var(--primary-color) 0%, 
+                var(--pet-accent) 50%, 
+                var(--primary-dark) 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 10px 15px -3px rgba(22, 160, 133, 0.3),
+                0 4px 6px -2px rgba(22, 160, 133, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 25px -5px rgba(22, 160, 133, 0.4),
+                0 10px 10px -5px rgba(22, 160, 133, 0.2);
+            background: linear-gradient(135deg, 
+                var(--pet-accent) 0%, 
+                var(--primary-color) 50%, 
+                var(--primary-dark) 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.95) 100%);
+            border: 2px solid rgba(22, 160, 133, 0.2);
+            color: var(--text-primary);
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(145deg, 
+                rgba(22, 160, 133, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 15px -3px rgba(22, 160, 133, 0.2),
+                0 4px 6px -2px rgba(22, 160, 133, 0.1);
+        }
+
+        /* Breadcrumb glassmorphism */
+        .breadcrumb-container {
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.1) 0%, 
+                rgba(230, 126, 34, 0.08) 100%);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 1.25rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(22, 160, 133, 0.15);
+            box-shadow: 
+                0 8px 32px rgba(22, 160, 133, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animaciones de entrada */
+        .slide-in {
+            animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Efectos de loading mejorados */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spinGlow 1s linear infinite;
+        }
+
+        @keyframes spinGlow {
+            0% { 
+                transform: rotate(0deg);
+                box-shadow: 0 0 5px currentColor;
+            }
+            100% { 
+                transform: rotate(360deg);
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        /* Loading state for dependent selects */
+        .loading-select {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .loading-select::after {
+            content: '';
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--primary-color);
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        /* Responsive mejorado */
+        @media (max-width: 768px) {
+            .form-container {
+                border-radius: 16px;
+                margin: 1rem;
+            }
+            
+            .form-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .form-header .icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .btn-submit-container {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .client-info-banner {
+                padding: 1rem 1.5rem;
+            }
+        }
+
+        /* Micro-interacciones para los grupos de formulario */
+        .form-group {
+            position: relative;
+        }
+
+        .form-group::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--pet-accent));
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+
+        .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        /* Indicador de campo requerido mejorado */
+        .required-field::after {
+            content: '*';
+            color: var(--danger-color);
+            margin-left: 0.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Mejoras adicionales para limpieza visual */
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Asegurar que no hay elementos superpuestos problemáticos */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary-dark);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ESTILOS ADICIONALES PARA ELIMINAR CUALQUIER LÍNEA NEGRA */
+        input, textarea, select {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        input.form-control, 
+        textarea.form-control, 
+        select.form-control {
+            border: 2px solid var(--input-border) !important;
+            box-shadow: none !important;
+        }
+
+        /* Sobrescribir cualquier estilo de Bootstrap que cause problemas */
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1) !important;
+        }
+
+        /* Estilo especial para campos dependientes */
+        .dependent-field {
+            position: relative;
+        }
+
+        .field-help-text {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .field-help-text i {
+            color: var(--info-color);
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid slide-in">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'clientes:lista_clientes' %}">
+                        <i class="fas fa-users me-1"></i>Clientes
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'clientes:detalle_cliente' cliente.id %}">
+                        <i class="fas fa-user me-1"></i>{{ cliente.nombre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if form.instance.id %}
+                        <i class="fas fa-edit me-1"></i>Editar Mascota
+                    {% else %}
+                        <i class="fas fa-plus me-1"></i>Nueva Mascota
+                    {% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Client Info Banner -->
+    <div class="client-info-banner">
+        <h4>
+            <i class="fas fa-user-circle"></i>
+            Cliente: {{ cliente.nombre }}
+        </h4>
+        <p>
+            <i class="fas fa-phone me-2"></i>{{ cliente.telefono }}
+            {% if cliente.correo %}
+                <span class="ms-3"><i class="fas fa-envelope me-2"></i>{{ cliente.correo }}</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container hover-lift">
+        <!-- Form Header -->
+        <div class="form-header">
+            <div class="form-header-content">
+                <h2>
+                    <div class="icon">
+                        {% if form.instance.id %}
+                            <i class="fas fa-paw"></i>
+                        {% else %}
+                            <i class="fas fa-heart"></i>
+                        {% endif %}
+                    </div>
+                    {% if form.instance.id %}
+                        Editar Mascota
+                    {% else %}
+                        Registrar Nueva Mascota
+                    {% endif %}
+                </h2>
+                <p>
+                    {% if form.instance.id %}
+                        Actualiza la información de: <strong>{{ form.instance.nombre }}</strong>
+                    {% else %}
+                        Complete el formulario para registrar una nueva mascota para <strong>{{ cliente.nombre }}</strong>
+                    {% endif %}
+                </p>
+            </div>
         </div>
-        <div class="card-body">
-            {% crispy form %}
+
+        <!-- Form Body -->
+        <div class="form-body">
+            <form method="post" id="mascotaForm" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                <!-- Campo cliente oculto -->
+                {{ form.cliente }}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-paw"></i>
+                                Nombre de la Mascota
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group dependent-field">
+                            <label for="{{ form.especie.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-dog"></i>
+                                Especie
+                            </label>
+                            {{ form.especie }}
+                            {% if form.especie.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.especie.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="field-help-text">
+                                <i class="fas fa-info-circle"></i>
+                                Seleccione la especie para cargar las razas disponibles
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group dependent-field">
+                            <label for="{{ form.raza.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-certificate"></i>
+                                Raza
+                            </label>
+                            {{ form.raza }}
+                            {% if form.raza.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.raza.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="field-help-text">
+                                <i class="fas fa-info-circle"></i>
+                                Las razas se cargan según la especie seleccionada
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.sexo.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-venus-mars"></i>
+                                Sexo
+                            </label>
+                            {{ form.sexo }}
+                            {% if form.sexo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.sexo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.fecha_nacimiento.id_for_label }}" class="form-label">
+                                <i class="fas fa-birthday-cake"></i>
+                                Fecha de Nacimiento
+                            </label>
+                            {{ form.fecha_nacimiento }}
+                            {% if form.fecha_nacimiento.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha_nacimiento.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.foto.id_for_label }}" class="form-label">
+                                <i class="fas fa-camera"></i>
+                                Foto de la Mascota
+                            </label>
+                            {{ form.foto }}
+                            {% if form.foto.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.foto.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="field-help-text">
+                                <i class="fas fa-info-circle"></i>
+                                Opcional - Formatos: JPG, PNG, máximo 5MB
+                            </div>
+                            {% if form.instance.foto %}
+                                <div class="mt-2">
+                                    <small class="text-muted">Foto actual:</small><br>
+                                    <img src="{{ form.instance.foto.url }}" alt="Foto actual" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px;">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="btn-submit-container">
+                    <a href="{% url 'clientes:detalle_cliente' cliente.id %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        {% if form.instance.id %}
+                            Actualizar Mascota
+                        {% else %}
+                            Guardar Mascota
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
 <script>
-    $(document).ready(function() {
-        function cargarRazas() {
-            const especieId = $('#id_especie').val();
-            if (especieId) {
-                $.ajax({
-                    url: '{% url "clientes:get_razas_by_especie" %}',
-                    data: {
-                        'especie_id': especieId
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        $('#id_raza').empty();
-                        if (data.length > 0) {
-                            $.each(data, function(index, raza) {
-                                $('#id_raza').append($('<option></option>').attr('value', raza.id).text(raza.nombre));
-                            });
-                        } else {
-                            $('#id_raza').append($('<option></option>').text('No hay razas disponibles'));
-                        }
-                    }
-                });
-            } else {
-                $('#id_raza').empty();
-                $('#id_raza').append($('<option></option>').text('Primero seleccione una especie'));
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('mascotaForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formControls = form.querySelectorAll('.form-control');
+    const especieSelect = document.getElementById('id_especie');
+    const razaSelect = document.getElementById('id_raza');
+    
+    // Guardar el valor inicial de la raza (para modo edición)
+    const razaInicialValue = razaSelect ? razaSelect.value : '';
+
+    // Add Bootstrap classes and setup form fields
+    formControls.forEach(function(control) {
+        // Add placeholder text
+        const label = control.closest('.form-group')?.querySelector('.form-label');
+        if (label && !control.hasAttribute('placeholder')) {
+            const labelText = label.textContent.trim().replace('*', '').replace(/^\s*[\w\s]*\s*/, '');
+            if (control.tagName.toLowerCase() !== 'select' && control.type !== 'file') {
+                control.setAttribute('placeholder', 'Ingrese ' + labelText.toLowerCase());
             }
         }
 
-        $('#id_especie').change(cargarRazas);
-        cargarRazas();
+        // Add form-control class if not present
+        if (!control.classList.contains('form-control')) {
+            control.classList.add('form-control');
+        }
+
+        // Real-time validation
+        control.addEventListener('blur', function() {
+            validateField(this);
+        });
+
+        control.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+        });
     });
+
+    // Función para cargar razas usando jQuery
+    function cargarRazas(mantenerSeleccion = false) {
+        const especieId = $('#id_especie').val();
+        const razaSelect = $('#id_raza');
+        const valorActualRaza = mantenerSeleccion ? razaSelect.val() : razaInicialValue;
+        
+        if (especieId) {
+            // Agregar clase de loading
+            razaSelect.addClass('loading-select');
+            
+            $.ajax({
+                url: '{% url "clientes:get_razas_by_especie" %}',
+                data: {
+                    'especie_id': especieId
+                },
+                dataType: 'json',
+                success: function(data) {
+                    razaSelect.empty();
+                    razaSelect.append($('<option></option>').attr('value', '').text('Seleccione una raza'));
+                    
+                    if (data.length > 0) {
+                        $.each(data, function(index, raza) {
+                            const option = $('<option></option>')
+                                .attr('value', raza.id)
+                                .text(raza.nombre);
+                            
+                            // Mantener la selección si coincide con el valor actual
+                            if (raza.id == valorActualRaza) {
+                                option.prop('selected', true);
+                            }
+                            
+                            razaSelect.append(option);
+                        });
+                    } else {
+                        razaSelect.append($('<option></option>').attr('value', '').text('No hay razas disponibles'));
+                    }
+                },
+                error: function() {
+                    razaSelect.empty();
+                    razaSelect.append($('<option></option>').attr('value', '').text('Error al cargar razas'));
+                },
+                complete: function() {
+                    razaSelect.removeClass('loading-select');
+                }
+            });
+        } else {
+            razaSelect.empty();
+            razaSelect.append($('<option></option>').attr('value', '').text('Primero seleccione una especie'));
+        }
+    }
+
+    // Event listener for especie change
+    if (especieSelect) {
+        $(especieSelect).change(function() {
+            cargarRazas(true); // true para mantener selección en cambios posteriores
+        });
+        
+        // Cargar razas inicialmente si ya hay una especie seleccionada (modo edición)
+        if (especieSelect.value) {
+            // Usar setTimeout para asegurar que el DOM esté completamente cargado
+            setTimeout(function() {
+                cargarRazas(false); // false para usar el valor inicial guardado
+            }, 100);
+        }
+    }
+
+    // Form validation function
+    function validateField(field) {
+        const value = field.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        // Remove existing validation classes
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        // Get or create error element
+        let errorElement = field.parentNode.querySelector('.invalid-feedback');
+        if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'invalid-feedback d-block';
+            field.parentNode.appendChild(errorElement);
+        }
+
+        // Required field validation
+        const isRequired = field.hasAttribute('required') || 
+                          field.closest('.form-group')?.querySelector('.required-field') ||
+                          ['nombre', 'especie', 'raza', 'sexo'].includes(field.name);
+
+        if (isRequired && !value && field.type !== 'file') {
+            isValid = false;
+            errorMessage = 'Este campo es obligatorio';
+        }
+
+        // Specific field validations
+        if (field.name === 'fecha_nacimiento' && value) {
+            const fechaNac = new Date(value);
+            const hoy = new Date();
+            if (fechaNac > hoy) {
+                isValid = false;
+                errorMessage = 'La fecha de nacimiento no puede ser en el futuro';
+            }
+        }
+
+        // File validation
+        if (field.type === 'file' && field.files.length > 0) {
+            const file = field.files[0];
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+
+            if (!allowedTypes.includes(file.type)) {
+                isValid = false;
+                errorMessage = 'Solo se permiten archivos JPG, PNG o GIF';
+            } else if (file.size > maxSize) {
+                isValid = false;
+                errorMessage = 'El archivo debe ser menor a 5MB';
+            }
+        }
+
+        // Apply validation styles
+        if (isValid && (value || field.type === 'file')) {
+            field.classList.add('is-valid');
+            errorElement.style.display = 'none';
+        } else if (!isValid) {
+            field.classList.add('is-invalid');
+            errorElement.textContent = errorMessage;
+            errorElement.style.display = 'block';
+        } else {
+            errorElement.style.display = 'none';
+        }
+
+        return isValid;
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let isFormValid = true;
+        
+        // Validar campos requeridos
+        const requiredFields = ['nombre', 'especie', 'raza', 'sexo'];
+        
+        requiredFields.forEach(function(fieldName) {
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            if (field && !validateField(field)) {
+                isFormValid = false;
+            }
+        });
+
+        // Validar otros campos
+        formControls.forEach(function(field) {
+            if (!requiredFields.includes(field.name)) {
+                validateField(field);
+            }
+        });
+
+        if (!isFormValid) {
+            e.preventDefault();
+            
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return false;
+        }
+
+        // Show loading state
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+        
+        return true;
+    });
+
+    // Auto-capitalize pet name
+    const nameField = form.querySelector('input[name="nombre"]');
+    if (nameField) {
+        nameField.addEventListener('input', function(e) {
+            const words = e.target.value.split(' ');
+            const capitalizedWords = words.map(word => {
+                if (word.length > 0) {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+                return word;
+            });
+            e.target.value = capitalizedWords.join(' ');
+        });
+    }
+
+    // Date input configuration
+    const fechaInput = form.querySelector('input[name="fecha_nacimiento"]');
+    if (fechaInput) {
+        const today = new Date().toISOString().split('T')[0];
+        fechaInput.setAttribute('max', today);
+    }
+
+    // File input preview
+    const fotoInput = form.querySelector('input[name="foto"]');
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Remove existing preview
+                const existingPreview = fotoInput.parentNode.querySelector('.file-preview');
+                if (existingPreview) {
+                    existingPreview.remove();
+                }
+
+                // Create new preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.createElement('div');
+                    preview.className = 'file-preview mt-2';
+                    preview.innerHTML = `
+                        <small class="text-muted">Vista previa:</small><br>
+                        <img src="${e.target.result}" alt="Vista previa" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 8px;">
+                    `;
+                    fotoInput.parentNode.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    console.log('Script cargado correctamente');
+});
 </script>
 {% endblock %}

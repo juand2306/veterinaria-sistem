@@ -3,33 +3,508 @@
 
 {% block title %}Eliminar Mascota{% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_clientes' %}">Clientes</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}">{{ mascota.cliente.nombre }}</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' mascota.id %}">{{ mascota.nombre }}</a></li>
-            <li class="breadcrumb-item active">Eliminar</li>
-        </ol>
-    </nav>
+{% block page_title %}Eliminar Mascota{% endblock %}
 
-    <div class="card">
-        <div class="card-header bg-danger text-white">
-            <h5 class="mb-0">Confirmar Eliminación</h5>
+{% block extra_css %}
+<style>
+    .delete-header {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(231, 76, 60, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .delete-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(231, 76, 60, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .delete-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .delete-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--danger-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .delete-title .icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--danger-color);
+        font-size: 1.8rem;
+    }
+
+    .delete-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .breadcrumb-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb {
+        margin: 0;
+        background: none;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: var(--danger-color);
+        font-weight: 600;
+    }
+
+    .confirmation-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-lg);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .confirmation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--danger-color), #c0392b);
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .card-header-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-header-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .card-body-custom {
+        padding: 2rem;
+    }
+
+    .warning-section {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.05) 0%, rgba(192, 57, 43, 0.05) 100%);
+        border: 1px solid rgba(231, 76, 60, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .warning-section::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--danger-color);
+        border-radius: 2px 0 0 2px;
+    }
+
+    .warning-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--danger-color);
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .warning-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--danger-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .warning-text {
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+        line-height: 1.6;
+    }
+
+    .mascot-info {
+        background: rgba(22, 160, 133, 0.05);
+        border: 1px solid rgba(22, 160, 133, 0.1);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .mascot-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .mascot-details h4 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.2rem;
+    }
+
+    .mascot-details small {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #5a6268 0%, #6c757d 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-delete::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: var(--transition);
+    }
+
+    .btn-delete:hover::before {
+        left: 100%;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #c0392b 0%, var(--danger-color) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .shake {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    @media (max-width: 768px) {
+        .delete-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column-reverse;
+            gap: 0.75rem;
+        }
+        
+        .btn-cancel,
+        .btn-delete {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .mascot-info {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="delete-header">
+        <div class="delete-header-content">
+            <div class="delete-title">
+                <div class="icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div>
+                    <div>Eliminar Mascota</div>
+                    <p class="delete-subtitle">Confirmación de eliminación</p>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <p class="lead">¿Estás seguro de que deseas eliminar la mascota <strong>{{ mascota.nombre }}</strong>?</p>
-            <p class="text-danger">Esta acción no se puede deshacer. Se eliminarán todos los registros asociados a esta mascota.</p>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container slide-up">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'clientes:lista_clientes' %}">
+                    <i class="fas fa-users me-1"></i>Clientes
+                </a></li>
+                <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}">
+                    <i class="fas fa-user me-1"></i>{{ mascota.cliente.nombre }}
+                </a></li>
+                <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' mascota.id %}">
+                    <i class="fas fa-paw me-1"></i>{{ mascota.nombre }}
+                </a></li>
+                <li class="breadcrumb-item active">
+                    <i class="fas fa-trash me-1"></i>Eliminar
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Confirmation Card -->
+    <div class="confirmation-card slide-up">
+        <div class="card-header-custom">
+            <h5 class="card-header-title">
+                <div class="card-header-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                Confirmar Eliminación
+            </h5>
+        </div>
+        
+        <div class="card-body-custom">
+            <!-- Warning Section -->
+            <div class="warning-section">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h4 class="warning-title">¡Atención! Esta acción es irreversible</h4>
+                <p class="warning-text">
+                    Estás a punto de eliminar permanentemente la mascota de tu sistema. 
+                    Todos los registros, historiales médicos, citas y datos asociados a esta mascota serán eliminados definitivamente.
+                </p>
+                <p class="warning-text">
+                    <strong>Esta acción no se puede deshacer.</strong>
+                </p>
+            </div>
+
+            <!-- Mascot Info -->
+            <div class="mascot-info">
+                <div class="mascot-avatar">
+                    <i class="fas fa-paw"></i>
+                </div>
+                <div class="mascot-details">
+                    <h4>{{ mascota.nombre }}</h4>
+                    <small>Mascota de {{ mascota.cliente.nombre }}</small>
+                </div>
+            </div>
+
+            <p class="text-center" style="font-size: 1.1rem; color: var(--text-primary); margin: 1.5rem 0;">
+                ¿Estás seguro de que deseas eliminar a <strong style="color: var(--danger-color);">{{ mascota.nombre }}</strong>?
+            </p>
             
-            <form method="post">
+            <!-- Form -->
+            <form method="post" id="deleteForm">
                 {% csrf_token %}
-                <div class="d-flex justify-content-end mt-3">
-                    <a href="{% url 'clientes:detalle_mascota' mascota.id %}" class="btn btn-secondary me-2">Cancelar</a>
-                    <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+                <div class="action-buttons">
+                    <a href="{% url 'clientes:detalle_mascota' mascota.id %}" class="btn-cancel">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-delete" id="confirmDelete">
+                        <i class="fas fa-trash-alt"></i>
+                        Confirmar Eliminación
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteForm = document.getElementById('deleteForm');
+    const confirmButton = document.getElementById('confirmDelete');
+    const confirmationCard = document.querySelector('.confirmation-card');
+    
+    // Add shake animation on form submission
+    deleteForm.addEventListener('submit', function(e) {
+        // Add loading state to button
+        confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+        confirmButton.disabled = true;
+        
+        // Add shake animation to card for dramatic effect
+        confirmationCard.classList.add('shake');
+        
+        // Optional: Add a small delay for better UX
+        setTimeout(() => {
+            // Form will submit normally after this
+        }, 500);
+    });
+    
+    // Add hover effects
+    const warningSection = document.querySelector('.warning-section');
+    const mascotInfo = document.querySelector('.mascot-info');
+    
+    // Pulse effect on warning section
+    setInterval(() => {
+        warningSection.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+            warningSection.style.transform = 'scale(1)';
+        }, 200);
+    }, 3000);
+    
+    // Add smooth transitions
+    document.querySelectorAll('a, button').forEach(element => {
+        element.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+    });
+});
+</script>
 {% endblock %}

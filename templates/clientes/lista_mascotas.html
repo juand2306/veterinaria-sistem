@@ -3,92 +3,1041 @@
 
 {% block title %}
 {% if cliente %}
-    Mascotas de {{ cliente.nombre }}
+    Mascotas de {{ cliente.nombre }} - VetSystem
 {% else %}
-    Listado de Mascotas
+    Listado de Mascotas - VetSystem
 {% endif %}
 {% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>
-            {% if cliente %}
-                Mascotas de {{ cliente.nombre }}
-            {% else %}
-                Mascotas
-            {% endif %}
-        </h1>
-        {% if cliente %}
-        <a href="{% url 'clientes:crear_mascota' cliente.id %}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Nueva Mascota
-        </a>
-        {% endif %}
-    </div>
+{% block page_title %}
+{% if cliente %}
+    Mascotas de {{ cliente.nombre }}
+{% else %}
+    Gestión de Mascotas
+{% endif %}
+{% endblock %}
 
-    <div class="card">
-        <div class="card-body">
-            {% if mascotas %}
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Especie</th>
-                            <th>Raza</th>
-                            <th>Sexo</th>
-                            {% if not cliente %}<th>Cliente</th>{% endif %}
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for mascota in mascotas %}
-                        <tr>
-                            <td>{{ mascota.nombre }}</td>
-                            <td>{{ mascota.especie.nombre }}</td>
-                            <td>{{ mascota.raza.nombre }}</td>
-                            <td>{{ mascota.get_sexo_display }}</td>
-                            {% if not cliente %}
-                            <td>
-                                <a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}">
-                                    {{ mascota.cliente.nombre }}
-                                </a>
-                            </td>
-                            {% endif %}
-                            <td>
-                                <a href="{% url 'clientes:detalle_mascota' mascota.id %}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="{% url 'clientes:editar_mascota' mascota.id %}" class="btn btn-sm btn-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="{% url 'clientes:eliminar_mascota' mascota.id %}" class="btn btn-sm btn-danger">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="alert alert-info">
+{% block extra_css %}
+<style>
+    .pets-header {
+        background: linear-gradient(135deg, rgba(22, 160, 133, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(22, 160, 133, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pets-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(22, 160, 133, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .pets-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .pets-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .pets-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .pets-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .pets-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon.primary {
+        background: linear-gradient(45deg, rgba(22, 160, 133, 0.1), rgba(22, 160, 133, 0.2));
+        color: var(--primary-color);
+    }
+
+    .stat-icon.secondary {
+        background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.2));
+        color: var(--secondary-color);
+    }
+
+    .stat-icon.accent {
+        background: linear-gradient(45deg, rgba(243, 156, 18, 0.1), rgba(243, 156, 18, 0.2));
+        color: var(--accent-color);
+    }
+
+    .stat-icon.success {
+        background: linear-gradient(45deg, rgba(39, 174, 96, 0.1), rgba(39, 174, 96, 0.2));
+        color: var(--success-color);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .search-filter-section {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: #f8f9fa;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1);
+        background: white;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .add-pet-btn {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(22, 160, 133, 0.3);
+    }
+
+    .add-pet-btn:hover {
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(22, 160, 133, 0.4);
+    }
+
+    .pets-table-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .table-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .table-count {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .filter-dropdown {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: var(--border-radius-sm);
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .filter-dropdown:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .pets-table {
+        margin: 0;
+    }
+
+    .pets-table thead th {
+        background: rgba(22, 160, 133, 0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border: none;
+        padding: 1rem 1.5rem;
+        position: relative;
+    }
+
+    .pets-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
+
+    .pets-table tbody tr {
+        transition: var(--transition);
+        border: none;
+    }
+
+    .pets-table tbody tr:hover {
+        background: rgba(22, 160, 133, 0.03);
+        transform: scale(1.01);
+    }
+
+    .pets-table tbody td {
+        padding: 1.25rem 1.5rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+
+    .pet-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .pet-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .pet-details h6 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .pet-details small {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .species-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .species-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .species-item i {
+        width: 16px;
+        text-align: center;
+        color: var(--primary-color);
+    }
+
+    .species-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background: rgba(22, 160, 133, 0.1);
+        color: var(--primary-color);
+    }
+
+    .gender-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .gender-badge.male {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+    }
+
+    .gender-badge.female {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+    }
+
+    .client-link {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .client-link:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: var(--transition);
+        font-size: 0.9rem;
+    }
+
+    .btn-action.view {
+        background: rgba(93, 173, 226, 0.1);
+        color: var(--info-color);
+    }
+
+    .btn-action.view:hover {
+        background: var(--info-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action.edit {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--warning-color);
+    }
+
+    .btn-action.edit:hover {
+        background: var(--warning-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action.delete {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+    }
+
+    .btn-action.delete:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: rgba(22, 160, 133, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .filter-tags {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+    }
+
+    .filter-tag {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .filter-tag .remove-tag {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        margin-left: 0.25rem;
+    }
+
+    .filter-tag .remove-tag:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .back-button {
+        background: linear-gradient(135deg, var(--text-secondary) 0%, rgba(127, 140, 141, 0.8) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        margin-top: 2rem;
+    }
+
+    .back-button:hover {
+        background: linear-gradient(135deg, rgba(127, 140, 141, 0.9) 0%, var(--text-secondary) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    @media (max-width: 768px) {
+        .pets-title {
+            font-size: 1.75rem;
+        }
+        
+        .pets-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-filter-section {
+            padding: 1rem;
+        }
+        
+        .table-responsive {
+            border-radius: var(--border-radius);
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .table-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="pets-header">
+        <div class="pets-header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h1 class="pets-title">
+                        <i class="fas fa-paw icon"></i>
+                        {% if cliente %}
+                            Mascotas de {{ cliente.nombre }}
+                        {% else %}
+                            Gestión de Mascotas
+                        {% endif %}
+                    </h1>
+                    <p class="pets-subtitle">
+                        {% if cliente %}
+                            Todas las mascotas registradas para este cliente
+                        {% else %}
+                            Administra todas las mascotas del sistema
+                        {% endif %}
+                    </p>
+                </div>
                 {% if cliente %}
-                    Este cliente no tiene mascotas registradas.
-                {% else %}
-                    No hay mascotas registradas actualmente.
+                <a href="{% url 'clientes:crear_mascota' cliente.id %}" class="add-pet-btn hover-lift">
+                    <i class="fas fa-plus"></i>
+                    Nueva Mascota
+                </a>
                 {% endif %}
             </div>
-            {% endif %}
-            
-            {% if cliente %}
-            <div class="mt-3">
-                <a href="{% url 'clientes:detalle_cliente' cliente.id %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Volver al Cliente
-                </a>
-            </div>
-            {% endif %}
         </div>
     </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filter-section slide-up">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Buscar mascotas por nombre, especie o raza..." id="searchInput">
+                </div>
+            </div>
+        </div>
+        <div class="filter-tags" id="filterTags">
+            <!-- Los tags de filtro aparecerán aquí dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="pets-table-container slide-up">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-list"></i>
+                {% if cliente %}
+                    Lista de Mascotas de {{ cliente.nombre }}
+                {% else %}
+                    Lista de Mascotas
+                {% endif %}
+            </h3>
+            <div class="table-actions">
+                <span class="table-count">Total: <strong id="resultCount">{{ mascotas.count|default:mascotas|length }}</strong> mascotas</span>
+                <div class="dropdown">
+                    <button class="filter-dropdown dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-filter me-1"></i>Filtrar
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="clearFilters()">Todas las mascotas</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterBySpecies('caninos')">Solo Perros</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterBySpecies('felinos')">Solo Gatos</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterByGender('macho')">Solo Machos</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterByGender('hembra')">Solo Hembras</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="clearFilters()">Limpiar filtros</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        {% if mascotas %}
+        <div class="table-responsive">
+            <table class="table pets-table">
+                <thead>
+                    <tr>
+                        <th>Mascota</th>
+                        <th>Información de Especie</th>
+                        <th>Género</th>
+                        {% if not cliente %}<th>Cliente</th>{% endif %}
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="petsTableBody">
+                    {% for mascota in mascotas %}
+                    <tr class="pet-row" 
+                        data-pet-name="{{ mascota.nombre|lower }}" 
+                        data-pet-species="{{ mascota.especie.nombre|lower }}" 
+                        data-pet-breed="{{ mascota.raza.nombre|lower }}"
+                        data-pet-gender="{{ mascota.sexo|lower }}">
+                        <td>
+                            <div class="pet-info">
+                                <div class="pet-avatar">
+                                    {{ mascota.nombre|first|upper }}
+                                </div>
+                                <div class="pet-details">
+                                    <h6>{{ mascota.nombre }}</h6>
+                                    <small>{{ mascota.fecha_nacimiento|date:"d/m/Y"|default:"Fecha no registrada" }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="species-info">
+                                <div class="species-item">
+                                    <i class="fas fa-dna"></i>
+                                    <span class="species-badge">
+                                        <i class="fas fa-paw"></i>
+                                        {{ mascota.especie.nombre }}
+                                    </span>
+                                </div>
+                                <div class="species-item">
+                                    <i class="fas fa-tag"></i>
+                                    <span>{{ mascota.raza.nombre }}</span>
+                                </div>
+                                {% if mascota.color %}
+                                <div class="species-item">
+                                    <i class="fas fa-palette"></i>
+                                    <span>{{ mascota.color }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="gender-badge {% if mascota.sexo == 'M' %}male{% else %}female{% endif %}">
+                                <i class="fas {% if mascota.sexo == 'M' %}fa-mars{% else %}fa-venus{% endif %}"></i>
+                                {{ mascota.get_sexo_display }}
+                            </span>
+                        </td>
+                        {% if not cliente %}
+                        <td>
+                            <a href="{% url 'clientes:detalle_cliente' mascota.cliente.id %}" class="client-link">
+                                {{ mascota.cliente.nombre }}
+                            </a>
+                        </td>
+                        {% endif %}
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'clientes:detalle_mascota' mascota.id %}" 
+                                   class="btn-action view" 
+                                   title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'clientes:editar_mascota' mascota.id %}" 
+                                   class="btn-action edit" 
+                                   title="Editar mascota">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'clientes:eliminar_mascota' mascota.id %}" 
+                                   class="btn-action delete" 
+                                   title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                <h5>No se encontraron mascotas</h5>
+                <p>Intenta ajustar los filtros o cambiar el término de búsqueda.</p>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-paw"></i>
+            </div>
+            <h3>No hay mascotas registradas</h3>
+            <p>
+                {% if cliente %}
+                    Este cliente no tiene mascotas registradas aún.
+                {% else %}
+                    No hay mascotas registradas en el sistema actualmente.
+                {% endif %}
+            </p>
+            {% if cliente %}
+            <a href="{% url 'clientes:crear_mascota' cliente.id %}" class="add-pet-btn">
+                <i class="fas fa-plus"></i>
+                Registrar Primera Mascota
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        {% if cliente %}
+        <div style="padding: 2rem;">
+            <a href="{% url 'clientes:detalle_cliente' cliente.id %}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Cliente
+            </a>
+        </div>
+        {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables globales
+    const searchInput = document.getElementById('searchInput');
+    const petRows = document.querySelectorAll('.pet-row');
+    const filterTagsContainer = document.getElementById('filterTags');
+    const tableCountElement = document.querySelector('.table-count strong');
+    
+    let currentFilters = {
+        search: '',
+        species: '',
+        gender: ''
+    };
+
+    // Función principal de búsqueda
+    searchInput.addEventListener('input', function() {
+        currentFilters.search = this.value.toLowerCase();
+        applyAllFilters();
+    });
+    
+    // Función para aplicar todos los filtros
+    function applyAllFilters() {
+        let visibleCount = 0;
+        
+        petRows.forEach(row => {
+            const petName = row.dataset.petName || '';
+            const petSpecies = row.dataset.petSpecies || '';
+            const petBreed = row.dataset.petBreed || '';
+            const petGender = row.dataset.petGender || '';
+            
+            // Verificar filtro de búsqueda
+            const matchesSearch = !currentFilters.search || 
+                petName.includes(currentFilters.search) || 
+                petSpecies.includes(currentFilters.search) || 
+                petBreed.includes(currentFilters.search);
+            
+            // Verificar filtro de especie
+            const matchesSpecies = !currentFilters.species || 
+                petSpecies.includes(currentFilters.species.toLowerCase());
+            
+            // Verificar filtro de género
+            let matchesGender = true;
+            if (currentFilters.gender) {
+                if (currentFilters.gender === 'macho') {
+                    matchesGender = petGender === 'm';
+                } else if (currentFilters.gender === 'hembra') {
+                    matchesGender = petGender === 'h';
+                }
+            }
+            
+            // Mostrar/ocultar fila
+            const isVisible = matchesSearch && matchesSpecies && matchesGender;
+            
+            if (isVisible) {
+                row.style.display = '';
+                row.style.animation = 'fadeIn 0.3s ease-in';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        updateResultsCount(visibleCount);
+        updateFilterTags();
+    }
+    
+    // Actualizar contador de resultados
+    function updateResultsCount(count) {
+        if (tableCountElement) {
+            tableCountElement.textContent = count;
+        }
+        
+        // Mostrar mensaje de "sin resultados" si es necesario
+        const tableBody = document.getElementById('petsTableBody');
+        let noResultsRow = document.getElementById('noResultsRow');
+        
+        if (count === 0 && tableBody) {
+            if (!noResultsRow) {
+                noResultsRow = document.createElement('tr');
+                noResultsRow.id = 'noResultsRow';
+                noResultsRow.innerHTML = `
+                    <td colspan="100%" class="no-results">
+                        <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <div>No se encontraron mascotas que coincidan con los criterios de búsqueda.</div>
+                        <small style="margin-top: 0.5rem; display: block;">Intenta con otros términos o limpia los filtros.</small>
+                    </td>
+                `;
+                tableBody.appendChild(noResultsRow);
+            }
+            noResultsRow.style.display = '';
+        } else if (noResultsRow) {
+            noResultsRow.style.display = 'none';
+        }
+    }
+    
+    // Actualizar tags de filtros activos
+    function updateFilterTags() {
+        if (!filterTagsContainer) return;
+        
+        filterTagsContainer.innerHTML = '';
+        
+        // Tag de búsqueda
+        if (currentFilters.search) {
+            addFilterTag(`Búsqueda: "${currentFilters.search}"`, 'search');
+        }
+        
+        // Tag de especie
+        if (currentFilters.species) {
+            addFilterTag(`Especie: ${currentFilters.species}`, 'species');
+        }
+        
+        // Tag de género
+        if (currentFilters.gender) {
+            const genderText = currentFilters.gender === 'male' ? 'Machos' : 'Hembras';
+            addFilterTag(`Género: ${genderText}`, 'gender');
+        }
+    }
+    
+    // Añadir tag de filtro
+    function addFilterTag(text, filterType) {
+        const tag = document.createElement('div');
+        tag.className = 'filter-tag';
+        tag.innerHTML = `
+            ${text}
+            <span class="remove-tag" onclick="removeFilter('${filterType}')">
+                <i class="fas fa-times"></i>
+            </span>
+        `;
+        filterTagsContainer.appendChild(tag);
+    }
+    
+    // Hacer funciones globales para los eventos onclick
+    window.removeFilter = function(filterType) {
+        switch(filterType) {
+            case 'search':
+                currentFilters.search = '';
+                searchInput.value = '';
+                break;
+            case 'species':
+                currentFilters.species = '';
+                break;
+            case 'gender':
+                currentFilters.gender = '';
+                break;
+        }
+        applyAllFilters();
+    };
+    
+    window.filterBySpecies = function(species) {
+        if (species === 'all') {
+            currentFilters.species = '';
+        } else {
+            currentFilters.species = species;
+        }
+        applyAllFilters();
+    };
+    
+    window.filterByGender = function(gender) {
+        currentFilters.gender = gender;
+        applyAllFilters();
+    };
+    
+    window.clearFilters = function() {
+        currentFilters = {
+            search: '',
+            species: '',
+            gender: ''
+        };
+        searchInput.value = '';
+        applyAllFilters();
+    };
+    
+    // Mejorar la experiencia de usuario con animaciones
+    function addRowAnimation(row) {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(10px)';
+        
+        requestAnimationFrame(() => {
+            row.style.transition = 'all 0.3s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        });
+    }
+    
+    // Añadir efectos hover mejorados
+    petRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            if (this.style.display !== 'none') {
+                this.style.transform = 'scale(1.01)';
+                this.style.boxShadow = '0 4px 20px rgba(22, 160, 133, 0.1)';
+            }
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = 'none';
+        });
+    });
+    
+    // Función para exportar/imprimir resultados filtrados (bonus)
+    window.exportFilteredResults = function() {
+        const visibleRows = Array.from(petRows).filter(row => row.style.display !== 'none');
+        console.log(`${visibleRows.length} mascotas encontradas con los filtros actuales`);
+        
+        // Aquí podrías añadir lógica para exportar a CSV, PDF, etc.
+        const petData = visibleRows.map(row => ({
+            nombre: row.querySelector('.pet-details h6').textContent,
+            especie: row.querySelector('.species-badge').textContent.trim(),
+            genero: row.querySelector('.gender-badge').textContent.trim()
+        }));
+        
+        console.table(petData);
+    };
+    
+    // Inicializar la tabla
+    updateResultsCount(petRows.length);
+    
+    // Añadir soporte para teclas de acceso rápido
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + F para enfocar el buscador
+        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+        
+        // Escape para limpiar filtros
+        if (e.key === 'Escape') {
+            clearFilters();
+        }
+    });
+    
+    // Debounce para la búsqueda (optimización)
+    let searchTimeout;
+    searchInput.removeEventListener('input', arguments.callee);
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentFilters.search = this.value.toLowerCase();
+            applyAllFilters();
+        }, 300);
+    });
+    
+    console.log(' Sistema de filtros y búsqueda de mascotas inicializado correctamente');
+});
+
+</script>
 {% endblock %}
