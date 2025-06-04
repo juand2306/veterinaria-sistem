@@ -9,148 +9,728 @@ Lista de Imágenes Diagnósticas
 {% endif %}
 {% endblock %}
 
-{% block content %}
-<div class="container mt-4">
-    <!-- Navegación breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            {% if mascota %}
-                <li class="breadcrumb-item">
-                    <a href="{% url 'consultas:historia_clinica' mascota.id %}">Historia Clínica</a>
-                </li>
-                <li class="breadcrumb-item active">Imágenes de {{ mascota.nombre }}</li>
-            {% else %}
-                <li class="breadcrumb-item active">Imágenes Diagnósticas</li>
-            {% endif %}
-        </ol>
-    </nav>
+{% block page_title %}
+{% if mascota %}
+Imágenes Diagnósticas de {{ mascota.nombre }}
+{% else %}
+Imágenes Diagnósticas
+{% endif %}
+{% endblock %}
 
-    <!-- Encabezado -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            {% if mascota %}
-            <h1>
-                <i class="fas fa-images me-2"></i>
-                Imágenes Diagnósticas de {{ mascota.nombre }}
-            </h1>
-            
-            <!-- Información de la mascota -->
-            <div class="card bg-light mb-3">
-                <div class="card-body py-2">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <small class="text-muted">
-                                <i class="fas fa-paw me-1"></i>
-                                <strong>Mascota:</strong> {{ mascota.nombre }} ({{ mascota.especie }})
-                            </small>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted">
-                                <i class="fas fa-user me-1"></i>
-                                <strong>Propietario:</strong> {{ mascota.propietario.nombre }}
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% else %}
-            <h1><i class="fas fa-images me-2"></i>Lista de Imágenes Diagnósticas</h1>
-            {% endif %}
-        </div>
-        <div class="col-md-4 text-end">
-            {% if mascota %}
-            <div class="btn-group" role="group">
-                <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' mascota.id %}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Nueva Imagen
-                </a>
-                <a href="{% url 'consultas:historia_clinica' mascota.id %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-file-medical me-1"></i>Historia Clínica
-                </a>
-            </div>
-            {% else %}
-            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#selectMascotaModal">
-                <i class="fas fa-plus me-1"></i>Nueva Imagen
-            </a>
-            {% endif %}
-        </div>
+{% block extra_css %}
+<style>
+    .images-header {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .images-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(52, 152, 219, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .images-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .images-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .images-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--secondary-color), #9b59b6);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .images-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .breadcrumb-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb {
+        margin: 0;
+        background: none;
+        padding: 0;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+
+    .pet-info-card {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(155, 89, 182, 0.05) 100%);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .pet-info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--secondary-color), #9b59b6);
+    }
+
+    .pet-info-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .pet-detail {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .pet-detail i {
+        width: 20px;
+        text-align: center;
+        color: var(--secondary-color);
+        font-size: 1.1rem;
+    }
+
+    .pet-detail strong {
+        color: var(--text-primary);
+    }
+
+    .action-buttons-header {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary-gradient {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, #9b59b6 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-primary-gradient:hover {
+        background: linear-gradient(135deg, #9b59b6 0%, var(--secondary-color) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        text-decoration: none;
+    }
+
+    .btn-outline-gradient {
+        background: transparent;
+        color: var(--secondary-color);
+        border: 2px solid var(--secondary-color);
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+    }
+
+    .btn-outline-gradient:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        text-decoration: none;
+    }
+
+    .images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .image-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+        overflow: hidden;
+        position: relative;
+        height: fit-content;
+    }
+
+    .image-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .image-card-header {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(155, 89, 182, 0.05) 100%);
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .date-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .date-info i {
+        color: var(--secondary-color);
+    }
+
+    .pet-badge {
+        background: linear-gradient(135deg, var(--secondary-color), #9b59b6);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .image-card-body {
+        padding: 1.5rem;
+    }
+
+    .file-preview {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .file-preview img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: var(--border-radius-sm);
+        transition: var(--transition);
+    }
+
+    .file-preview img:hover {
+        transform: scale(1.02);
+    }
+
+    .file-icon-container {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        transition: var(--transition);
+    }
+
+    .file-icon-container:hover {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(155, 89, 182, 0.15) 100%);
+    }
+
+    .file-icon {
+        font-size: 3rem;
+        transition: var(--transition);
+    }
+
+    .file-icon.pdf {
+        color: #dc3545;
+    }
+
+    .file-icon.word {
+        color: var(--secondary-color);
+    }
+
+    .file-icon.generic {
+        color: var(--text-secondary);
+    }
+
+    .file-type-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .image-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .image-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .image-card-footer {
+        padding: 1rem 1.5rem;
+        background: rgba(52, 152, 219, 0.02);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .card-actions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    .btn-action-card {
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: var(--transition);
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-action-card.view {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+        border: 1px solid rgba(52, 152, 219, 0.2);
+    }
+
+    .btn-action-card.view:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .btn-action-card.edit {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--warning-color);
+        border: 1px solid rgba(243, 156, 18, 0.2);
+    }
+
+    .btn-action-card.edit:hover {
+        background: var(--warning-color);
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .btn-action-card.delete {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(231, 76, 60, 0.2);
+    }
+
+    .btn-action-card.delete:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: translateY(-1px);
+        text-decoration: none;
+    }
+
+    .pagination-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-top: 2rem;
+    }
+
+    .pagination {
+        margin: 0;
+        justify-content: center;
+    }
+
+    .page-link {
+        color: var(--secondary-color);
+        border: 1px solid rgba(52, 152, 219, 0.2);
+        padding: 0.75rem 1rem;
+        transition: var(--transition);
+    }
+
+    .page-link:hover {
+        background: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--secondary-color), #9b59b6);
+        border-color: var(--secondary-color);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .empty-state::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--secondary-color), #9b59b6);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        background: linear-gradient(45deg, rgba(52, 152, 219, 0.2), rgba(155, 89, 182, 0.2));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    .modal-content {
+        border-radius: var(--border-radius);
+        border: none;
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(155, 89, 182, 0.05) 100%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .modal-title {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        opacity: 0.6;
+        transition: var(--transition);
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+    }
+
+    .modal-body p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+
+    .btn-secondary {
+        background: var(--text-secondary);
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+        background: var(--text-primary);
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 768px) {
+        .images-title {
+            font-size: 1.75rem;
+        }
+        
+        .images-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .action-buttons-header {
+            flex-direction: column;
+        }
+        
+        .pet-info-content {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .card-actions {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .breadcrumb-container {
+            padding: 1rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stagger-animation .image-card {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .stagger-animation .image-card:nth-child(1) { animation-delay: 0.1s; }
+    .stagger-animation .image-card:nth-child(2) { animation-delay: 0.2s; }
+    .stagger-animation .image-card:nth-child(3) { animation-delay: 0.3s; }
+    .stagger-animation .image-card:nth-child(4) { animation-delay: 0.4s; }
+    .stagger-animation .image-card:nth-child(5) { animation-delay: 0.5s; }
+    .stagger-animation .image-card:nth-child(6) { animation-delay: 0.6s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Navegación breadcrumb -->
+    <div class="breadcrumb-container slide-up">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% if mascota %}
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'consultas:historia_clinica' mascota.id %}">Historia Clínica</a>
+                    </li>
+                    <li class="breadcrumb-item active">Imágenes de {{ mascota.nombre }}</li>
+                {% else %}
+                    <li class="breadcrumb-item active">Imágenes Diagnósticas</li>
+                {% endif %}
+            </ol>
+        </nav>
     </div>
 
-    <!-- Lista de imágenes -->
-    {% if imagenes %}
-    <div class="row">
-        {% for imagen in imagenes %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <small class="text-muted">
-                        <i class="fas fa-calendar me-1"></i>
-                        {{ imagen.fecha|date:"d/m/Y H:i" }}
-                    </small>
-                    {% if not mascota %}
-                    <span class="badge bg-primary">{{ imagen.mascota.nombre }}</span>
-                    {% endif %}
-                </div>
-                
-                <div class="card-body">
-                    <!-- Vista previa del archivo -->
-                    <div class="text-center mb-3">
-                        {% if imagen.archivo %}
-                            {% with extension=imagen.archivo.name|lower|slice:"-4:" %}
-                                {% if extension == ".pdf" %}
-                                    <div class="bg-light p-4 rounded">
-                                        <i class="fas fa-file-pdf fa-3x text-danger"></i>
-                                        <p class="mt-2 mb-0 small">Documento PDF</p>
-                                    </div>
-                                {% elif extension == ".doc" or imagen.archivo.name|lower|slice:"-5:" == ".docx" %}
-                                    <div class="bg-light p-4 rounded">
-                                        <i class="fas fa-file-word fa-3x text-primary"></i>
-                                        <p class="mt-2 mb-0 small">Documento Word</p>
-                                    </div>
-                                {% elif extension == ".jpg" or extension == ".png" or extension == ".gif" or extension == "jpeg" or imagen.archivo.name|lower|slice:"-5:" == ".webp" %}
-                                    <img src="{{ imagen.archivo.url }}" 
-                                         alt="Imagen diagnóstica" 
-                                         class="img-fluid rounded"
-                                         style="max-height: 200px; object-fit: cover;"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                    <div class="bg-light p-4 rounded" style="display: none;">
-                                        <i class="fas fa-file fa-3x text-secondary"></i>
-                                        <p class="mt-2 mb-0 small">Archivo</p>
-                                    </div>
-                                {% else %}
-                                    <div class="bg-light p-4 rounded">
-                                        <i class="fas fa-file fa-3x text-secondary"></i>
-                                        <p class="mt-2 mb-0 small">Archivo</p>
-                                    </div>
-                                {% endif %}
-                            {% endwith %}
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Descripción -->
-                    <h6 class="card-title">{{ imagen.descripcion|truncatechars:50 }}</h6>
-                    
-                    {% if imagen.descripcion|length > 50 %}
-                    <p class="card-text">
-                        <small class="text-muted">{{ imagen.descripcion|truncatechars:100 }}</small>
+    <!-- Header Section -->
+    <div class="images-header">
+        <div class="images-header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    {% if mascota %}
+                    <h1 class="images-title">
+                        <i class="fas fa-images icon"></i>
+                        Imágenes Diagnósticas de {{ mascota.nombre }}
+                    </h1>
+                    <p class="images-subtitle">
+                        Gestiona las imágenes diagnósticas de la mascota
+                    </p>
+                    {% else %}
+                    <h1 class="images-title">
+                        <i class="fas fa-images icon"></i>
+                        Imágenes Diagnósticas
+                    </h1>
+                    <p class="images-subtitle">
+                        Administra todas las imágenes diagnósticas del sistema
                     </p>
                     {% endif %}
                 </div>
+                <div class="action-buttons-header">
+                    {% if mascota %}
+                    <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' mascota.id %}" class="btn-primary-gradient hover-lift">
+                        <i class="fas fa-plus"></i>
+                        Nueva Imagen
+                    </a>
+                    <a href="{% url 'consultas:historia_clinica' mascota.id %}" class="btn-outline-gradient hover-lift">
+                        <i class="fas fa-file-medical"></i>
+                        Historia Clínica
+                    </a>
+                    {% else %}
+                    <a href="#" class="btn-primary-gradient hover-lift" data-bs-toggle="modal" data-bs-target="#selectMascotaModal">
+                        <i class="fas fa-plus"></i>
+                        Nueva Imagen
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información de la mascota -->
+    {% if mascota %}
+    <div class="pet-info-card slide-up">
+        <div class="pet-info-content">
+            <div class="pet-detail">
+                <i class="fas fa-paw"></i>
+                <span><strong>Mascota:</strong> {{ mascota.nombre }} ({{ mascota.especie }})</span>
+            </div>
+            <div class="pet-detail">
+                <i class="fas fa-user"></i>
+                <span><strong>Propietario:</strong> {{ mascota.cliente.nombre }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lista de imágenes -->
+    {% if imagenes %}
+    <div class="images-grid stagger-animation">
+        {% for imagen in imagenes %}
+        <div class="image-card">
+            <div class="image-card-header">
+                <div class="date-info">
+                    <i class="fas fa-calendar"></i>
+                    <span>{{ imagen.fecha|date:"d/m/Y H:i" }}</span>
+                </div>
+                {% if not mascota %}
+                <div class="pet-badge">{{ imagen.mascota.nombre }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="image-card-body">
+                <!-- Vista previa del archivo -->
+                <div class="file-preview">
+                    {% if imagen.archivo %}
+                        {% with extension=imagen.archivo.name|lower|slice:"-4:" %}
+                            {% if extension == ".pdf" %}
+                                <div class="file-icon-container">
+                                    <i class="fas fa-file-pdf file-icon pdf"></i>
+                                    <p class="file-type-label">Documento PDF</p>
+                                </div>
+                            {% elif extension == ".doc" or imagen.archivo.name|lower|slice:"-5:" == ".docx" %}
+                                <div class="file-icon-container">
+                                    <i class="fas fa-file-word file-icon word"></i>
+                                    <p class="file-type-label">Documento Word</p>
+                                </div>
+                            {% elif extension == ".jpg" or extension == ".png" or extension == ".gif" or extension == "jpeg" or imagen.archivo.name|lower|slice:"-5:" == ".webp" %}
+                                <img src="{{ imagen.archivo.url }}" 
+                                     alt="Imagen diagnóstica" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div class="file-icon-container" style="display: none;">
+                                    <i class="fas fa-file file-icon generic"></i>
+                                    <p class="file-type-label">Archivo</p>
+                                </div>
+                            {% else %}
+                                <div class="file-icon-container">
+                                    <i class="fas fa-file file-icon generic"></i>
+                                    <p class="file-type-label">Archivo</p>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+                </div>
                 
-                <div class="card-footer">
-                    <div class="btn-group w-100" role="group">
-                        <a href="{% url 'consultas:detalle_imagen_diagnostica' imagen.id %}" 
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye me-1"></i>Ver
-                        </a>
-                        <a href="{% url 'consultas:editar_imagen_diagnostica' imagen.id %}" 
-                           class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-edit me-1"></i>Editar
-                        </a>
-                        <a href="{% url 'consultas:eliminar_imagen_diagnostica' imagen.id %}" 
-                           class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-trash me-1"></i>Eliminar
-                        </a>
-                    </div>
+                <!-- Descripción -->
+                <h6 class="image-title">{{ imagen.descripcion|truncatechars:50 }}</h6>
+                
+                {% if imagen.descripcion|length > 50 %}
+                <p class="image-description">{{ imagen.descripcion|truncatechars:100 }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="image-card-footer">
+                <div class="card-actions">
+                    <a href="{% url 'consultas:detalle_imagen_diagnostica' imagen.id %}" 
+                       class="btn-action-card view">
+                        <i class="fas fa-eye"></i>Ver
+                    </a>
+                    <a href="{% url 'consultas:editar_imagen_diagnostica' imagen.id %}" 
+                       class="btn-action-card edit">
+                        <i class="fas fa-edit"></i>Editar
+                    </a>
+                    <a href="{% url 'consultas:eliminar_imagen_diagnostica' imagen.id %}" 
+                       class="btn-action-card delete">
+                        <i class="fas fa-trash"></i>Eliminar
+                    </a>
                 </div>
             </div>
         </div>
@@ -159,48 +739,51 @@ Lista de Imágenes Diagnósticas
     
     <!-- Paginación si es necesaria -->
     {% if is_paginated %}
-    <nav aria-label="Paginación de imágenes">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1">Primera</a>
+    <div class="pagination-container">
+        <nav aria-label="Paginación de imágenes">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">Primera</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
                 </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-                </li>
-            {% endif %}
-            
-            <li class="page-item active">
-                <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-            </li>
-            
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
+                
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
     {% endif %}
     
     {% else %}
     <!-- Estado vacío -->
-    <div class="text-center py-5">
-        <div class="mb-4">
-            <i class="fas fa-images fa-4x text-muted"></i>
+    <div class="empty-state slide-up">
+        <div class="empty-state-icon">
+            <i class="fas fa-images"></i>
         </div>
         {% if mascota %}
-        <h4 class="text-muted">No hay imágenes diagnósticas</h4>
-        <p class="text-muted">{{ mascota.nombre }} aún no tiene imágenes diagnósticas registradas.</p>
-        <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' mascota.id %}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i>Subir Primera Imagen
+        <h4>No hay imágenes diagnósticas</h4>
+        <p>{{ mascota.nombre }} aún no tiene imágenes diagnósticas registradas.</p>
+        <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' mascota.id %}" class="btn-primary-gradient hover-lift">
+            <i class="fas fa-plus"></i>
+            Subir Primera Imagen
         </a>
         {% else %}
-        <h4 class="text-muted">No hay imágenes diagnósticas registradas</h4>
-        <p class="text-muted">Aún no se han subido imágenes diagnósticas al sistema.</p>
+        <h4>No hay imágenes diagnósticas registradas</h4>
+        <p>Aún no se han subido imágenes diagnósticas al sistema.</p>
         {% endif %}
     </div>
     {% endif %}

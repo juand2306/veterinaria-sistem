@@ -1,86 +1,644 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Imagen Diagnóstica - {{ imagen.mascota.nombre }}{% endblock %}
 
+{% block page_title %}Imagen Diagnóstica{% endblock %}
+
+{% block extra_css %}
+<style>
+    .diagnostic-image-header {
+        background: linear-gradient(135deg, rgba(22, 160, 133, 0.1) 0%, rgba(52, 152, 219, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(22, 160, 133, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .diagnostic-image-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(22, 160, 133, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .diagnostic-image-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .breadcrumb-modern {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb-modern .breadcrumb {
+        margin: 0;
+        background: none;
+        padding: 0;
+    }
+
+    .breadcrumb-modern .breadcrumb-item {
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb-modern .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-modern .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+    }
+
+    .breadcrumb-modern .breadcrumb-item.active {
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .image-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .image-title .icon {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+    }
+
+    .image-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .date-badge {
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(22, 160, 133, 0.3);
+        margin-left: auto;
+    }
+
+    .detail-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: var(--transition);
+    }
+
+    .detail-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .card-header-modern {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+
+    .detail-card:hover .card-header-modern::before {
+        transform: translateX(100%);
+    }
+
+    .card-title-modern {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+        background: var(--bg-white);
+    }
+
+    .image-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .image-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 0%, rgba(22, 160, 133, 0.02) 50%, transparent 100%);
+        pointer-events: none;
+    }
+
+    .diagnostic-image {
+        max-height: 500px;
+        max-width: 100%;
+        border-radius: var(--border-radius);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transition: var(--transition);
+        position: relative;
+        z-index: 2;
+    }
+
+    .diagnostic-image:hover {
+        transform: scale(1.02);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .image-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-modern {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        font-size: 0.9rem;
+        border: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+    }
+
+    .btn-modern:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-modern span {
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-modern.btn-outline-primary {
+        background: var(--primary-color);
+        color: white;
+        border: 1px solid var(--primary-color);
+    }
+
+    .btn-modern.btn-outline-primary:hover {
+        background: var(--primary-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(22, 160, 133, 0.4);
+    }
+
+    .btn-modern.btn-outline-success {
+        background: var(--success-color);
+        color: white;
+        border: 1px solid var(--success-color);
+    }
+
+    .btn-modern.btn-outline-success:hover {
+        background: #27ae60;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-modern.btn-outline-secondary {
+        background: var(--text-secondary);
+        color: white;
+        border: 1px solid var(--text-secondary);
+    }
+
+    .btn-modern.btn-outline-secondary:hover {
+        background: #5a6c7d;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn-modern.btn-outline-info {
+        background: var(--info-color);
+        color: white;
+        border: 1px solid var(--info-color);
+    }
+
+    .btn-modern.btn-outline-info:hover {
+        background: #138496;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+    }
+
+    .btn-modern.btn-outline-danger {
+        background: var(--danger-color);
+        color: white;
+        border: 1px solid var(--danger-color);
+    }
+
+    .btn-modern.btn-outline-danger:hover {
+        background: #c82333;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+
+    .info-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        height: fit-content;
+        position: relative;
+    }
+
+    .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .info-card-header {
+        background: rgba(22, 160, 133, 0.05);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .info-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-card-title i {
+        color: var(--primary-color);
+    }
+
+    .info-card-body {
+        padding: 1.5rem;
+    }
+
+    .info-item {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-label i {
+        color: var(--primary-color);
+        width: 16px;
+        text-align: center;
+    }
+
+    .info-value {
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-left: 1.5rem;
+    }
+
+    .info-value.description {
+        background: rgba(22, 160, 133, 0.02);
+        padding: 1rem;
+        border-radius: var(--border-radius-sm);
+        border-left: 3px solid var(--primary-color);
+        margin-left: 0;
+        font-style: italic;
+    }
+
+    .action-footer {
+        background: rgba(248, 249, 250, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .action-group {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .diagnostic-image-header {
+            padding: 1.5rem;
+        }
+
+        .image-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .date-badge {
+            margin-left: 0;
+            margin-top: 1rem;
+            align-self: flex-start;
+        }
+
+        .image-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .action-footer {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.25rem;
+        }
+
+        .action-group {
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-modern {
+            font-size: 0.85rem;
+            padding: 0.6rem 1.2rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .zoom-effect {
+        animation: zoomIn 0.4s ease-out;
+    }
+
+    @keyframes zoomIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="fade-in">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-modern slide-up">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' imagen.mascota.pk %}">
+                    <i class="fas fa-images me-1"></i>Imágenes Diagnósticas
+                </a>
+            </li>
+            <li class="breadcrumb-item active">{{ imagen.mascota.nombre }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="diagnostic-image-header slide-up">
+        <div class="diagnostic-image-header-content">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
+                <div>
+                    <h1 class="image-title">
+                        <i class="fas fa-x-ray icon"></i>
+                        Imagen Diagnóstica - {{ imagen.mascota.nombre }}
+                    </h1>
+                    <p class="image-subtitle">
+                        <i class="fas fa-paw me-1"></i>
+                        {{ imagen.mascota.especie.nombre }} - {{ imagen.mascota.raza.nombre }}
+                    </p>
+                </div>
+                <div class="date-badge">
+                    <i class="fas fa-calendar me-1"></i>
+                    {{ imagen.fecha|date:"d/m/Y H:i" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <div class="card">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="fas fa-x-ray me-2"></i>Imagen Diagnóstica - {{ imagen.mascota.nombre }}
-                    </h4>
-                    <span class="badge bg-light text-dark">{{ imagen.fecha|date:"d/m/Y H:i" }}</span>
+        <!-- Imagen Principal -->
+        <div class="col-lg-8">
+            <div class="image-container zoom-effect">
+                <img src="{{ imagen.archivo.url }}" class="diagnostic-image" alt="Imagen diagnóstica">
+                
+                <div class="image-actions">
+                    <a href="{{ imagen.archivo.url }}" class="btn-modern btn-outline-primary" target="_blank">
+                        <span><i class="fas fa-external-link-alt me-1"></i>Abrir en nueva ventana</span>
+                    </a>
+                    <a href="{{ imagen.archivo.url }}" class="btn-modern btn-outline-success" download>
+                        <span><i class="fas fa-download me-1"></i>Descargar</span>
+                    </a>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="text-center mb-4">
-                                <img src="{{ imagen.archivo.url }}" class="img-fluid rounded shadow" alt="Imagen diagnóstica" style="max-height: 500px;">
-                            </div>
-                            <div class="d-flex justify-content-center gap-2 mb-4">
-                                <a href="{{ imagen.archivo.url }}" class="btn btn-outline-primary" target="_blank">
-                                    <i class="fas fa-external-link-alt me-1"></i>Abrir en nueva ventana
-                                </a>
-                                <a href="{{ imagen.archivo.url }}" class="btn btn-outline-success" download>
-                                    <i class="fas fa-download me-1"></i>Descargar
-                                </a>
-                            </div>
+            </div>
+        </div>
+
+        <!-- Información -->
+        <div class="col-lg-4">
+            <div class="info-card slide-up">
+                <div class="info-card-header">
+                    <h5 class="info-card-title">
+                        <i class="fas fa-info-circle"></i>
+                        Información
+                    </h5>
+                </div>
+                <div class="info-card-body">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-paw"></i>
+                            Mascota
                         </div>
-                        <div class="col-md-4">
-                            <div class="card bg-light">
-                                <div class="card-header">
-                                    <h5 class="mb-0"><i class="fas fa-info-circle me-1"></i>Información</h5>
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <strong><i class="fas fa-paw me-1"></i>Mascota:</strong><br>
-                                        {{ imagen.mascota.nombre }} ({{ imagen.mascota.especie }})
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong><i class="fas fa-user me-1"></i>Propietario:</strong><br>
-                                        {{ imagen.mascota.propietario.nombre }}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong><i class="fas fa-phone me-1"></i>Contacto:</strong><br>
-                                        {{ imagen.mascota.propietario.telefono }}
-                                    </div>
-                                    <div class="mb-3">
-                                        <strong><i class="fas fa-calendar me-1"></i>Fecha:</strong><br>
-                                        {{ imagen.fecha|date:"d/m/Y H:i" }}
-                                    </div>
-                                    {% if imagen.descripcion %}
-                                    <div class="mb-3">
-                                        <strong><i class="fas fa-comment me-1"></i>Descripción:</strong><br>
-                                        <p class="text-muted">{{ imagen.descripcion }}</p>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
+                        <div class="info-value">
+                            {{ imagen.mascota.nombre }} ({{ imagen.mascota.especie }})
                         </div>
                     </div>
-                </div>
-                <div class="card-footer bg-light">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' imagen.mascota.pk %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Volver a Imágenes
-                            </a>
-                            <a href="{% url 'consultas:historia_clinica' imagen.mascota.pk %}" class="btn btn-outline-info ms-2">
-                                <i class="fas fa-file-medical me-1"></i>Historia Clínica
-                            </a>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i>
+                            Propietario
                         </div>
-                        <div>
-                            <a href="{% url 'consultas:editar_imagen_diagnostica' imagen.pk %}" class="btn btn-outline-primary">
-                                <i class="fas fa-edit me-1"></i>Editar
-                            </a>
-                            <a href="{% url 'consultas:eliminar_imagen_diagnostica' imagen.pk %}" class="btn btn-outline-danger ms-2">
-                                <i class="fas fa-trash me-1"></i>Eliminar
-                            </a>
+                        <div class="info-value">
+                            {{ imagen.mascota.cliente.nombre }}
                         </div>
                     </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-phone"></i>
+                            Contacto
+                        </div>
+                        <div class="info-value">
+                            {{ imagen.mascota.cliente.telefono }}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-calendar"></i>
+                            Fecha
+                        </div>
+                        <div class="info-value">
+                            {{ imagen.fecha|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+
+                    {% if imagen.descripcion %}
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-comment"></i>
+                            Descripción
+                        </div>
+                        <div class="info-value description">
+                            {{ imagen.descripcion }}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Footer -->
+    <div class="detail-card slide-up">
+        <div class="action-footer">
+            <div class="action-group">
+                <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' imagen.mascota.pk %}" class="btn-modern btn-outline-secondary">
+                    <span><i class="fas fa-arrow-left me-1"></i>Volver a Imágenes</span>
+                </a>
+                <a href="{% url 'consultas:historia_clinica' imagen.mascota.pk %}" class="btn-modern btn-outline-info">
+                    <span><i class="fas fa-file-medical me-1"></i>Historia Clínica</span>
+                </a>
+            </div>
+            <div class="action-group">
+                <a href="{% url 'consultas:editar_imagen_diagnostica' imagen.pk %}" class="btn-modern btn-outline-primary">
+                    <span><i class="fas fa-edit me-1"></i>Editar</span>
+                </a>
+                <a href="{% url 'consultas:eliminar_imagen_diagnostica' imagen.pk %}" class="btn-modern btn-outline-danger">
+                    <span><i class="fas fa-trash me-1"></i>Eliminar</span>
+                </a>
             </div>
         </div>
     </div>

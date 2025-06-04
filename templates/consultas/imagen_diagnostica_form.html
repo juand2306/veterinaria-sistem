@@ -3,95 +3,1010 @@
 
 {% block title %}{% if form.instance.id %}Editar Imagen Diagnóstica{% else %}Nueva Imagen Diagnóstica{% endif %}{% endblock %}
 
+{% block page_title %}
+{% if form.instance.id %}
+    Editar Imagen Diagnóstica
+{% else %}
+    Nueva Imagen Diagnóstica
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+        /* Root variables para consistencia */
+        :root {
+            --primary-color: #16a085;
+            --secondary-color: #3498db;
+            --primary-dark: #138d75;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #17a2b8;
+            --text-primary: #2c3e50;
+            --text-light: #ffffff;
+            --bg-white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+        }
+        
+        .form-container {
+            background: var(--bg-white);
+            border-radius: 24px;
+            box-shadow: 
+                0 32px 64px -12px rgba(22, 160, 133, 0.15),
+                0 16px 32px -8px rgba(52, 152, 219, 0.1),
+                0 8px 16px -4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(22, 160, 133, 0.1);
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.02) 0%, 
+                rgba(52, 152, 219, 0.02) 50%, 
+                rgba(155, 89, 182, 0.02) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, 
+                var(--primary-color) 0%, 
+                var(--secondary-color) 50%, 
+                var(--primary-dark) 100%);
+            color: var(--text-light);
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .form-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .form-header-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header .icon {
+            width: 70px;
+            height: 70px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-body {
+            padding: 3rem;
+            position: relative;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 2;
+        }
+
+        /* Alerta de información de mascota */
+        .mascota-info {
+            background: linear-gradient(135deg, 
+                rgba(23, 162, 184, 0.08) 0%, 
+                rgba(52, 152, 219, 0.08) 100%);
+            border: 1px solid rgba(23, 162, 184, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(23, 162, 184, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mascota-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--info-color), var(--secondary-color));
+            border-radius: 0 2px 2px 0;
+        }
+
+        .mascota-info h5 {
+            color: var(--info-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .mascota-info .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .mascota-info .info-item i {
+            color: var(--info-color);
+            width: 20px;
+        }
+
+        /* Contenedor de previsualización de imagen */
+        .image-preview-container {
+            background: linear-gradient(135deg, 
+                rgba(248, 250, 252, 0.95) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            border: 2px dashed rgba(22, 160, 133, 0.3);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .image-preview-container:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.05) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(22, 160, 133, 0.15);
+        }
+
+        .image-preview-container img {
+            max-height: 250px;
+            border-radius: 16px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+        }
+
+        .image-preview-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .image-preview-label {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--glass-bg);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* INPUTS COMPLETAMENTE REDISEÑADOS */
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-label i {
+            color: var(--primary-color);
+            width: 18px;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            background-color: var(--input-bg);
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: none;
+            text-decoration: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .form-control::before,
+        .form-control::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        .form-control:hover {
+            border-color: rgba(22, 160, 133, 0.4);
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(22, 160, 133, 0.08);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+            box-shadow: 
+                0 0 0 3px rgba(22, 160, 133, 0.1),
+                0 4px 12px rgba(22, 160, 133, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        /* Input de archivo especial */
+        input[type="file"].form-control {
+            padding: 1.25rem;
+            border: 2px dashed var(--primary-color);
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.05) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            cursor: pointer;
+            position: relative;
+        }
+
+        input[type="file"].form-control:hover {
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            border-color: var(--primary-dark);
+        }
+
+        /* TEXTAREAS específicamente */
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Estados de validación */
+        .form-control.is-valid {
+            border-color: var(--success-color);
+            background-color: rgba(39, 174, 96, 0.02);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+            background-color: rgba(231, 76, 60, 0.02);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, 
+                rgba(231, 76, 60, 0.08) 0%, 
+                rgba(231, 76, 60, 0.05) 100%);
+            border-radius: 12px;
+            border-left: 3px solid var(--danger-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .invalid-feedback::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--danger-color);
+        }
+
+        /* Botones premium */
+        .btn-submit-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: flex-end;
+            align-items: center;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(22, 160, 133, 0.1);
+            margin-top: 2.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, 
+                var(--primary-color) 0%, 
+                var(--secondary-color) 50%, 
+                var(--primary-dark) 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 10px 15px -3px rgba(22, 160, 133, 0.3),
+                0 4px 6px -2px rgba(22, 160, 133, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 25px -5px rgba(22, 160, 133, 0.4),
+                0 10px 10px -5px rgba(22, 160, 133, 0.2);
+            background: linear-gradient(135deg, 
+                var(--secondary-color) 0%, 
+                var(--primary-color) 50%, 
+                var(--primary-dark) 100%);
+        }
+
+        .btn-secondary, .btn-outline-secondary {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.95) 100%);
+            border: 2px solid rgba(22, 160, 133, 0.2);
+            color: var(--text-primary);
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover, .btn-outline-secondary:hover {
+            background: linear-gradient(145deg, 
+                rgba(22, 160, 133, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 15px -3px rgba(22, 160, 133, 0.2),
+                0 4px 6px -2px rgba(22, 160, 133, 0.1);
+        }
+
+        /* Breadcrumb glassmorphism */
+        .breadcrumb-container {
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.1) 0%, 
+                rgba(52, 152, 219, 0.08) 100%);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 1.25rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(22, 160, 133, 0.15);
+            box-shadow: 
+                0 8px 32px rgba(22, 160, 133, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animaciones de entrada */
+        .slide-in {
+            animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Efectos de loading mejorados */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spinGlow 1s linear infinite;
+        }
+
+        @keyframes spinGlow {
+            0% { 
+                transform: rotate(0deg);
+                box-shadow: 0 0 5px currentColor;
+            }
+            100% { 
+                transform: rotate(360deg);
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        /* Responsive mejorado */
+        @media (max-width: 768px) {
+            .form-container {
+                border-radius: 16px;
+                margin: 1rem;
+            }
+            
+            .form-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .form-header .icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .btn-submit-container {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .btn-primary,
+            .btn-secondary,
+            .btn-outline-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .mascota-info .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Micro-interacciones para los grupos de formulario */
+        .form-group {
+            position: relative;
+        }
+
+        .form-group::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+
+        .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        /* Indicador de campo requerido mejorado */
+        .required-field::after {
+            content: '*';
+            color: var(--danger-color);
+            margin-left: 0.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Mejoras adicionales para limpieza visual */
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Asegurar que no hay elementos superpuestos problemáticos */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary-dark);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ESTILOS ADICIONALES PARA ELIMINAR CUALQUIER LÍNEA NEGRA */
+        input, textarea, select {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        input.form-control, 
+        textarea.form-control, 
+        select.form-control {
+            border: 2px solid var(--input-border) !important;
+            box-shadow: none !important;
+        }
+
+        /* Sobrescribir cualquier estilo de Bootstrap que cause problemas */
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1) !important;
+        }
+
+        /* Estilos específicos para crispy forms */
+        .crispy-form .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .crispy-form label {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Drag and drop para archivo */
+        .file-drop-zone {
+            border: 2px dashed var(--primary-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.05) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-drop-zone:hover {
+            border-color: var(--primary-dark);
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            transform: translateY(-2px);
+        }
+
+        .file-drop-zone.dragover {
+            border-color: var(--success-color);
+            background: linear-gradient(135deg, 
+                rgba(39, 174, 96, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-x-ray me-2"></i>
-                        {% if form.instance.id %}Editar Imagen Diagnóstica{% else %}Nueva Imagen Diagnóstica{% endif %}
-                    </h4>
-                </div>
-                <div class="card-body">
-                    {% if mascota %}
-                    <div class="alert alert-info mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <strong><i class="fas fa-paw me-1"></i>Mascota:</strong> {{ mascota.nombre }} ({{ mascota.especie }})
-                            </div>
-                            <div class="col-md-6">
-                                <strong><i class="fas fa-user me-1"></i>Propietario:</strong> {{ mascota.propietario.nombre }}
+<div class="container-fluid slide-in">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">
+                        <i class="fas fa-x-ray me-1"></i>Imágenes Diagnósticas
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if form.instance.id %}
+                        <i class="fas fa-edit me-1"></i>Editar Imagen
+                    {% else %}
+                        <i class="fas fa-plus me-1"></i>Nueva Imagen
+                    {% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container hover-lift">
+        <!-- Form Header -->
+        <div class="form-header">
+            <div class="form-header-content">
+                <h2>
+                    <div class="icon">
+                        {% if form.instance.id %}
+                            <i class="fas fa-x-ray"></i>
+                        {% else %}
+                            <i class="fas fa-camera-retro"></i>
+                        {% endif %}
+                    </div>
+                    {% if form.instance.id %}
+                        Editar Imagen Diagnóstica
+                    {% else %}
+                        Nueva Imagen Diagnóstica
+                    {% endif %}
+                </h2>
+                <p>
+                    {% if form.instance.id %}
+                        Actualiza la información de la imagen diagnóstica
+                    {% else %}
+                        Complete el formulario para registrar una nueva imagen diagnóstica
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Form Body -->
+        <div class="form-body">
+            <!-- Información de la mascota -->
+            {% if mascota %}
+            <div class="mascota-info">
+                <h5>
+                    <i class="fas fa-info-circle"></i>
+                    Información de la Mascota
+                </h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <i class="fas fa-paw"></i>
+                            <div>
+                                <strong>Mascota:</strong> {{ mascota.nombre }} ({{ mascota.especie }})
                             </div>
                         </div>
                     </div>
-                    {% endif %}
-
-                    {% if form.instance.id and form.instance.archivo %}
-                    <div class="text-center mb-4">
-                        <img src="{{ form.instance.archivo.url }}" class="img-fluid rounded" alt="Imagen actual" style="max-height: 200px;">
-                        <p class="text-muted mt-2">Imagen actual</p>
-                    </div>
-                    {% endif %}
-
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                            {% if form.instance.id %}
-                            <a href="{% url 'consultas:detalle_imagen_diagnostica' form.instance.pk %}" class="btn btn-outline-secondary me-md-2">
-                                <i class="fas fa-times me-1"></i>Cancelar
-                            </a>
-                            {% else %}
-                                {% if mascota %}
-                                <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' mascota.pk %}" class="btn btn-outline-secondary me-md-2">
-                                    <i class="fas fa-times me-1"></i>Cancelar
-                                </a>
-                                {% else %}
-                                <a href="{% url 'consultas:lista_imagenes_diagnosticas' %}" class="btn btn-outline-secondary me-md-2">
-                                    <i class="fas fa-times me-1"></i>Cancelar
-                                </a>
-                                {% endif %}
-                            {% endif %}
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>
-                                {% if form.instance.id %}Actualizar Imagen{% else %}Guardar Imagen{% endif %}
-                            </button>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <i class="fas fa-user"></i>
+                            <div>
+                                <strong>Propietario:</strong> {{ mascota.cliente.nombre }}
+                            </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
+            {% endif %}
+
+            <!-- Imagen actual (si existe) -->
+            {% if form.instance.id and form.instance.archivo %}
+            <div class="image-preview-container">
+                <img src="{{ form.instance.archivo.url }}" class="img-fluid" alt="Imagen actual">
+                <div class="image-preview-label">
+                    <i class="fas fa-image me-2"></i>Imagen Actual
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Formulario -->
+            <form method="post" enctype="multipart/form-data" id="imagenForm" novalidate>
+                {% csrf_token %}
+                {{ form|crispy }}
+                
+                <!-- Submit Buttons -->
+                <div class="btn-submit-container">
+                    {% if form.instance.id %}
+                    <a href="{% url 'consultas:detalle_imagen_diagnostica' form.instance.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </a>
+                    {% else %}
+                        {% if mascota %}
+                        <a href="{% url 'consultas:lista_imagenes_diagnosticas_mascota' mascota.pk %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </a>
+                        {% else %}
+                        <a href="{% url 'consultas:lista_imagenes_diagnosticas' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </a>
+                        {% endif %}
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        {% if form.instance.id %}
+                            Actualizar Imagen
+                        {% else %}
+                            Guardar Imagen
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
-// Previsualización de imagen
-document.getElementById('id_archivo').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Crear o actualizar la previsualización
-            let preview = document.getElementById('image-preview');
-            if (!preview) {
-                preview = document.createElement('div');
-                preview.id = 'image-preview';
-                preview.className = 'text-center mt-3 mb-3';
-                e.target.closest('form').insertBefore(preview, e.target.closest('form').querySelector('.d-grid'));
-            }
-            preview.innerHTML = `
-                <img src="${e.target.result}" class="img-fluid rounded" alt="Previsualización" style="max-height: 200px;">
-                <p class="text-muted mt-2">Previsualización de la nueva imagen</p>
-            `;
-        };
-        reader.readAsDataURL(file);
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('imagenForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const fileInput = document.querySelector('input[type="file"]');
+    
+    // Efecto de loading en el botón
+    if (form && submitBtn) {
+        form.addEventListener('submit', function() {
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+        });
     }
+
+    // Preview de imagen mejorado
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Crear o actualizar preview
+                    let previewContainer = document.querySelector('.image-preview-container');
+                    if (!previewContainer) {
+                        previewContainer = document.createElement('div');
+                        previewContainer.className = 'image-preview-container';
+                        fileInput.parentNode.appendChild(previewContainer);
+                    }
+                    
+                    previewContainer.innerHTML = `
+                        <img src="${e.target.result}" class="img-fluid" alt="Vista previa">
+                        <div class="image-preview-label">
+                            <i class="fas fa-eye me-2"></i>Vista Previa - ${file.name}
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop functionality
+        const fileDropZone = document.createElement('div');
+        fileDropZone.className = 'file-drop-zone';
+        fileDropZone.innerHTML = `
+            <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color: var(--primary-color);"></i>
+            <p><strong>Arrastra tu imagen aquí</strong> o haz clic para seleccionar</p>
+            <small>Formatos soportados: JPG, PNG, GIF</small>
+        `;
+        
+        fileInput.parentNode.appendChild(fileDropZone);
+        fileInput.style.display = 'none';
+
+        fileDropZone.addEventListener('click', () => fileInput.click());
+        
+        fileDropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileDropZone.classList.add('dragover');
+        });
+        
+        fileDropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            fileDropZone.classList.remove('dragover');
+        });
+        
+        fileDropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileDropZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    // Validación en tiempo real
+    const inputs = form.querySelectorAll('input, textarea, select');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+        });
+    });
+
+    function validateField(field) {
+        const value = field.value.trim();
+        const isRequired = field.hasAttribute('required');
+        
+        // Remover clases previas
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        if (isRequired && !value) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Este campo es requerido');
+        } else if (value) {
+            field.classList.add('is-valid');
+            hideFieldError(field);
+        }
+    }
+
+    function showFieldError(field, message) {
+        hideFieldError(field);
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        field.parentNode.appendChild(errorDiv);
+    }
+
+    function hideFieldError(field) {
+        const existingError = field.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+    }
+
+    // Animaciones de entrada mejoradas
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    document.querySelectorAll('.form-group').forEach(group => {
+        group.style.opacity = '0';
+        group.style.transform = 'translateY(20px)';
+        group.style.transition = 'all 0.6s ease';
+        observer.observe(group);
+    });
+
+    // Auto-save draft (simulado - en memoria)
+    let draftTimer;
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            clearTimeout(draftTimer);
+            draftTimer = setTimeout(() => {
+                saveDraft();
+            }, 2000);
+        });
+    });
 });
 </script>
-{% endblock %}
-
 {% endblock %}

@@ -3,166 +3,777 @@
 
 {% block title %}Detalle de Cita{% endblock %}
 
+{% block page_title %}Detalle de la Cita{% endblock %}
+
+{% block extra_css %}
+<style>
+    .appointment-detail-header {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .appointment-detail-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(52, 152, 219, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .appointment-detail-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .breadcrumb-modern {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb-modern .breadcrumb {
+        margin: 0;
+        background: none;
+        padding: 0;
+    }
+
+    .breadcrumb-modern .breadcrumb-item {
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb-modern .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-modern .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+    }
+
+    .breadcrumb-modern .breadcrumb-item.active {
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .appointment-avatar-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+    }
+
+    .appointment-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .appointment-title .icon {
+        font-size: 1.8rem;
+        color: var(--secondary-color);
+    }
+
+    .appointment-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .detail-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: var(--transition);
+    }
+
+    .detail-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .card-header-modern {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header-modern.bg-success-modern {
+        background: linear-gradient(135deg, var(--success-color) 0%, #27ae60 100%);
+    }
+
+    .card-header-modern.bg-light-modern {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--text-primary);
+    }
+
+    .card-header-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+
+    .detail-card:hover .card-header-modern::before {
+        transform: translateX(100%);
+    }
+
+    .card-title-modern {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        position: relative;
+        z-index: 2;
+        flex-wrap: wrap;
+    }
+
+    .btn-modern {
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        font-size: 0.875rem;
+        border: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-modern.btn-edit {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-modern.btn-edit:hover {
+        background: var(--warning-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-modern.btn-delete {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-modern.btn-delete:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-modern.btn-primary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-modern.btn-primary:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-modern.btn-success {
+        background: var(--success-color);
+        color: white;
+        border: 1px solid var(--success-color);
+    }
+
+    .btn-modern.btn-success:hover {
+        background: #27ae60;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-modern.btn-info {
+        background: var(--info-color);
+        color: white;
+        border: 1px solid var(--info-color);
+    }
+
+    .btn-modern.btn-info:hover {
+        background: #2980b9;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-modern.btn-outline-secondary {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--text-secondary);
+    }
+
+    .btn-modern.btn-outline-secondary:hover {
+        background: var(--text-secondary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+        background: var(--bg-white);
+    }
+
+    .info-item {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(52, 152, 219, 0.02);
+        border-radius: var(--border-radius-sm);
+        border-left: 4px solid var(--secondary-color);
+        transition: var(--transition);
+    }
+
+    .info-item:hover {
+        background: rgba(52, 152, 219, 0.05);
+        transform: translateX(4px);
+    }
+
+    .info-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-item strong {
+        font-weight: 600;
+        color: var(--text-primary);
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item p {
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .info-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .info-item a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+
+    .info-item .text-muted {
+        color: var(--text-secondary) !important;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .badge-modern {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .badge-modern.badge-primary {
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        color: white;
+    }
+
+    .badge-modern.badge-warning {
+        background: linear-gradient(45deg, var(--warning-color), #f39c12);
+        color: white;
+    }
+
+    .badge-modern.badge-success {
+        background: linear-gradient(45deg, var(--success-color), #27ae60);
+        color: white;
+    }
+
+    .badge-modern.badge-danger {
+        background: linear-gradient(45deg, var(--danger-color), #c0392b);
+        color: white;
+    }
+
+    .consultation-content {
+        background: rgba(46, 204, 113, 0.02);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+    }
+
+    .consultation-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--bg-white);
+        border-radius: var(--border-radius-sm);
+        border-left: 4px solid var(--success-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .consultation-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .consultation-section h5 {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .consultation-section h5 i {
+        color: var(--success-color);
+    }
+
+    .consultation-section p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .alert-modern {
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert-modern.alert-warning {
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(241, 196, 15, 0.1) 100%);
+        color: #8b4513;
+        border-left: 4px solid var(--warning-color);
+    }
+
+    .alert-modern i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .register-consultation-card {
+        background: linear-gradient(135deg, rgba(46, 204, 113, 0.05) 0%, rgba(39, 174, 96, 0.05) 100%);
+        border: 2px dashed rgba(46, 204, 113, 0.3);
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .register-consultation-card p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .action-buttons-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+        padding: 2rem;
+        background: rgba(52, 152, 219, 0.02);
+        border-radius: var(--border-radius);
+    }
+
+    .consultation-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .consultation-meta small {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .consultation-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .appointment-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .appointment-detail-header {
+            padding: 1.5rem;
+        }
+
+        .card-header-modern {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .card-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .action-buttons-container {
+            flex-direction: column;
+        }
+
+        .consultation-meta {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .consultation-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
+<div class="fade-in">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-modern slide-up">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'consultas:lista_citas' %}">Citas</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'consultas:lista_citas' %}">
+                    <i class="fas fa-calendar-alt me-1"></i>Citas
+                </a>
+            </li>
             <li class="breadcrumb-item active">Detalle de Cita</li>
         </ol>
     </nav>
 
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1><i class="fas fa-calendar-day me-2"></i>Detalle de Cita</h1>
-        </div>
-        <div class="col-md-4 text-end">
-            <div class="btn-group" role="group">
-                <a href="{% url 'consultas:editar_cita' cita.id %}" class="btn btn-outline-primary">
-                    <i class="fas fa-edit me-1"></i>Editar
-                </a>
-                <a href="{% url 'consultas:eliminar_cita' cita.id %}" class="btn btn-outline-danger">
-                    <i class="fas fa-trash me-1"></i>Eliminar
-                </a>
+    <!-- Header Section -->
+    <div class="appointment-detail-header slide-up">
+        <div class="appointment-detail-header-content">
+            <div class="d-flex flex-column flex-md-row align-items-start gap-4">
+                <div class="appointment-avatar-large">
+                    <i class="fas fa-calendar-day"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h1 class="appointment-title">
+                        <i class="fas fa-calendar-day icon"></i>
+                        Detalle de Cita
+                    </h1>
+                    <p class="appointment-subtitle">
+                        Cita para {{ cita.mascota.nombre }} - {{ cita.fecha|date:"d/m/Y H:i" }}
+                    </p>
+                </div>
+                <div class="card-actions">
+                    <a href="{% url 'consultas:editar_cita' cita.id %}" class="btn-modern btn-edit">
+                        <i class="fas fa-edit"></i>
+                        Editar
+                    </a>
+                    <a href="{% url 'consultas:eliminar_cita' cita.id %}" class="btn-modern btn-delete">
+                        <i class="fas fa-trash"></i>
+                        Eliminar
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row">
+        <!-- Información de la Cita -->
         <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-info-circle me-1"></i>Información de la Cita
+            <div class="detail-card slide-up">
+                <div class="card-header-modern">
+                    <h3 class="card-title-modern">
+                        <i class="fas fa-info-circle"></i>
+                        Información de la Cita
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <p><strong>Mascota:</strong> 
-                        <a href="{% url 'clientes:detalle_mascota' cita.mascota.id %}">
-                            {{ cita.mascota.nombre }}
-                        </a>
-                        <small class="text-muted d-block">{{ cita.mascota.especie }} - {{ cita.mascota.raza }}</small>
-                    </p>
+                <div class="card-body-modern">
+                    <div class="info-item">
+                        <strong>Mascota:</strong>
+                        <p>
+                            <a href="{% url 'clientes:detalle_mascota' cita.mascota.id %}">
+                                {{ cita.mascota.nombre }}
+                            </a>
+                            <small class="text-muted d-block">{{ cita.mascota.especie }} - {{ cita.mascota.raza }}</small>
+                        </p>
+                    </div>
                     
-                    <p><strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
-                    <p><strong>Tipo:</strong> 
-                        {% if cita.programada %}
-                        <span class="badge bg-primary">Programada</span>
-                        {% else %}
-                        <span class="badge bg-warning text-dark">Urgencia</span>
-                        {% endif %}
-                    </p>
-                    <p><strong>Estado:</strong> 
-                        {% if cita.atendida %}
-                        <span class="badge bg-success">Atendida</span>
-                        {% else %}
-                        <span class="badge bg-danger">Pendiente</span>
-                        {% endif %}
-                    </p>
-                    <p><strong>Fecha de Creación:</strong> {{ cita.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                    <div class="info-item">
+                        <strong>Fecha:</strong>
+                        <p>{{ cita.fecha|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <strong>Tipo:</strong>
+                        <p>
+                            {% if cita.programada %}
+                            <span class="badge-modern badge-primary">
+                                <i class="fas fa-calendar-check"></i>
+                                Programada
+                            </span>
+                            {% else %}
+                            <span class="badge-modern badge-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Urgencia
+                            </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <strong>Estado:</strong>
+                        <p>
+                            {% if cita.atendida %}
+                            <span class="badge-modern badge-success">
+                                <i class="fas fa-check-circle"></i>
+                                Atendida
+                            </span>
+                            {% else %}
+                            <span class="badge-modern badge-danger">
+                                <i class="fas fa-clock"></i>
+                                Pendiente
+                            </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="info-item">
+                        <strong>Fecha de Creación:</strong>
+                        <p>{{ cita.fecha_creacion|date:"d/m/Y H:i" }}</p>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Motivo de la Cita -->
         <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-clipboard-list me-1"></i>Motivo de la Cita
+            <div class="detail-card slide-up">
+                <div class="card-header-modern">
+                    <h3 class="card-title-modern">
+                        <i class="fas fa-clipboard-list"></i>
+                        Motivo de la Cita
+                    </h3>
                 </div>
-                <div class="card-body">
-                    <p>{{ cita.motivo|linebreaks }}</p>
+                <div class="card-body-modern">
+                    <div class="info-item">
+                        <p>{{ cita.motivo|linebreaks }}</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Si existe una consulta asociada a esta cita, mostrar información -->
+    <!-- Consulta Asociada -->
     {% if consulta %}
-    <div class="card mb-4">
-        <div class="card-header bg-success text-white">
-            <i class="fas fa-stethoscope me-1"></i>Consulta Realizada
+    <div class="detail-card slide-up">
+        <div class="card-header-modern bg-success-modern">
+            <h3 class="card-title-modern">
+                <i class="fas fa-stethoscope"></i>
+                Consulta Realizada
+            </h3>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-12 mb-3">
-                    <h5>Diagnóstico</h5>
+        <div class="card-body-modern">
+            <div class="consultation-content">
+                <div class="consultation-section">
+                    <h5>
+                        <i class="fas fa-diagnoses"></i>
+                        Diagnóstico
+                    </h5>
                     <p>{{ consulta.diagnostico|linebreaks }}</p>
                 </div>
                 
-                <div class="col-md-12 mb-3">
-                    <h5>Tratamiento</h5>
+                <div class="consultation-section">
+                    <h5>
+                        <i class="fas fa-pills"></i>
+                        Tratamiento
+                    </h5>
                     <p>{{ consulta.tratamiento|linebreaks }}</p>
                 </div>
                 
                 {% if consulta.notas %}
-                <div class="col-md-12 mb-3">
-                    <h5>Notas Adicionales</h5>
+                <div class="consultation-section">
+                    <h5>
+                        <i class="fas fa-sticky-note"></i>
+                        Notas Adicionales
+                    </h5>
                     <p>{{ consulta.notas|linebreaks }}</p>
                 </div>
                 {% endif %}
                 
                 {% if consulta.es_eutanasia %}
-                <div class="col-md-12">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        Esta consulta registra un procedimiento de eutanasia.
-                    </div>
+                <div class="alert-modern alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Esta consulta registra un procedimiento de eutanasia.</span>
                 </div>
                 {% endif %}
                 
-                <div class="col-md-12 mt-2">
+                <div class="consultation-meta">
                     <small class="text-muted">
-                        <i class="fas fa-clock me-1"></i>
+                        <i class="fas fa-clock"></i>
                         Fecha de registro: {{ consulta.fecha_registro|date:"d/m/Y H:i" }}
                     </small>
+                    
+                    <div class="consultation-actions">
+                        <a href="{% url 'consultas:detalle_consulta' consulta.id %}" class="btn-modern btn-primary">
+                            <i class="fas fa-eye"></i>
+                            Ver Consulta Completa
+                        </a>
+                        <a href="{% url 'consultas:editar_consulta' consulta.id %}" class="btn-modern btn-outline-secondary">
+                            <i class="fas fa-edit"></i>
+                            Editar Consulta
+                        </a>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="text-end mt-3">
-                <a href="{% url 'consultas:detalle_consulta' consulta.id %}" class="btn btn-outline-primary">
-                    <i class="fas fa-eye me-1"></i>Ver Consulta Completa
-                </a>
-                <a href="{% url 'consultas:editar_consulta' consulta.id %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-edit me-1"></i>Editar Consulta
-                </a>
             </div>
         </div>
     </div>
     
     {% else %}
-    <!-- Si la cita no tiene consulta asociada y no está atendida, mostrar botón para registrar -->
+    <!-- Registrar Consulta -->
     {% if not cita.atendida %}
-    <div class="card mb-4">
-        <div class="card-header bg-light">
-            <i class="fas fa-stethoscope me-1"></i>Registrar Consulta
+    <div class="detail-card slide-up">
+        <div class="card-header-modern bg-light-modern">
+            <h3 class="card-title-modern">
+                <i class="fas fa-stethoscope"></i>
+                Registrar Consulta
+            </h3>
         </div>
-        <div class="card-body">
-            <p>Esta cita aún no ha sido atendida. Puedes registrar la consulta médica ahora.</p>
-            <a href="{% url 'consultas:crear_consulta' cita.id %}" class="btn btn-success">
-                <i class="fas fa-plus-circle me-1"></i>Registrar Consulta
-            </a>
+        <div class="card-body-modern">
+            <div class="register-consultation-card">
+                <p>Esta cita aún no ha sido atendida. Puedes registrar la consulta médica ahora.</p>
+                <a href="{% url 'consultas:crear_consulta' cita.id %}" class="btn-modern btn-success">
+                    <i class="fas fa-plus-circle"></i>
+                    Registrar Consulta
+                </a>
+            </div>
         </div>
     </div>
     {% else %}
-    <!-- Caso especial: cita marcada como atendida pero sin consulta -->
-    <div class="alert alert-warning">
-        <i class="fas fa-exclamation-triangle me-1"></i>
-        Esta cita está marcada como atendida pero no tiene consulta registrada.
-        <a href="{% url 'consultas:crear_consulta' cita.id %}" class="btn btn-sm btn-outline-primary ms-2">
-            Registrar Consulta
-        </a>
+    <!-- Caso especial: cita atendida sin consulta -->
+    <div class="alert-modern alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>
+            Esta cita está marcada como atendida pero no tiene consulta registrada.
+            <a href="{% url 'consultas:crear_consulta' cita.id %}" class="btn-modern btn-outline-secondary ms-2">
+                Registrar Consulta
+            </a>
+        </span>
     </div>
     {% endif %}
     {% endif %}
 
-    <!-- Enlace a la historia clínica de la mascota -->
-    <div class="text-center mt-4">
-        <div class="btn-group" role="group">
-            <a href="{% url 'consultas:historia_clinica' cita.mascota.id %}" class="btn btn-info">
-                <i class="fas fa-file-medical me-1"></i>Ver Historia Clínica Completa
-            </a>
-            <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' cita.mascota.id %}" class="btn btn-outline-secondary">
-                <i class="fas fa-image me-1"></i>Subir Imagen Diagnóstica
-            </a>
-        </div>
+    <!-- Botones de Acción -->
+    <div class="action-buttons-container">
+        <a href="{% url 'consultas:historia_clinica' cita.mascota.id %}" class="btn-modern btn-info">
+            <i class="fas fa-file-medical"></i>
+            Ver Historia Clínica Completa
+        </a>
+        <a href="{% url 'consultas:crear_imagen_diagnostica_mascota' cita.mascota.id %}" class="btn-modern btn-outline-secondary">
+            <i class="fas fa-image"></i>
+            Subir Imagen Diagnóstica
+        </a>
     </div>
 </div>
 {% endblock %}

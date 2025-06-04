@@ -3,26 +3,684 @@
 
 {% block title %}{% if form.instance.id %}Editar Consulta{% else %}Nueva Consulta{% endif %}{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Root variables para consistencia */
+    :root {
+        --primary-color: #16a085;
+        --secondary-color: #3498db;
+        --primary-dark: #138d75;
+        --success-color: #27ae60;
+        --danger-color: #e74c3c;
+        --warning-color: #f39c12;
+        --info-color: #17a2b8;
+        --text-primary: #2c3e50;
+        --text-light: #ffffff;
+        --bg-white: #ffffff;
+        --glass-bg: rgba(255, 255, 255, 0.25);
+        --glass-border: rgba(255, 255, 255, 0.18);
+        --input-bg: #f8fafc;
+        --input-border: #e2e8f0;
+    }
+    
+    .form-container, .info-card {
+        background: var(--bg-white);
+        border-radius: 24px;
+        box-shadow: 
+            0 32px 64px -12px rgba(22, 160, 133, 0.15),
+            0 16px 32px -8px rgba(52, 152, 219, 0.1),
+            0 8px 16px -4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(22, 160, 133, 0.1);
+    }
+
+    .form-container::before, .info-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(22, 160, 133, 0.02) 0%, 
+            rgba(52, 152, 219, 0.02) 50%, 
+            rgba(155, 89, 182, 0.02) 100%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--secondary-color) 50%, 
+            var(--primary-dark) 100%);
+        color: var(--text-light);
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+    }
+
+    .info-header {
+        background: linear-gradient(135deg, 
+            var(--info-color) 0%, 
+            var(--secondary-color) 50%, 
+            #1995ad 100%);
+        color: var(--text-light);
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+    }
+
+    .success-header {
+        background: linear-gradient(135deg, 
+            var(--success-color) 0%, 
+            #2ecc71 50%, 
+            #229954 100%);
+        color: var(--text-light);
+        padding: 2.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+    }
+
+    .form-header::before, .info-header::before, .success-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .form-header::after, .info-header::after, .success-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .form-header-content, .info-header-content, .success-header-content {
+        position: relative;
+        z-index: 3;
+    }
+
+    .form-header h2, .info-header h2, .success-header h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-header h2, .success-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-header .icon, .info-header .icon, .success-header .icon {
+        width: 70px;
+        height: 70px;
+        background: var(--glass-bg);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-header .icon, .success-header .icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+
+    .form-body, .info-body {
+        padding: 3rem;
+        position: relative;
+        background: rgba(255, 255, 255, 0.98);
+        z-index: 2;
+    }
+
+    /* INPUTS COMPLETAMENTE REDISEÑADOS - SIN RECUADROS NEGROS */
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label i {
+        color: var(--primary-color);
+        width: 18px;
+        font-size: 1.1rem;
+    }
+
+    /* NUEVO DISEÑO DE INPUT - LIMPIO Y MODERNO */
+    .form-control {
+        /* Resetear todos los estilos problemáticos */
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background-color: var(--input-bg);
+        width: 100%;
+        outline: none;
+        transition: all 0.3s ease;
+        
+        /* Eliminar cualquier decoración no deseada */
+        box-shadow: none;
+        text-decoration: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    /* ELIMINAR PSEUDO-ELEMENTOS PROBLEMÁTICOS */
+    .form-control::before,
+    .form-control::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    /* Estados del input mejorados */
+    .form-control:hover {
+        border-color: rgba(22, 160, 133, 0.4);
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(22, 160, 133, 0.08);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        background-color: #ffffff;
+        box-shadow: 
+            0 0 0 3px rgba(22, 160, 133, 0.1),
+            0 4px 12px rgba(22, 160, 133, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .form-control::placeholder {
+        color: #94a3b8;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    /* TEXTAREAS específicamente */
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    /* Estados de validación limpios */
+    .form-control.is-valid {
+        border-color: var(--success-color);
+        background-color: rgba(39, 174, 96, 0.02);
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger-color);
+        background-color: rgba(231, 76, 60, 0.02);
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Feedback de validación mejorado */
+    .invalid-feedback {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, 
+            rgba(231, 76, 60, 0.08) 0%, 
+            rgba(231, 76, 60, 0.05) 100%);
+        border-radius: 12px;
+        border-left: 3px solid var(--danger-color);
+        backdrop-filter: blur(8px);
+    }
+
+    .invalid-feedback::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--danger-color);
+    }
+
+    /* Botones premium */
+    .btn-submit-container {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: flex-end;
+        align-items: center;
+        padding-top: 2.5rem;
+        border-top: 1px solid rgba(22, 160, 133, 0.1);
+        margin-top: 2.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--secondary-color) 50%, 
+            var(--primary-dark) 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 10px 15px -3px rgba(22, 160, 133, 0.3),
+            0 4px 6px -2px rgba(22, 160, 133, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 20px 25px -5px rgba(22, 160, 133, 0.4),
+            0 10px 10px -5px rgba(22, 160, 133, 0.2);
+        background: linear-gradient(135deg, 
+            var(--secondary-color) 0%, 
+            var(--primary-color) 50%, 
+            var(--primary-dark) 100%);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-outline-secondary {
+        background: linear-gradient(145deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(248, 250, 252, 0.95) 100%);
+        border: 2px solid rgba(22, 160, 133, 0.2);
+        color: var(--text-primary);
+        padding: 1rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+    }
+
+    .btn-outline-secondary:hover {
+        background: linear-gradient(145deg, 
+            rgba(22, 160, 133, 0.08) 0%, 
+            rgba(255, 255, 255, 0.95) 100%);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 
+            0 10px 15px -3px rgba(22, 160, 133, 0.2),
+            0 4px 6px -2px rgba(22, 160, 133, 0.1);
+    }
+
+    /* Botones especiales para vacunas/productos */
+    .btn-outline-primary {
+        background: linear-gradient(145deg, 
+            rgba(22, 160, 133, 0.05) 0%, 
+            rgba(255, 255, 255, 0.95) 100%);
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 1.5rem 2rem;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 4px 6px -1px rgba(22, 160, 133, 0.1),
+            0 2px 4px -1px rgba(22, 160, 133, 0.06);
+        cursor: pointer;
+        height: auto;
+        min-height: 120px;
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--secondary-color) 100%);
+        border-color: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-5px);
+        box-shadow: 
+            0 15px 25px -5px rgba(22, 160, 133, 0.4),
+            0 8px 12px -3px rgba(22, 160, 133, 0.2);
+    }
+
+    .btn-outline-info {
+        background: linear-gradient(145deg, 
+            rgba(23, 162, 184, 0.05) 0%, 
+            rgba(255, 255, 255, 0.95) 100%);
+        border: 2px solid var(--info-color);
+        color: var(--info-color);
+        padding: 1.5rem 2rem;
+        border-radius: 20px;
+        font-weight: 600;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 4px 6px -1px rgba(23, 162, 184, 0.1),
+            0 2px 4px -1px rgba(23, 162, 184, 0.06);
+        cursor: pointer;
+        height: auto;
+        min-height: 120px;
+    }
+
+    .btn-outline-info:hover {
+        background: linear-gradient(135deg, 
+            var(--info-color) 0%, 
+            var(--secondary-color) 100%);
+        border-color: var(--info-color);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-5px);
+        box-shadow: 
+            0 15px 25px -5px rgba(23, 162, 184, 0.4),
+            0 8px 12px -3px rgba(23, 162, 184, 0.2);
+    }
+
+    /* Alertas mejoradas */
+    .alert {
+        border: none;
+        border-radius: 16px;
+        padding: 1.5rem;
+        backdrop-filter: blur(16px);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, 
+            rgba(23, 162, 184, 0.1) 0%, 
+            rgba(52, 152, 219, 0.08) 100%);
+        color: #0c5460;
+        border: 1px solid rgba(23, 162, 184, 0.2);
+        box-shadow: 0 8px 32px rgba(23, 162, 184, 0.1);
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, 
+            rgba(243, 156, 18, 0.1) 0%, 
+            rgba(255, 193, 7, 0.08) 100%);
+        color: #856404;
+        border: 1px solid rgba(243, 156, 18, 0.2);
+        box-shadow: 0 8px 32px rgba(243, 156, 18, 0.1);
+    }
+
+    /* Información de cita mejorada */
+    .cita-info-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+
+    .cita-info-item {
+        background: linear-gradient(135deg, 
+            rgba(22, 160, 133, 0.05) 0%, 
+            rgba(255, 255, 255, 0.8) 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid rgba(22, 160, 133, 0.1);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 16px rgba(22, 160, 133, 0.08);
+    }
+
+    .cita-info-item strong {
+        color: var(--primary-color);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Animaciones de entrada */
+    .slide-in {
+        animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Micro-interacciones para los grupos de formulario */
+    .form-group {
+        position: relative;
+    }
+
+    .form-group::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 0.3s ease;
+        border-radius: 1px;
+    }
+
+    .form-group:focus-within::after {
+        width: 100%;
+    }
+
+    /* Indicador de campo requerido mejorado */
+    .required-field::after {
+        content: '*';
+        color: var(--danger-color);
+        margin-left: 0.5rem;
+        font-weight: bold;
+        font-size: 1.1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* Asegurar que no hay elementos superpuestos problemáticos */
+    * {
+        box-sizing: border-box;
+    }
+
+    /* ESTILOS ADICIONALES PARA ELIMINAR CUALQUIER LÍNEA NEGRA */
+    input, textarea, select {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    input.form-control, 
+    textarea.form-control, 
+    select.form-control {
+        border: 2px solid var(--input-border) !important;
+        box-shadow: none !important;
+    }
+
+    /* Sobrescribir cualquier estilo de Bootstrap que cause problemas */
+    .form-control:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1) !important;
+    }
+
+    /* Responsive mejorado */
+    @media (max-width: 768px) {
+        .form-container, .info-card {
+            border-radius: 16px;
+            margin: 1rem;
+        }
+        
+        .form-body, .info-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-header, .info-header, .success-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-header h2, .info-header h2, .success-header h2 {
+            font-size: 1.5rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .form-header .icon, .info-header .icon, .success-header .icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .btn-submit-container {
+            flex-direction: column-reverse;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .btn-primary,
+        .btn-outline-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .cita-info-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .btn-outline-primary,
+        .btn-outline-info {
+            min-height: 100px;
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4 slide-in">
     <div class="row">
         <div class="col-md-10 offset-md-1">
             <!-- Información de la cita -->
             {% if cita %}
-            <div class="card mb-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calendar-check me-2"></i>
-                        Información de la Cita
-                    </h5>
+            <div class="info-card">
+                <div class="info-header">
+                    <div class="info-header-content">
+                        <h2>
+                            <div class="icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            Información de la Cita
+                        </h2>
+                        <p>Detalles de la cita programada para esta consulta</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
+                <div class="info-body">
+                    <div class="cita-info-row">
+                        <div class="cita-info-item">
                             <p><strong>Mascota:</strong> {{ cita.mascota.nombre }} ({{ cita.mascota.especie }})</p>
                             <p><strong>Propietario:</strong> {{ cita.mascota.cliente.nombre }}</p>
                         </div>
-                        <div class="col-md-6">
+                        <div class="cita-info-item">
                             <p><strong>Fecha de la Cita:</strong> {{ cita.fecha|date:"d/m/Y H:i" }}</p>
                             <p><strong>Motivo:</strong> {{ cita.motivo }}</p>
                         </div>
@@ -32,31 +690,42 @@
             {% endif %}
 
             <!-- Formulario de consulta -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-stethoscope me-2"></i>
-                        {% if form.instance.id %}Editar Consulta{% else %}Nueva Consulta{% endif %}
-                    </h4>
+            <div class="form-container">
+                <div class="form-header">
+                    <div class="form-header-content">
+                        <h2>
+                            <div class="icon">
+                                <i class="fas fa-stethoscope"></i>
+                            </div>
+                            {% if form.instance.id %}Editar Consulta{% else %}Nueva Consulta{% endif %}
+                        </h2>
+                        <p>
+                            {% if form.instance.id %}
+                                Modifica los datos de la consulta médica
+                            {% else %}
+                                Complete el formulario para registrar una nueva consulta médica
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form method="post">
+                <div class="form-body">
+                    <form method="post" id="consultaForm" novalidate>
                         {% csrf_token %}
                         {{ form|crispy }}
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <div class="btn-submit-container">
                             {% if form.instance.id %}
-                            <a href="{% url 'consultas:detalle_consulta' form.instance.id %}" class="btn btn-outline-secondary me-md-2">
-                                <i class="fas fa-times me-1"></i>Cancelar
+                            <a href="{% url 'consultas:detalle_consulta' form.instance.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i>Cancelar
                             </a>
                             {% else %}
                             {% if cita %}
-                            <a href="{% url 'consultas:detalle_cita' cita.id %}" class="btn btn-outline-secondary me-md-2">
-                                <i class="fas fa-times me-1"></i>Cancelar
+                            <a href="{% url 'consultas:detalle_cita' cita.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i>Cancelar
                             </a>
                             {% endif %}
                             {% endif %}
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Guardar Consulta
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-save"></i>Guardar Consulta
                             </button>
                         </div>
                     </form>
@@ -65,14 +734,19 @@
 
             <!-- Acciones rápidas: Aplicar vacunas/productos -->
             {% if cita or form.instance.id %}
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-syringe me-2"></i>
-                        Aplicar Vacunas y Productos
-                    </h5>
+            <div class="info-card">
+                <div class="success-header">
+                    <div class="success-header-content">
+                        <h2>
+                            <div class="icon">
+                                <i class="fas fa-syringe"></i>
+                            </div>
+                            Aplicar Vacunas y Productos
+                        </h2>
+                        <p>Gestión de vacunas y productos durante la consulta</p>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="info-body">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-1"></i>
                         <strong>Nota:</strong> Puedes aplicar vacunas y productos durante esta consulta. 
@@ -110,10 +784,11 @@
                         {% else %}
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle me-1"></i>
-                            No se pueden aplicar vacunas o productos porque la mascota {{ cita.mascota.nombre }} está inactiva.
+                            <strong>Mascota Inactiva:</strong> Esta mascota está marcada como inactiva. 
+                            No se pueden aplicar vacunas o productos.
                         </div>
                         {% endif %}
-                    {% elif form.instance.id %}
+                    {% elif form.instance.id and form.instance.mascota %}
                         {% if form.instance.mascota.activa %}
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -144,7 +819,8 @@
                         {% else %}
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle me-1"></i>
-                            No se pueden aplicar vacunas o productos porque la mascota {{ form.instance.mascota.nombre }} está inactiva.
+                            <strong>Mascota Inactiva:</strong> Esta mascota está marcada como inactiva. 
+                            No se pueden aplicar vacunas o productos.
                         </div>
                         {% endif %}
                     {% endif %}
@@ -154,4 +830,134 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Formulario de consulta
+    const form = document.getElementById('consultaForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Animación de carga en el botón
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+            submitBtn.disabled = true;
+        });
+    }
+    
+    // Validación en tiempo real
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+        
+        input.addEventListener('focus', function() {
+            this.classList.remove('is-invalid');
+            const feedback = this.parentNode.querySelector('.invalid-feedback');
+            if (feedback) {
+                feedback.style.display = 'none';
+            }
+        });
+    });
+    
+    function validateField(field) {
+        if (field.hasAttribute('required') && !field.value.trim()) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Este campo es obligatorio');
+            return false;
+        }
+        
+        // Validación específica para campos de texto
+        if (field.type === 'text' && field.value.trim() && field.value.trim().length < 2) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Debe tener al menos 2 caracteres');
+            return false;
+        }
+        
+        // Validación para textarea
+        if (field.tagName.toLowerCase() === 'textarea' && field.value.trim() && field.value.trim().length < 10) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Debe tener al menos 10 caracteres');
+            return false;
+        }
+        
+        field.classList.remove('is-invalid');
+        field.classList.add('is-valid');
+        return true;
+    }
+    
+    function showFieldError(field, message) {
+        let feedback = field.parentNode.querySelector('.invalid-feedback');
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            field.parentNode.appendChild(feedback);
+        }
+        feedback.textContent = message;
+        feedback.style.display = 'block';
+    }
+    
+    // Efecto de hover mejorado para botones
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Auto-resize para textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    });
+    
+    // Smooth scroll para alertas
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        alert.addEventListener('click', function() {
+            this.style.transition = 'all 0.3s ease';
+            this.style.opacity = '0.7';
+            setTimeout(() => {
+                this.style.opacity = '1';
+            }, 300);
+        });
+    });
+    
+    // Confirmación antes de salir si hay cambios
+    let formChanged = false;
+    if (form) {
+        const originalData = new FormData(form);
+        
+        form.addEventListener('input', function() {
+            formChanged = true;
+        });
+        
+        window.addEventListener('beforeunload', function(e) {
+            if (formChanged && !form.submitted) {
+                e.preventDefault();
+                e.returnValue = '¿Estás seguro de que quieres salir? Los cambios no guardados se perderán.';
+                return e.returnValue;
+            }
+        });
+        
+        form.addEventListener('submit', function() {
+            form.submitted = true;
+        });
+    }
+    
+    // Animaciones de entrada escalonadas
+    const elements = document.querySelectorAll('.form-container, .info-card');
+    elements.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+    });
+});
+</script>
 {% endblock %}
