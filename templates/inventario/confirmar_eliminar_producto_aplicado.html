@@ -3,25 +3,470 @@
 
 {% block title %}Confirmar Eliminación de Producto Aplicado | Sistema Veterinario{% endblock %}
 
+{% block page_title %}Eliminar Producto Aplicado{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirm-delete-header {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(231, 76, 60, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .confirm-delete-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(231, 76, 60, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .confirm-delete-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .confirm-delete-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--danger-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .confirm-delete-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--danger-color), #c0392b);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .confirm-delete-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .breadcrumb-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb {
+        margin-bottom: 0;
+        background: none;
+        padding: 0;
+    }
+
+    .breadcrumb-item {
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--danger-color);
+        font-weight: 600;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "/";
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    .confirmation-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-lg);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .confirmation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--danger-color), #c0392b);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .card-header h5 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-header .icon {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .warning-content {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .warning-icon {
+        font-size: 4rem;
+        color: var(--danger-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    .warning-message {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(243, 156, 18, 0.05) 100%);
+        border: 1px solid rgba(243, 156, 18, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+        color: var(--text-primary);
+    }
+
+    .alert-warning::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: #f39c12;
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    .product-info-card {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.02) 100%);
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        border-radius: var(--border-radius);
+        padding: 0;
+        margin: 1.5rem 0;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+    }
+
+    .product-info-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--secondary-color);
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    .product-info-card .card-body {
+        padding: 1.5rem;
+        background: transparent;
+    }
+
+    .product-info-card .card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .list-group {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: none;
+    }
+
+    .list-group-item {
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        background: rgba(255, 255, 255, 0.7);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        position: relative;
+        transition: var(--transition);
+    }
+
+    .list-group-item:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateX(5px);
+    }
+
+    .list-group-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--secondary-color);
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .list-group-item:hover::before {
+        opacity: 1;
+    }
+
+    .list-group-item strong {
+        color: var(--text-primary);
+        font-weight: 600;
+        min-width: 140px;
+        display: inline-block;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-outline-secondary {
+        background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        min-width: 140px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+    }
+
+    .btn-outline-secondary:hover {
+        background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 180px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-danger::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-danger:hover::before {
+        left: 100%;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #c0392b 0%, var(--danger-color) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .confirm-delete-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-outline-secondary,
+        .btn-danger {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .breadcrumb-container {
+            padding: 0.75rem 1rem;
+        }
+
+        .list-group-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .list-group-item strong {
+            min-width: auto;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .container {
+        max-width: 800px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container my-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_mascotas' %}">Mascotas</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' object.mascota.id %}">{{ object.mascota.nombre }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Eliminar Producto Aplicado</li>
-        </ol>
-    </nav>
-    
-    <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h1 class="h5 card-title mb-0 text-danger">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+<div class="container my-4 fade-in">
+    <!-- Header Section -->
+    <div class="confirm-delete-header">
+        <div class="confirm-delete-header-content">
+            <h1 class="confirm-delete-title">
+                <i class="fas fa-exclamation-triangle icon"></i>
                 Confirmar Eliminación
             </h1>
+            <p class="confirm-delete-subtitle">
+                Confirma la eliminación del registro de producto aplicado
+            </p>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container slide-up">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'clientes:lista_mascotas' %}">
+                        <i class="fas fa-paw me-1"></i>Mascotas
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'clientes:detalle_mascota' object.mascota.id %}">{{ object.mascota.nombre }}</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Eliminar Producto Aplicado</li>
+            </ol>
+        </nav>
+    </div>
+    
+    <!-- Confirmation Card -->
+    <div class="confirmation-card slide-up">
+        <div class="card-header">
+            <h5>
+                <i class="fas fa-trash-alt icon"></i>
+                Confirmar Eliminación de Producto Aplicado
+            </h5>
         </div>
         
         <div class="card-body">
+            <!-- Warning Content -->
+            <div class="warning-content">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <p class="warning-message">
+                    ¿Estás seguro de que deseas eliminar este registro?
+                </p>
+            </div>
+
             <div class="alert alert-warning">
                 <p class="mb-0">
                     <strong>¿Estás seguro de que deseas eliminar este registro de producto aplicado?</strong>
@@ -31,9 +476,12 @@
                 </p>
             </div>
             
-            <div class="card mb-4 mt-3">
+            <div class="product-info-card">
                 <div class="card-body">
-                    <h5 class="card-title">Detalles del registro:</h5>
+                    <h5 class="card-title">
+                        <i class="fas fa-syringe"></i>
+                        Detalles del registro:
+                    </h5>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
                             <strong>Producto:</strong> {{ object.producto.nombre }} ({{ object.producto.get_tipo_display }})
@@ -55,12 +503,12 @@
             
             <form method="post">
                 {% csrf_token %}
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'inventario:detalle_producto_aplicado' object.id %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> Cancelar
+                <div class="action-buttons">
+                    <a href="{% url 'inventario:detalle_producto_aplicado' object.id %}" class="btn-outline-secondary">
+                        <i class="fas fa-times"></i> Cancelar
                     </a>
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash-alt me-1"></i> Confirmar Eliminación
+                    <button type="submit" class="btn-danger">
+                        <i class="fas fa-trash-alt"></i> Confirmar Eliminación
                     </button>
                 </div>
             </form>

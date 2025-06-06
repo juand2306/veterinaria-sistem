@@ -3,151 +3,745 @@
 
 {% block title %}Detalle de Vacuna Aplicada | Sistema Veterinario{% endblock %}
 
+{% block extra_css %}
+<style>
+    .vaccine-detail-header {
+        background: linear-gradient(135deg, rgba(155, 89, 182, 0.1) 0%, rgba(142, 68, 173, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(155, 89, 182, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .vaccine-detail-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(155, 89, 182, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .vaccine-detail-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .breadcrumb-modern {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb-modern .breadcrumb {
+        margin: 0;
+        background: none;
+        padding: 0;
+    }
+
+    .breadcrumb-modern .breadcrumb-item {
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb-modern .breadcrumb-item a {
+        color: #9b59b6;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-modern .breadcrumb-item a:hover {
+        color: #8e44ad;
+    }
+
+    .breadcrumb-modern .breadcrumb-item.active {
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .vaccine-icon-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 20px rgba(155, 89, 182, 0.3);
+    }
+
+    .vaccine-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .vaccine-title .icon {
+        font-size: 1.8rem;
+        color: #9b59b6;
+    }
+
+    .vaccine-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .detail-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: var(--transition);
+    }
+
+    .detail-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .card-header-modern {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+
+    .detail-card:hover .card-header-modern::before {
+        transform: translateX(100%);
+    }
+
+    .card-title-modern {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-modern {
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        font-size: 0.875rem;
+        border: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-modern.btn-edit {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-modern.btn-edit:hover {
+        background: var(--warning-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+    }
+
+    .btn-modern.btn-delete {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-modern.btn-delete:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-modern.btn-primary {
+        background: #9b59b6;
+        color: white;
+        border: 1px solid transparent;
+    }
+
+    .btn-modern.btn-primary:hover {
+        background: #8e44ad;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+    }
+
+    .btn-modern.btn-secondary {
+        background: var(--secondary-color);
+        color: white;
+        border: 1px solid transparent;
+    }
+
+    .btn-modern.btn-secondary:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .card-body-modern {
+        padding: 2rem;
+        background: var(--bg-white);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1.5rem;
+        background: rgba(155, 89, 182, 0.02);
+        border-radius: var(--border-radius-sm);
+        border-left: 4px solid #9b59b6;
+        transition: var(--transition);
+    }
+
+    .info-item:hover {
+        background: rgba(155, 89, 182, 0.05);
+        transform: translateX(4px);
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-label i {
+        color: #9b59b6;
+        font-size: 1rem;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .info-value.empty {
+        color: var(--text-secondary);
+        font-style: italic;
+        opacity: 0.7;
+    }
+
+    .info-value a {
+        color: #9b59b6;
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .info-value a:hover {
+        color: #8e44ad;
+        text-decoration: underline;
+    }
+
+    .pet-info-card {
+        background: linear-gradient(135deg, rgba(155, 89, 182, 0.05) 0%, rgba(142, 68, 173, 0.05) 100%);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        border: 2px solid rgba(155, 89, 182, 0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .pet-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+    }
+
+    .pet-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .pet-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .pet-detail {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .pet-detail i {
+        color: #9b59b6;
+        width: 16px;
+        text-align: center;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 0.5rem;
+    }
+
+    .status-badge.expired {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .status-badge.upcoming {
+        background: #f39c12;
+        color: white;
+    }
+
+    .status-badge.completed {
+        background: #8e44ad;
+        color: white;
+    }
+
+    .observations-section {
+        background: rgba(155, 89, 182, 0.02);
+        border-radius: var(--border-radius-sm);
+        padding: 1.5rem;
+        border-left: 4px solid #9b59b6;
+        margin-top: 1rem;
+    }
+
+    .observations-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .observations-label i {
+        color: #9b59b6;
+        font-size: 1rem;
+    }
+
+    .observations-text {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .stats-mini {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(155, 89, 182, 0.05);
+        padding: 1rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-mini {
+        text-align: center;
+    }
+
+    .stat-mini-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #9b59b6;
+        display: block;
+    }
+
+    .stat-mini-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    @media (max-width: 768px) {
+        .vaccine-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .vaccine-detail-header {
+            padding: 1.5rem;
+        }
+
+        .card-header-modern {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .card-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pet-details {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stats-mini {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .stats-mini .stat-mini {
+            width: 100%;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb">
+<div class="fade-in">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-modern slide-up">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'clientes:lista_mascotas' %}">Mascotas</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}">{{ vacuna_aplicada.mascota.nombre }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Detalle de Vacuna Aplicada</li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'clientes:lista_mascotas' %}">
+                    <i class="fas fa-paw me-1"></i>Mascotas
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}">
+                    {{ vacuna_aplicada.mascota.nombre }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Detalle de Vacuna Aplicada</li>
         </ol>
     </nav>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h5 card-title mb-0">
-                    <i class="fas fa-syringe me-2"></i>Detalle de Vacuna Aplicada
-                </h1>
-                <div>
-                    <a href="{% url 'inventario:editar_vacuna_aplicada' vacuna_aplicada.id %}" class="btn btn-sm btn-outline-primary me-2">
-                        <i class="fas fa-edit me-1"></i>Editar
+    <!-- Header Section -->
+    <div class="vaccine-detail-header slide-up">
+        <div class="vaccine-detail-header-content">
+            <div class="d-flex flex-column flex-md-row align-items-start gap-4">
+                <div class="vaccine-icon-large">
+                    <i class="fas fa-syringe"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h1 class="vaccine-title">
+                        <i class="fas fa-syringe icon"></i>
+                        Detalle de Vacuna Aplicada
+                    </h1>
+                    <p class="vaccine-subtitle">
+                        Vacuna aplicada el {{ vacuna_aplicada.fecha_aplicacion|date:"d/m/Y" }}
+                    </p>
+                    
+                    <!-- Mini Stats -->
+                    <div class="stats-mini">
+                        <div class="stat-mini">
+                            <span class="stat-mini-number">{{ vacuna_aplicada.fecha_aplicacion|date:"d" }}</span>
+                            <span class="stat-mini-label">Día</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span class="stat-mini-number">{{ vacuna_aplicada.fecha_aplicacion|date:"m" }}</span>
+                            <span class="stat-mini-label">Mes</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span class="stat-mini-number">{{ vacuna_aplicada.fecha_aplicacion|date:"Y" }}</span>
+                            <span class="stat-mini-label">Año</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="{% url 'inventario:editar_vacuna_aplicada' vacuna_aplicada.id %}" class="btn-modern btn-edit">
+                        <i class="fas fa-edit"></i>Editar
                     </a>
-                    <a href="{% url 'inventario:eliminar_vacuna_aplicada' vacuna_aplicada.id %}" class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-trash me-1"></i>Eliminar
+                    <a href="{% url 'inventario:eliminar_vacuna_aplicada' vacuna_aplicada.id %}" class="btn-modern btn-delete">
+                        <i class="fas fa-trash"></i>Eliminar
                     </a>
                 </div>
             </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <!-- Información de la mascota -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2">Información de la Mascota</h5>
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-paw fa-2x text-primary"></i>
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <h5 class="mb-0">
-                                        <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}" class="text-decoration-none">
-                                            {{ vacuna_aplicada.mascota.nombre }}
-                                        </a>
-                                    </h5>
-                                    <p class="mb-0 text-muted">
-                                        {{ vacuna_aplicada.mascota.especie }} • {{ vacuna_aplicada.mascota.raza }} • 
-                                        {{ vacuna_aplicada.mascota.get_sexo_display }}
-                                    </p>
-                                </div>
+    </div>
+
+    <div class="row">
+        <!-- Información de la mascota -->
+        <div class="col-md-6">
+            <div class="detail-card slide-up">
+                <div class="card-header-modern">
+                    <h3 class="card-title-modern">
+                        <i class="fas fa-paw"></i>
+                        Información de la Mascota
+                    </h3>
+                </div>
+                <div class="card-body-modern">
+                    <div class="pet-info-card">
+                        <div class="pet-avatar">
+                            {{ vacuna_aplicada.mascota.nombre|first|upper }}
+                        </div>
+                        <div class="pet-name">
+                            <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}" class="text-decoration-none">
+                                {{ vacuna_aplicada.mascota.nombre }}
+                            </a>
+                        </div>
+                        <div class="pet-details">
+                            <div class="pet-detail">
+                                <i class="fas fa-dna"></i>
+                                <span>{{ vacuna_aplicada.mascota.especie }}</span>
                             </div>
-                            <div class="mt-3">
-                                <strong>Propietario:</strong>
-                                <div>
-                                    {% if vacuna_aplicada.mascota.propietario %}
-                                        <a href="{% url 'clientes:detalle_cliente' vacuna_aplicada.mascota.propietario.id %}" class="text-decoration-none">
-                                            {{ vacuna_aplicada.mascota.propietario.nombre }}
-                                        </a>
-                                    {% else %}
-                                        <span class="text-muted">Sin propietario asignado</span>
-                                    {% endif %}
-                                </div>
+                            <div class="pet-detail">
+                                <i class="fas fa-tags"></i>
+                                <span>{{ vacuna_aplicada.mascota.raza }}</span>
+                            </div>
+                            <div class="pet-detail">
+                                <i class="fas fa-venus-mars"></i>
+                                <span>{{ vacuna_aplicada.mascota.get_sexo_display }}</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Información de la vacuna -->
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2">Información de la Vacuna</h5>
-                            <div class="mb-3">
-                                <strong>Vacuna:</strong>
-                                <div>
-                                    <a href="{% url 'inventario:detalle_vacuna' vacuna_aplicada.vacuna.id %}" class="text-decoration-none">
-                                        {{ vacuna_aplicada.vacuna.nombre }}
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-user"></i>
+                                Propietario
+                            </div>
+                            <div class="info-value">
+                                {% if vacuna_aplicada.mascota.cliente %}
+                                    <a href="{% url 'clientes:detalle_cliente' vacuna_aplicada.mascota.cliente.id %}">
+                                        {{ vacuna_aplicada.mascota.cliente.nombre }}
                                     </a>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <strong>Descripción:</strong>
-                                <div>{{ vacuna_aplicada.vacuna.descripcion|truncatechars:100 }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Detalles de la aplicación -->
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title border-bottom pb-2">Detalles de la Aplicación</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <strong>Fecha de Aplicación:</strong>
-                            <div>{{ vacuna_aplicada.fecha_aplicacion|date:"d/m/Y" }}</div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <strong>Próxima Aplicación:</strong>
-                            <div>
-                                {% if vacuna_aplicada.fecha_proxima %}
-                                    {{ vacuna_aplicada.fecha_proxima|date:"d/m/Y" }}
-                                    
-                                    <!-- Alerta si la fecha próxima está cercana o pasada -->
-                                    {% now "Y-m-d" as today %}
-                                    {% if vacuna_aplicada.fecha_proxima|date:"Y-m-d" < today %}
-                                        <span class="badge bg-danger ms-2">Vencida</span>
-                                    {% elif vacuna_aplicada.fecha_proxima|timeuntil %}
-                                        {% with days_until=vacuna_aplicada.fecha_proxima|timeuntil %}
-                                            {% if "day" in days_until and "30" in days_until or "week" in days_until %}
-                                                <span class="badge bg-warning ms-2">Próxima</span>
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% endif %}
                                 {% else %}
-                                    <span class="text-muted">No programada</span>
+                                    <span class="empty">Sin propietario asignado</span>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="mt-2">
-                        <strong>Observaciones:</strong>
-                        <div class="mt-2">
-                            {% if vacuna_aplicada.observaciones %}
-                                {{ vacuna_aplicada.observaciones|linebreaks }}
-                            {% else %}
-                                <span class="text-muted">Sin observaciones</span>
-                            {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de la vacuna -->
+        <div class="col-md-6">
+            <div class="detail-card slide-up">
+                <div class="card-header-modern">
+                    <h3 class="card-title-modern">
+                        <i class="fas fa-shield-alt"></i>
+                        Información de la Vacuna
+                    </h3>
+                </div>
+                <div class="card-body-modern">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-vial"></i>
+                                Vacuna
+                            </div>
+                            <div class="info-value">
+                                <a href="{% url 'inventario:detalle_vacuna' vacuna_aplicada.vacuna.id %}">
+                                    {{ vacuna_aplicada.vacuna.nombre }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-file-alt"></i>
+                                Descripción
+                            </div>
+                            <div class="info-value">
+                                {{ vacuna_aplicada.vacuna.descripcion|truncatechars:100 }}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Volver a la Mascota
-                </a>
-                
-                {% if vacuna_aplicada.fecha_proxima %}
-                <a href="{% url 'inventario:aplicar_vacuna' mascota_id=vacuna_aplicada.mascota.id %}" class="btn btn-primary">
-                    <i class="fas fa-syringe me-1"></i>Nueva Aplicación
-                </a>
-                {% endif %}
+    <!-- Detalles de la aplicación -->
+    <div class="detail-card slide-up">
+        <div class="card-header-modern">
+            <h3 class="card-title-modern">
+                <i class="fas fa-calendar-check"></i>
+                Detalles de la Aplicación
+            </h3>
+        </div>
+        <div class="card-body-modern">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        Fecha de Aplicación
+                    </div>
+                    <div class="info-value">{{ vacuna_aplicada.fecha_aplicacion|date:"d/m/Y" }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="fas fa-calendar-plus"></i>
+                        Próxima Aplicación
+                    </div>
+                    <div class="info-value">
+                        {% if vacuna_aplicada.fecha_proxima %}
+                            {{ vacuna_aplicada.fecha_proxima|date:"d/m/Y" }}
+                            
+                            <!-- Alerta si la fecha próxima está cercana o pasada -->
+                            {% now "Y-m-d" as today %}
+                            {% if vacuna_aplicada.fecha_proxima|date:"Y-m-d" < today %}
+                                <span class="status-badge expired">Vencida</span>
+                            {% elif vacuna_aplicada.fecha_proxima|timeuntil %}
+                                {% with days_until=vacuna_aplicada.fecha_proxima|timeuntil %}
+                                    {% if "day" in days_until and "30" in days_until or "week" in days_until %}
+                                        <span class="status-badge upcoming">Próxima</span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        {% else %}
+                            <span class="empty">No programada</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="observations-section">
+                <div class="observations-label">
+                    <i class="fas fa-sticky-note"></i>
+                    Observaciones
+                </div>
+                <div class="observations-text">
+                    {% if vacuna_aplicada.observaciones %}
+                        {{ vacuna_aplicada.observaciones|linebreaks }}
+                    {% else %}
+                        <span class="empty">Sin observaciones</span>
+                    {% endif %}
+                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="action-buttons">
+        <a href="{% url 'clientes:detalle_mascota' vacuna_aplicada.mascota.id %}" class="btn-modern btn-secondary">
+            <i class="fas fa-arrow-left"></i>Volver a la Mascota
+        </a>
+        
+        {% if vacuna_aplicada.fecha_proxima %}
+        <a href="{% url 'inventario:aplicar_vacuna' mascota_id=vacuna_aplicada.mascota.id %}" class="btn-modern btn-primary">
+            <i class="fas fa-syringe"></i>Nueva Aplicación
+        </a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

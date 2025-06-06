@@ -6,49 +6,680 @@
     {% if form.instance.pk %}Editar Vacuna{% else %}Nueva Vacuna{% endif %} | Sistema Veterinario
 {% endblock %}
 
-{% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'inventario:lista_vacunas' %}">Vacunas</a></li>
-            <li class="breadcrumb-item active" aria-current="page">
-                {% if form.instance.pk %}Editar Vacuna{% else %}Nueva Vacuna{% endif %}
-            </li>
-        </ol>
-    </nav>
+{% block page_title %}
+{% if form.instance.pk %}
+    Editar Vacuna
+{% else %}
+    Nueva Vacuna
+{% endif %}
+{% endblock %}
 
+{% block extra_css %}
+<style>
+        /* Root variables para consistencia */
+        :root {
+            --primary-color: #16a085;
+            --secondary-color: #3498db;
+            --primary-dark: #138d75;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #17a2b8;
+            --text-primary: #2c3e50;
+            --text-light: #ffffff;
+            --bg-white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+            --vaccine-primary: #9b59b6;
+            --vaccine-secondary: #8e44ad;
+        }
+        
+        .form-container {
+            background: var(--bg-white);
+            border-radius: 24px;
+            box-shadow: 
+                0 32px 64px -12px rgba(155, 89, 182, 0.15),
+                0 16px 32px -8px rgba(142, 68, 173, 0.1),
+                0 8px 16px -4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(155, 89, 182, 0.1);
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(155, 89, 182, 0.02) 0%, 
+                rgba(142, 68, 173, 0.02) 50%, 
+                rgba(22, 160, 133, 0.02) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, 
+                var(--vaccine-primary) 0%, 
+                var(--vaccine-secondary) 50%, 
+                var(--primary-color) 100%);
+            color: var(--text-light);
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .form-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .form-header-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header .icon {
+            width: 70px;
+            height: 70px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-body {
+            padding: 3rem;
+            position: relative;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 2;
+        }
+
+        /* INPUTS COMPLETAMENTE REDISEÑADOS - SIN RECUADROS NEGROS */
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-label i {
+            color: var(--vaccine-primary);
+            width: 18px;
+            font-size: 1.1rem;
+        }
+
+        /* NUEVO DISEÑO DE INPUT - LIMPIO Y MODERNO */
+        .form-control {
+            /* Resetear todos los estilos problemáticos */
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            background-color: var(--input-bg);
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+            
+            /* Eliminar cualquier decoración no deseada */
+            box-shadow: none;
+            text-decoration: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* ELIMINAR PSEUDO-ELEMENTOS PROBLEMÁTICOS */
+        .form-control::before,
+        .form-control::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        /* Estados del input mejorados */
+        .form-control:hover {
+            border-color: rgba(155, 89, 182, 0.4);
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(155, 89, 182, 0.08);
+        }
+
+        .form-control:focus {
+            border-color: var(--vaccine-primary);
+            background-color: #ffffff;
+            box-shadow: 
+                0 0 0 3px rgba(155, 89, 182, 0.1),
+                0 4px 12px rgba(155, 89, 182, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        /* TEXTAREAS específicamente */
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Estados de validación limpios */
+        .form-control.is-valid {
+            border-color: var(--success-color);
+            background-color: rgba(39, 174, 96, 0.02);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+            background-color: rgba(231, 76, 60, 0.02);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Feedback de validación mejorado */
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, 
+                rgba(231, 76, 60, 0.08) 0%, 
+                rgba(231, 76, 60, 0.05) 100%);
+            border-radius: 12px;
+            border-left: 3px solid var(--danger-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .invalid-feedback::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--danger-color);
+        }
+
+        /* Botones premium */
+        .btn-submit-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: flex-end;
+            align-items: center;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(155, 89, 182, 0.1);
+            margin-top: 2.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, 
+                var(--vaccine-primary) 0%, 
+                var(--vaccine-secondary) 50%, 
+                var(--primary-color) 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 10px 15px -3px rgba(155, 89, 182, 0.3),
+                0 4px 6px -2px rgba(155, 89, 182, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 25px -5px rgba(155, 89, 182, 0.4),
+                0 10px 10px -5px rgba(155, 89, 182, 0.2);
+            background: linear-gradient(135deg, 
+                var(--vaccine-secondary) 0%, 
+                var(--vaccine-primary) 50%, 
+                var(--primary-color) 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.95) 100%);
+            border: 2px solid rgba(155, 89, 182, 0.2);
+            color: var(--text-primary);
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(145deg, 
+                rgba(155, 89, 182, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            border-color: var(--vaccine-primary);
+            color: var(--vaccine-primary);
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 15px -3px rgba(155, 89, 182, 0.2),
+                0 4px 6px -2px rgba(155, 89, 182, 0.1);
+        }
+
+        /* Breadcrumb glassmorphism */
+        .breadcrumb-container {
+            background: linear-gradient(135deg, 
+                rgba(155, 89, 182, 0.1) 0%, 
+                rgba(142, 68, 173, 0.08) 100%);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 1.25rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(155, 89, 182, 0.15);
+            box-shadow: 
+                0 8px 32px rgba(155, 89, 182, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animaciones de entrada */
+        .slide-in {
+            animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Efectos de loading mejorados */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spinGlow 1s linear infinite;
+        }
+
+        @keyframes spinGlow {
+            0% { 
+                transform: rotate(0deg);
+                box-shadow: 0 0 5px currentColor;
+            }
+            100% { 
+                transform: rotate(360deg);
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        /* Responsive mejorado */
+        @media (max-width: 768px) {
+            .form-container {
+                border-radius: 16px;
+                margin: 1rem;
+            }
+            
+            .form-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .form-header .icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .btn-submit-container {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Micro-interacciones para los grupos de formulario */
+        .form-group {
+            position: relative;
+        }
+
+        .form-group::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--vaccine-primary), var(--vaccine-secondary));
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+
+        .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        /* Indicador de campo requerido mejorado */
+        .required-field::after {
+            content: '*';
+            color: var(--danger-color);
+            margin-left: 0.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Mejoras adicionales para limpieza visual */
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Asegurar que no hay elementos superpuestos problemáticos */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: var(--vaccine-primary);
+            font-weight: bold;
+        }
+
+        .breadcrumb-item a {
+            color: var(--vaccine-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--vaccine-secondary);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ESTILOS ADICIONALES PARA ELIMINAR CUALQUIER LÍNEA NEGRA */
+        input, textarea, select {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        input.form-control, 
+        textarea.form-control, 
+        select.form-control {
+            border: 2px solid var(--input-border) !important;
+            box-shadow: none !important;
+        }
+
+        /* Sobrescribir cualquier estilo de Bootstrap que cause problemas */
+        .form-control:focus {
+            border-color: var(--vaccine-primary) !important;
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1) !important;
+        }
+
+        /* Estilos específicos para el icono de vacuna */
+        .vaccine-icon {
+            background: linear-gradient(135deg, 
+                var(--vaccine-primary) 0%, 
+                var(--vaccine-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid slide-in">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'inventario:lista_vacunas' %}">
+                        <i class="fas fa-vial me-1"></i>Vacunas
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {% if form.instance.pk %}
+                        <i class="fas fa-edit me-1"></i>Editar Vacuna
+                    {% else %}
+                        <i class="fas fa-plus me-1"></i>Nueva Vacuna
+                    {% endif %}
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Form Container -->
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <h1 class="h5 card-title mb-0">
-                        {% if form.instance.pk %}
-                            <i class="fas fa-edit me-2"></i>Editar Vacuna
-                        {% else %}
-                            <i class="fas fa-plus me-2"></i>Nueva Vacuna
-                        {% endif %}
-                    </h1>
+            <div class="form-container hover-lift">
+                <!-- Form Header -->
+                <div class="form-header">
+                    <div class="form-header-content">
+                        <h2>
+                            <div class="icon">
+                                {% if form.instance.pk %}
+                                    <i class="fas fa-syringe vaccine-icon"></i>
+                                {% else %}
+                                    <i class="fas fa-vial vaccine-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if form.instance.pk %}
+                                Editar Vacuna
+                            {% else %}
+                                Registrar Nueva Vacuna
+                            {% endif %}
+                        </h2>
+                        <p>
+                            {% if form.instance.pk %}
+                                Actualiza la información de la vacuna: <strong>{{ form.instance.nombre }}</strong>
+                            {% else %}
+                                Complete el formulario para registrar una nueva vacuna en el inventario
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form method="post" novalidate>
+
+                <!-- Form Body -->
+                <div class="form-body">
+                    <form method="post" id="vacunaForm" novalidate>
                         {% csrf_token %}
                         
-                        <div class="mb-3">
-                            {{ form.nombre|as_crispy_field }}
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-vial"></i>
+                                Nombre de la Vacuna
+                            </label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
                         
-                        <div class="mb-3">
-                            {{ form.descripcion|as_crispy_field }}
+                        <div class="form-group">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                <i class="fas fa-file-medical-alt"></i>
+                                Descripción
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.descripcion.errors.0 }}
+                                </div>
+                            {% endif %}
                         </div>
                         
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{% url 'inventario:lista_vacunas' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Cancelar
+                        <!-- Submit Buttons -->
+                        <div class="btn-submit-container">
+                            <a href="{% url 'inventario:lista_vacunas' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancelar
                             </a>
-                            
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>
-                                {% if form.instance.pk %}Actualizar{% else %}Guardar{% endif %}
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-save"></i>
+                                {% if form.instance.pk %}
+                                    Actualizar Vacuna
+                                {% else %}
+                                    Guardar Vacuna
+                                {% endif %}
                             </button>
                         </div>
                     </form>
@@ -57,4 +688,167 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('vacunaForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formControls = form.querySelectorAll('.form-control');
+
+    // Add Bootstrap classes and placeholders to form fields
+    formControls.forEach(function(control) {
+        // Add placeholder text
+        const label = control.previousElementSibling;
+        if (label && label.classList.contains('form-label')) {
+            const labelText = label.textContent.trim().replace('*', '');
+            if (control.tagName.toLowerCase() === 'textarea') {
+                control.setAttribute('placeholder', 'Describa las características y propiedades de la vacuna...');
+            } else {
+                control.setAttribute('placeholder', 'Ingrese ' + labelText.toLowerCase());
+            }
+        }
+
+        // Add form-control class if not present
+        if (!control.classList.contains('form-control')) {
+            control.classList.add('form-control');
+        }
+
+        // Real-time validation
+        control.addEventListener('blur', function() {
+            validateField(this);
+        });
+
+        control.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+        });
+    });
+
+    // Form validation
+    function validateField(field) {
+        const value = field.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        // Remove existing validation classes
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        // Get or create error element
+        let errorElement = field.parentNode.querySelector('.invalid-feedback');
+        if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'invalid-feedback';
+            field.parentNode.appendChild(errorElement);
+        }
+
+        // Required field validation (nombre is required)
+        if (field.name === 'nombre') {
+            if (!value) {
+                isValid = false;
+                errorMessage = 'El nombre de la vacuna es obligatorio';
+            } else if (value.length < 2) {
+                isValid = false;
+                errorMessage = 'El nombre debe tener al menos 2 caracteres';
+            }
+        }
+
+        // Description validation
+        if (field.name === 'descripcion' && value && value.length < 10) {
+            isValid = false;
+            errorMessage = 'La descripción debe tener al menos 10 caracteres para ser útil';
+        }
+
+        // Apply validation styles
+        if (isValid) {
+            field.classList.add('is-valid');
+            errorElement.style.display = 'none';
+        } else {
+            field.classList.add('is-invalid');
+            errorElement.textContent = errorMessage;
+            errorElement.style.display = 'block';
+        }
+
+        return isValid;
+    }
+
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let isFormValid = true;
+        
+        // Validate all fields
+        formControls.forEach(function(field) {
+            if (!validateField(field)) {
+                isFormValid = false;
+            }
+        });
+
+        if (isFormValid) {
+            // Add loading state
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+            
+            // Submit form
+            setTimeout(() => {
+                form.submit();
+            }, 500);
+        } else {
+            // Focus on first invalid field
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+
+    // Auto-capitalize vaccine names
+    const nameField = form.querySelector('input[name="nombre"]');
+    if (nameField) {
+        nameField.addEventListener('input', function(e) {
+            const words = e.target.value.split(' ');
+            const capitalizedWords = words.map(word => {
+                if (word.length > 0) {
+                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                }
+                return word;
+            });
+            e.target.value = capitalizedWords.join(' ');
+        });
+    }
+
+    // Enhanced textarea for description
+    const descriptionField = form.querySelector('textarea[name="descripcion"]');
+    if (descriptionField) {
+        // Auto-resize textarea
+        descriptionField.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(120, this.scrollHeight) + 'px';
+        });
+
+        // Character counter (optional)
+        const charCounter = document.createElement('small');
+        charCounter.className = 'text-muted mt-1';
+        charCounter.style.display = 'block';
+        charCounter.style.textAlign = 'right';
+        descriptionField.parentNode.appendChild(charCounter);
+
+        descriptionField.addEventListener('input', function() {
+            const length = this.value.length;
+            charCounter.textContent = `${length} caracteres`;
+            
+            if (length > 500) {
+                charCounter.classList.add('text-warning');
+                charCounter.textContent = `${length} caracteres (muy largo)`;
+            } else {
+                charCounter.classList.remove('text-warning');
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

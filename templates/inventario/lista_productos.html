@@ -1,88 +1,622 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Productos | Sistema Veterinario{% endblock %}
+{% block title %}Gestión de Productos{% endblock %}
+
+{% block page_title %}Gestión de Productos{% endblock %}
+
+{% block extra_css %}
+<style>
+    .products-header {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .products-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(52, 152, 219, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .products-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .products-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .products-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--secondary-color), var(--info-color));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .products-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .products-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--secondary-color), var(--info-color));
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon.primary {
+        background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.2));
+        color: var(--secondary-color);
+    }
+
+    .stat-icon.success {
+        background: linear-gradient(45deg, rgba(39, 174, 96, 0.1), rgba(39, 174, 96, 0.2));
+        color: var(--success-color);
+    }
+
+    .stat-icon.info {
+        background: linear-gradient(45deg, rgba(93, 173, 226, 0.1), rgba(93, 173, 226, 0.2));
+        color: var(--info-color);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .filter-section {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .add-product-btn {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--info-color) 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    }
+
+    .add-product-btn:hover {
+        background: linear-gradient(135deg, var(--info-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid rgba(52, 152, 219, 0.2);
+        background: white;
+        color: var(--text-secondary);
+        border-radius: var(--border-radius-sm);
+        text-decoration: none;
+        transition: var(--transition);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--secondary-color);
+        color: var(--secondary-color);
+        background: rgba(52, 152, 219, 0.05);
+    }
+
+    .filter-btn.active {
+        background: linear-gradient(135deg, var(--secondary-color), var(--info-color));
+        color: white;
+        border-color: var(--secondary-color);
+    }
+
+    .products-table-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--info-color) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .products-table {
+        margin: 0;
+    }
+
+    .products-table thead th {
+        background: rgba(52, 152, 219, 0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border: none;
+        padding: 1rem 1.5rem;
+        position: relative;
+    }
+
+    .products-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--secondary-color), transparent);
+    }
+
+    .products-table tbody tr {
+        transition: var(--transition);
+        border: none;
+    }
+
+    .products-table tbody tr:hover {
+        background: rgba(52, 152, 219, 0.03);
+        transform: scale(1.01);
+    }
+
+    .products-table tbody td {
+        padding: 1.25rem 1.5rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .product-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--secondary-color), var(--info-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .product-details h6 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .type-badge.vermifugo {
+        background: rgba(39, 174, 96, 0.1);
+        color: var(--success-color);
+    }
+
+    .type-badge.antiparasitario {
+        background: rgba(93, 173, 226, 0.1);
+        color: var(--info-color);
+    }
+
+    .product-description {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        line-height: 1.4;
+        max-width: 300px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: var(--transition);
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .btn-action.view {
+        background: rgba(52, 152, 219, 0.1);
+        color: var(--secondary-color);
+    }
+
+    .btn-action.view:hover {
+        background: var(--secondary-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action.edit {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--warning-color);
+    }
+
+    .btn-action.edit:hover {
+        background: var(--warning-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action.delete {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+    }
+
+    .btn-action.delete:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: rgba(52, 152, 219, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .products-title {
+            font-size: 1.75rem;
+        }
+        
+        .products-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .filter-section {
+            padding: 1rem;
+        }
+        
+        .table-responsive {
+            border-radius: var(--border-radius);
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .table-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .filter-buttons {
+            flex-direction: column;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">
-            <i class="fas fa-box me-2"></i>Productos
-        </h1>
-        <a href="{% url 'inventario:crear_producto' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i>Nuevo Producto
-        </a>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 class="h5 mb-0">Lista de Productos</h2>
-                <div class="btn-group">
-                    <a href="{% url 'inventario:lista_productos' %}" class="btn btn-outline-primary {% if not request.GET.tipo %}active{% endif %}">Todos</a>
-                    <a href="{% url 'inventario:lista_productos' %}?tipo=V" class="btn btn-outline-primary {% if request.GET.tipo == 'V' %}active{% endif %}">Vermífugos</a>
-                    <a href="{% url 'inventario:lista_productos' %}?tipo=A" class="btn btn-outline-primary {% if request.GET.tipo == 'A' %}active{% endif %}">Antiparasitarios</a>
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="products-header">
+        <div class="products-header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h1 class="products-title">
+                        <i class="fas fa-box icon"></i>
+                        Gestión de Productos
+                    </h1>
+                    <p class="products-subtitle">
+                        Administra el inventario de productos veterinarios
+                    </p>
                 </div>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            {% if productos %}
-            <div class="table-responsive">
-                <table class="table table-hover table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Tipo</th>
-                            <th>Descripción</th>
-                            <th class="text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for producto in productos %}
-                        <tr>
-                            <td>{{ producto.nombre }}</td>
-                            <td><span class="badge {% if producto.tipo == 'V' %}bg-success{% else %}bg-info{% endif %}">{{ producto.get_tipo_display }}</span></td>
-                            <td>{{ producto.descripcion|truncatechars:50 }}</td>
-                            <td class="text-end">
-                                <div class="btn-group">
-                                    <a href="{% url 'inventario:detalle_producto' producto.id %}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'inventario:editar_producto' producto.id %}" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{% url 'inventario:eliminar_producto' producto.id %}" class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center p-4">
-                <div class="mb-3">
-                    <i class="fas fa-box fa-3x text-muted"></i>
-                </div>
-                <h3 class="h5 mb-3">No hay productos registrados</h3>
-                <p class="text-muted mb-3">
-                    {% if request.GET.tipo %}
-                        {% if request.GET.tipo == 'V' %}
-                            No se encontraron vermífugos en el sistema.
-                        {% elif request.GET.tipo == 'A' %}
-                            No se encontraron antiparasitarios en el sistema.
-                        {% endif %}
-                    {% else %}
-                        No se han registrado productos en el sistema.
-                    {% endif %}
-                </p>
-                <a href="{% url 'inventario:crear_producto' %}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Crear Primer Producto
+                <a href="{% url 'inventario:crear_producto' %}" class="add-product-btn hover-lift">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Producto
                 </a>
             </div>
-            {% endif %}
         </div>
     </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section slide-up">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>
+                Filtrar por Tipo
+            </h5>
+            <div class="filter-buttons">
+                <a href="{% url 'inventario:lista_productos' %}" 
+                   class="filter-btn {% if not request.GET.tipo %}active{% endif %}">
+                    <i class="fas fa-list me-1"></i>
+                    Todos
+                </a>
+                <a href="{% url 'inventario:lista_productos' %}?tipo=V" 
+                   class="filter-btn {% if request.GET.tipo == 'V' %}active{% endif %}">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Vermífugos
+                </a>
+                <a href="{% url 'inventario:lista_productos' %}?tipo=A" 
+                   class="filter-btn {% if request.GET.tipo == 'A' %}active{% endif %}">
+                    <i class="fas fa-bug me-1"></i>
+                    Antiparasitarios
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="products-table-container slide-up">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-list"></i>
+                Lista de Productos
+            </h3>
+            <div class="d-flex align-items-center gap-3">
+                <span class="table-count">Total: <strong>{{ productos.count }}</strong> productos</span>
+            </div>
+        </div>
+        
+        {% if productos %}
+        <div class="table-responsive">
+            <table class="table products-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr class="product-row">
+                        <td>
+                            <div class="product-info">
+                                <div class="product-icon">
+                                    <i class="fas fa-capsules"></i>
+                                </div>
+                                <div class="product-details">
+                                    <h6>{{ producto.nombre }}</h6>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="type-badge {% if producto.tipo == 'V' %}vermifugo{% else %}antiparasitario{% endif %}">
+                                {% if producto.tipo == 'V' %}
+                                    <i class="fas fa-shield-alt"></i>
+                                {% else %}
+                                    <i class="fas fa-bug"></i>
+                                {% endif %}
+                                {{ producto.get_tipo_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="product-description">
+                                {{ producto.descripcion|truncatechars:50 }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'inventario:detalle_producto' producto.id %}" 
+                                   class="btn-action view" 
+                                   title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'inventario:editar_producto' producto.id %}" 
+                                   class="btn-action edit" 
+                                   title="Editar producto">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'inventario:eliminar_producto' producto.id %}" 
+                                   class="btn-action delete" 
+                                   title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-box"></i>
+            </div>
+            <h3>No hay productos registrados</h3>
+            <p>
+                {% if request.GET.tipo %}
+                    {% if request.GET.tipo == 'V' %}
+                        No se encontraron vermífugos en el sistema.
+                    {% elif request.GET.tipo == 'A' %}
+                        No se encontraron antiparasitarios en el sistema.
+                    {% endif %}
+                {% else %}
+                    No se han registrado productos en el sistema.
+                {% endif %}
+            </p>
+            <a href="{% url 'inventario:crear_producto' %}" class="add-product-btn">
+                <i class="fas fa-plus"></i>
+                Crear Primer Producto
+            </a>
+        </div>
+        {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth animations to table rows
+    document.querySelectorAll('.product-row').forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+        row.classList.add('slide-up');
+    });
+    
+    // Add hover effects to filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('active')) {
+                this.style.transform = 'translateY(-2px)';
+            }
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('active')) {
+                this.style.transform = 'translateY(0)';
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

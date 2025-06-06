@@ -1,36 +1,1063 @@
 {% extends "base.html" %}
+{% load static %}
 {% load crispy_forms_tags %}
 
-{% block title %}{% if form.instance.id %}Editar{% else %}Nuevo{% endif %} Producto | Sistema Veterinario{% endblock %}
+{% block title %}
+{% if form.instance.id %}
+    Editar Producto: {{ form.instance.nombre }}
+{% else %}
+    Nuevo Producto
+{% endif %}
+{% endblock %}
+
+{% block page_title %}
+{% if form.instance.id %}
+    Editar Producto
+{% else %}
+    Nuevo Producto
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+        /* Root variables para consistencia */
+        :root {
+            --primary-color: #16a085;
+            --secondary-color: #3498db;
+            --primary-dark: #138d75;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #17a2b8;
+            --text-primary: #2c3e50;
+            --text-light: #ffffff;
+            --bg-white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+        }
+        
+        .form-container {
+            background: var(--bg-white);
+            border-radius: 24px;
+            box-shadow: 
+                0 32px 64px -12px rgba(22, 160, 133, 0.15),
+                0 16px 32px -8px rgba(52, 152, 219, 0.1),
+                0 8px 16px -4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(22, 160, 133, 0.1);
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.02) 0%, 
+                rgba(52, 152, 219, 0.02) 50%, 
+                rgba(155, 89, 182, 0.02) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, 
+                var(--primary-color) 0%, 
+                var(--secondary-color) 50%, 
+                var(--primary-dark) 100%);
+            color: var(--text-light);
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .form-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .form-header-content {
+            position: relative;
+            z-index: 3;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header .icon {
+            width: 70px;
+            height: 70px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-body {
+            padding: 3rem;
+            position: relative;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 2;
+        }
+
+        /* INPUTS COMPLETAMENTE REDISEÑADOS - SIN RECUADROS NEGROS */
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-label i {
+            color: var(--primary-color);
+            width: 18px;
+            font-size: 1.1rem;
+        }
+
+        /* NUEVO DISEÑO DE INPUT - LIMPIO Y MODERNO */
+        .form-control {
+            /* Resetear todos los estilos problemáticos */
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            background-color: var(--input-bg);
+            width: 100%;
+            outline: none;
+            transition: all 0.3s ease;
+            
+            /* Eliminar cualquier decoración no deseada */
+            box-shadow: none;
+            text-decoration: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        /* ELIMINAR PSEUDO-ELEMENTOS PROBLEMÁTICOS */
+        .form-control::before,
+        .form-control::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        /* Estados del input mejorados */
+        .form-control:hover {
+            border-color: rgba(22, 160, 133, 0.4);
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(22, 160, 133, 0.08);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+            box-shadow: 
+                0 0 0 3px rgba(22, 160, 133, 0.1),
+                0 4px 12px rgba(22, 160, 133, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        /* TEXTAREAS específicamente */
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* SELECT styling */
+        select.form-control {
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2316a085' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px 12px;
+            padding-right: 3rem;
+        }
+
+        /* Estados de validación limpios */
+        .form-control.is-valid {
+            border-color: var(--success-color);
+            background-color: rgba(39, 174, 96, 0.02);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+            background-color: rgba(231, 76, 60, 0.02);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Feedback de validación mejorado */
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, 
+                rgba(231, 76, 60, 0.08) 0%, 
+                rgba(231, 76, 60, 0.05) 100%);
+            border-radius: 12px;
+            border-left: 3px solid var(--danger-color);
+            backdrop-filter: blur(8px);
+        }
+
+        .invalid-feedback::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--danger-color);
+        }
+
+        /* Botones premium */
+        .btn-submit-container {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: flex-end;
+            align-items: center;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(22, 160, 133, 0.1);
+            margin-top: 2.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, 
+                var(--primary-color) 0%, 
+                var(--secondary-color) 50%, 
+                var(--primary-dark) 100%);
+            border: none;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 10px 15px -3px rgba(22, 160, 133, 0.3),
+                0 4px 6px -2px rgba(22, 160, 133, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 20px 25px -5px rgba(22, 160, 133, 0.4),
+                0 10px 10px -5px rgba(22, 160, 133, 0.2);
+            background: linear-gradient(135deg, 
+                var(--secondary-color) 0%, 
+                var(--primary-color) 50%, 
+                var(--primary-dark) 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(248, 250, 252, 0.95) 100%);
+            border: 2px solid rgba(22, 160, 133, 0.2);
+            color: var(--text-primary);
+            padding: 1rem 2.5rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(145deg, 
+                rgba(22, 160, 133, 0.08) 0%, 
+                rgba(255, 255, 255, 0.95) 100%);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 
+                0 10px 15px -3px rgba(22, 160, 133, 0.2),
+                0 4px 6px -2px rgba(22, 160, 133, 0.1);
+        }
+
+        /* Breadcrumb glassmorphism */
+        .breadcrumb-container {
+            background: linear-gradient(135deg, 
+                rgba(22, 160, 133, 0.1) 0%, 
+                rgba(52, 152, 219, 0.08) 100%);
+            backdrop-filter: blur(16px);
+            border-radius: 16px;
+            padding: 1.25rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(22, 160, 133, 0.15);
+            box-shadow: 
+                0 8px 32px rgba(22, 160, 133, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        }
+
+        /* Animaciones de entrada */
+        .slide-in {
+            animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Efectos de loading mejorados */
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spinGlow 1s linear infinite;
+        }
+
+        @keyframes spinGlow {
+            0% { 
+                transform: rotate(0deg);
+                box-shadow: 0 0 5px currentColor;
+            }
+            100% { 
+                transform: rotate(360deg);
+                box-shadow: 0 0 15px currentColor;
+            }
+        }
+
+        /* Responsive mejorado */
+        @media (max-width: 768px) {
+            .form-container {
+                border-radius: 16px;
+                margin: 1rem;
+            }
+            
+            .form-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-header h2 {
+                font-size: 1.5rem;
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .form-header .icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .btn-submit-container {
+                flex-direction: column-reverse;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Micro-interacciones para los grupos de formulario */
+        .form-group {
+            position: relative;
+        }
+
+        .form-group::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+            border-radius: 1px;
+        }
+
+        .form-group:focus-within::after {
+            width: 100%;
+        }
+
+        /* Indicador de campo requerido mejorado */
+        .required-field::after {
+            content: '*';
+            color: var(--danger-color);
+            margin-left: 0.5rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Mejoras adicionales para limpieza visual */
+        .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Asegurar que no hay elementos superpuestos problemáticos */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Breadcrumb styling */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "›";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary-dark);
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ESTILOS ADICIONALES PARA ELIMINAR CUALQUIER LÍNEA NEGRA */
+        input, textarea, select {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        input.form-control, 
+        textarea.form-control, 
+        select.form-control {
+            border: 2px solid var(--input-border) !important;
+            box-shadow: none !important;
+        }
+
+        /* Sobrescribir cualquier estilo de Bootstrap que cause problemas */
+        .form-control:focus {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.1) !important;
+        }
+
+        /* Campos de precio con estilo especial */
+        .price-field {
+            position: relative;
+        }
+
+        .price-field::before {
+            content: '$';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.1rem;
+            z-index: 10;
+        }
+
+        .price-field .form-control {
+            padding-left: 2.5rem;
+        }
+
+        /* Campo de stock con indicador visual */
+        .stock-field {
+            position: relative;
+        }
+
+        .stock-indicator {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .stock-low { background-color: var(--danger-color); }
+        .stock-medium { background-color: var(--warning-color); }
+        .stock-high { background-color: var(--success-color); }
+    </style>
+{% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'inventario:lista_productos' %}">Productos</a></li>
-            {% if form.instance.id %}
-            <li class="breadcrumb-item"><a href="{% url 'inventario:detalle_producto' form.instance.id %}">{{ form.instance.nombre }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Editar</li>
-            {% else %}
-            <li class="breadcrumb-item active" aria-current="page">Nuevo Producto</li>
-            {% endif %}
-        </ol>
-    </nav>
-
-    <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h1 class="h5 card-title mb-0">
-                <i class="fas {% if form.instance.id %}fa-edit{% else %}fa-plus{% endif %} me-2"></i>
+<div class="container-fluid slide-in">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'inventario:lista_productos' %}">
+                        <i class="fas fa-boxes me-1"></i>Productos
+                    </a>
+                </li>
                 {% if form.instance.id %}
-                    Editar Producto
+                <li class="breadcrumb-item">
+                    <a href="{% url 'inventario:detalle_producto' form.instance.id %}">
+                        <i class="fas fa-box me-1"></i>{{ form.instance.nombre }}
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-edit me-1"></i>Editar
+                </li>
                 {% else %}
-                    Nuevo Producto
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-plus me-1"></i>Nuevo Producto
+                </li>
                 {% endif %}
-            </h1>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container hover-lift">
+        <!-- Form Header -->
+        <div class="form-header">
+            <div class="form-header-content">
+                <h2>
+                    <div class="icon">
+                        {% if form.instance.id %}
+                            <i class="fas fa-box-open"></i>
+                        {% else %}
+                            <i class="fas fa-plus-square"></i>
+                        {% endif %}
+                    </div>
+                    {% if form.instance.id %}
+                        Editar Producto
+                    {% else %}
+                        Registrar Nuevo Producto
+                    {% endif %}
+                </h2>
+                <p>
+                    {% if form.instance.id %}
+                        Actualiza la información del producto: <strong>{{ form.instance.nombre }}</strong>
+                    {% else %}
+                        Complete el formulario para agregar un nuevo producto al inventario
+                    {% endif %}
+                </p>
+            </div>
         </div>
-        <div class="card-body">
-            {% crispy form %}
+
+        <!-- Form Body -->
+        <div class="form-body">
+            <form method="post" id="productoForm" novalidate>
+                {% csrf_token %}
+                
+                <!-- Nombre del Producto -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-tag"></i>
+                                Nombre del Producto
+                            </label>
+                            <input type="text" 
+                                   name="nombre" 
+                                   id="{{ form.nombre.id_for_label }}"
+                                   class="form-control{% if form.nombre.errors %} is-invalid{% endif %}" 
+                                   value="{{ form.nombre.value|default:'' }}"
+                                   placeholder="Ingrese el nombre del producto"
+                                   required>
+                            {% if form.nombre.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.nombre.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipo de Producto -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.tipo.id_for_label }}" class="form-label required-field">
+                                <i class="fas fa-layer-group"></i>
+                                Tipo de Producto
+                            </label>
+                            <select name="tipo" 
+                                    id="{{ form.tipo.id_for_label }}"
+                                    class="form-control{% if form.tipo.errors %} is-invalid{% endif %}" 
+                                    required>
+                                <option value="">Seleccione el tipo de producto...</option>
+                                {% for choice in form.tipo.field.choices %}
+                                    <option value="{{ choice.0 }}" 
+                                            {% if form.tipo.value == choice.0 %}selected{% endif %}>
+                                        {{ choice.1 }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.tipo.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.tipo.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Descripción -->
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left"></i>
+                                Descripción del Producto
+                            </label>
+                            <textarea name="descripcion" 
+                                      id="{{ form.descripcion.id_for_label }}"
+                                      class="form-control{% if form.descripcion.errors %} is-invalid{% endif %}" 
+                                      rows="3"
+                                      placeholder="Describa las características principales del producto...">{{ form.descripcion.value|default:'' }}</textarea>
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.descripcion.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="btn-submit-container">
+                    <a href="{% url 'inventario:lista_productos' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        {% if form.instance.id %}
+                            Actualizar Producto
+                        {% else %}
+                            Guardar Producto
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('productoForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formControls = form.querySelectorAll('.form-control');
+    const nombreField = form.querySelector('input[name="nombre"]');
+    const tipoField = form.querySelector('select[name="tipo"]');
+    const descripcionField = form.querySelector('textarea[name="descripcion"]');
+
+    // Configuración inicial de los campos
+    formControls.forEach(function(control) {
+        // Agregar clase form-control si no la tiene
+        if (!control.classList.contains('form-control')) {
+            control.classList.add('form-control');
+        }
+
+        // Validación en tiempo real
+        control.addEventListener('blur', function() {
+            validateField(this);
+        });
+
+        control.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                validateField(this);
+            }
+        });
+    });
+
+    // Función de validación de campos
+    function validateField(field) {
+        const value = field.value.trim();
+        let isValid = true;
+        let errorMessage = '';
+
+        // Remover clases de validación existentes
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        // Obtener o crear elemento de error
+        let errorElement = field.parentNode.querySelector('.invalid-feedback');
+        if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'invalid-feedback';
+            field.parentNode.appendChild(errorElement);
+        }
+
+        // Validación de campos requeridos
+        if (field.hasAttribute('required') || field.parentNode.querySelector('.required-field')) {
+            if (!value) {
+                isValid = false;
+                errorMessage = 'Este campo es obligatorio';
+            }
+        }
+
+        // Validaciones específicas por campo
+        if (field.name === 'nombre' && value) {
+            if (value.length < 2) {
+                isValid = false;
+                errorMessage = 'El nombre debe tener al menos 2 caracteres';
+            } else if (value.length > 200) {
+                isValid = false;
+                errorMessage = 'El nombre no puede exceder 200 caracteres';
+            }
+        }
+
+        if (field.name === 'tipo' && !value && field.hasAttribute('required')) {
+            isValid = false;
+            errorMessage = 'Debe seleccionar un tipo de producto';
+        }
+
+        if (field.name === 'descripcion' && value && value.length > 500) {
+            isValid = false;
+            errorMessage = 'La descripción no puede exceder 500 caracteres';
+        }
+
+        // Aplicar estilos de validación
+        if (isValid) {
+            field.classList.add('is-valid');
+            errorElement.style.display = 'none';
+        } else {
+            field.classList.add('is-invalid');
+            errorElement.textContent = errorMessage;
+            errorElement.style.display = 'block';
+        }
+
+        return isValid;
+    }
+
+    // Auto-capitalización del nombre del producto
+    if (nombreField) {
+        nombreField.addEventListener('input', function() {
+            let value = this.value;
+            // Capitalizar primera letra de cada palabra
+            value = value.replace(/\b\w/g, l => l.toUpperCase());
+            this.value = value;
+        });
+    }
+
+    // Contador de caracteres para descripción
+    if (descripcionField) {
+        const maxLength = 500;
+        
+        // Crear contador si no existe
+        let counter = descripcionField.parentNode.querySelector('.char-counter');
+        if (!counter) {
+            counter = document.createElement('small');
+            counter.className = 'char-counter text-muted mt-1';
+            counter.style.display = 'block';
+            descripcionField.parentNode.appendChild(counter);
+        }
+        
+        function updateCounter() {
+            const remaining = maxLength - descripcionField.value.length;
+            counter.textContent = `${descripcionField.value.length}/${maxLength} caracteres`;
+            
+            if (remaining < 50) {
+                counter.classList.add('text-warning');
+                counter.classList.remove('text-muted');
+            } else {
+                counter.classList.add('text-muted');
+                counter.classList.remove('text-warning');
+            }
+        }
+        
+        descripcionField.addEventListener('input', updateCounter);
+        updateCounter(); // Inicializar contador
+    }
+
+    // Envío del formulario
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let isFormValid = true;
+        
+        // Validar todos los campos
+        formControls.forEach(function(field) {
+            if (!validateField(field)) {
+                isFormValid = false;
+            }
+        });
+
+        if (isFormValid) {
+            // Estado de carga
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+            
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            
+            // Enviar formulario después de un breve retraso para UX
+            setTimeout(() => {
+                form.submit();
+            }, 800);
+        } else {
+            // Enfocar en el primer campo inválido
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            // Mostrar notificación de error
+            showNotification('Por favor corrige los errores en el formulario', 'error');
+        }
+    });
+
+    // Funcionalidad de borrador automático
+    let saveTimer;
+    function saveDraft() {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+            const formData = new FormData(form);
+            const draftData = {};
+            for (let [key, value] of formData.entries()) {
+                if (key !== 'csrfmiddlewaretoken') {
+                    draftData[key] = value;
+                }
+            }
+            
+            // Guardar en variables de JavaScript (sin localStorage)
+            window.productoDraft = draftData;
+        }, 2000);
+    }
+
+    // Restaurar borrador al cargar
+    if (window.productoDraft && !form.querySelector('input[name="id"]')?.value) {
+        Object.keys(window.productoDraft).forEach(key => {
+            const field = form.querySelector(`[name="${key}"]`);
+            if (field && !field.value) {
+                field.value = window.productoDraft[key];
+            }
+        });
+    }
+
+    // Guardar borrador en entrada
+    formControls.forEach(field => {
+        field.addEventListener('input', saveDraft);
+    });
+
+    // Limpiar borrador en envío exitoso
+    form.addEventListener('submit', function() {
+        window.productoDraft = null;
+    });
+
+    // Función auxiliar para notificaciones
+    function showNotification(message, type = 'info') {
+        // Integrar con tu sistema de notificaciones
+        console.log(`${type.toUpperCase()}: ${message}`);
+        
+        // Ejemplo simple de notificación visual
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '9999';
+        notification.style.minWidth = '300px';
+        
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remover después de 5 segundos
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Navegación mejorada con teclado
+    form.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+            const fields = Array.from(formControls).filter(field => 
+                field.type !== 'hidden' && !field.disabled
+            );
+            const currentIndex = fields.indexOf(e.target);
+            const nextField = fields[currentIndex + 1];
+            
+            if (nextField) {
+                nextField.focus();
+            } else if (e.target !== submitBtn) {
+                submitBtn.focus();
+            }
+        }
+    });
+
+    // Confirmación antes de salir con cambios sin guardar
+    let formChanged = false;
+    formControls.forEach(field => {
+        field.addEventListener('input', () => {
+            formChanged = true;
+        });
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged && !form.submitted) {
+            e.preventDefault();
+            e.returnValue = '¿Estás seguro de que quieres salir? Los cambios no guardados se perderán.';
+            return e.returnValue;
+        }
+    });
+
+    // Marcar formulario como enviado
+    form.addEventListener('submit', function() {
+        form.submitted = true;
+    });
+
+    // Validación inicial para campos con valores
+    formControls.forEach(field => {
+        if (field.value) {
+            validateField(field);
+        }
+    });
+});
+</script>
 {% endblock %}

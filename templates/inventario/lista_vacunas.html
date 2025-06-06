@@ -3,69 +3,621 @@
 
 {% block title %}Vacunas | Sistema Veterinario{% endblock %}
 
+{% block page_title %}Gestión de Vacunas{% endblock %}
+
+{% block extra_css %}
+<style>
+    .vaccines-header {
+        background: linear-gradient(135deg, rgba(155, 89, 182, 0.1) 0%, rgba(142, 68, 173, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(155, 89, 182, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .vaccines-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(155, 89, 182, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .vaccines-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .vaccines-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .vaccines-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .vaccines-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .vaccines-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #9b59b6, #8e44ad);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, rgba(155, 89, 182, 0.1), rgba(155, 89, 182, 0.2));
+        color: #9b59b6;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .search-filter-section {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: #f8f9fa;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #9b59b6;
+        box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1);
+        background: white;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .add-vaccine-btn {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+    }
+
+    .add-vaccine-btn:hover {
+        background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(155, 89, 182, 0.4);
+    }
+
+    .vaccines-table-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .table-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .table-count {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .filter-dropdown {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: var(--border-radius-sm);
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .filter-dropdown:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .vaccines-table {
+        margin: 0;
+    }
+
+    .vaccines-table thead th {
+        background: rgba(155, 89, 182, 0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border: none;
+        padding: 1rem 1.5rem;
+        position: relative;
+    }
+
+    .vaccines-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #9b59b6, transparent);
+    }
+
+    .vaccines-table tbody tr {
+        transition: var(--transition);
+        border: none;
+    }
+
+    .vaccines-table tbody tr:hover {
+        background: rgba(155, 89, 182, 0.03);
+        transform: scale(1.01);
+    }
+
+    .vaccines-table tbody td {
+        padding: 1.25rem 1.5rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+
+    .vaccine-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .vaccine-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .vaccine-details h6 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .vaccine-details h6 a {
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .vaccine-details h6 a:hover {
+        color: #9b59b6;
+    }
+
+    .vaccine-description {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .applications-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background: rgba(155, 89, 182, 0.1);
+        color: #9b59b6;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: var(--transition);
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .btn-action.view {
+        background: rgba(93, 173, 226, 0.1);
+        color: var(--info-color);
+    }
+
+    .btn-action.view:hover {
+        background: var(--info-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action.edit {
+        background: rgba(243, 156, 18, 0.1);
+        color: var(--warning-color);
+    }
+
+    .btn-action.edit:hover {
+        background: var(--warning-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action.delete {
+        background: rgba(231, 76, 60, 0.1);
+        color: var(--danger-color);
+    }
+
+    .btn-action.delete:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: rgba(155, 89, 182, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .vaccines-title {
+            font-size: 1.75rem;
+        }
+        
+        .vaccines-stats {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-filter-section {
+            padding: 1rem;
+        }
+        
+        .table-responsive {
+            border-radius: var(--border-radius);
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .table-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h2"><i class="fas fa-syringe me-2"></i>Vacunas</h1>
-        <a href="{% url 'inventario:crear_vacuna' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i>Nueva Vacuna
-        </a>
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="vaccines-header">
+        <div class="vaccines-header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h1 class="vaccines-title">
+                        <i class="fas fa-syringe icon"></i>
+                        Gestión de Vacunas
+                    </h1>
+                    <p class="vaccines-subtitle">
+                        Administra el inventario de vacunas del sistema
+                    </p>
+                </div>
+                <a href="{% url 'inventario:crear_vacuna' %}" class="add-vaccine-btn hover-lift">
+                    <i class="fas fa-plus"></i>
+                    Nueva Vacuna
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="card-title mb-0">Lista de Vacunas</h5>
-        </div>
-        <div class="card-body">
-            {% if vacunas %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th class="text-center">Aplicaciones</th>
-                                <th class="text-end">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for vacuna in vacunas %}
-                            <tr>
-                                <td>
-                                    <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}" class="text-decoration-none fw-medium">
-                                        {{ vacuna.nombre }}
-                                    </a>
-                                </td>
-                                <td>{{ vacuna.descripcion|truncatechars:100 }}</td>
-                                <td class="text-center">
-                                    {{ vacuna.vacunaaplicada_set.count }}
-                                </td>
-                                <td class="text-end">
-                                    <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}" class="btn btn-sm btn-outline-primary me-1" title="Ver detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{% url 'inventario:editar_vacuna' vacuna.id %}" class="btn btn-sm btn-outline-secondary me-1" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="{% url 'inventario:eliminar_vacuna' vacuna.id %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <!-- Search and Filters -->
+    <div class="search-filter-section slide-up">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" placeholder="Buscar vacunas por nombre o descripción..." id="searchInput">
                 </div>
-            {% else %}
-                <div class="text-center py-4">
-                    <i class="fas fa-syringe fa-3x text-muted mb-3"></i>
-                    <p class="lead">No hay vacunas registradas.</p>
-                    <a href="{% url 'inventario:crear_vacuna' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>Registrar primera vacuna
-                    </a>
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
+
+    <!-- Table Section -->
+    <div class="vaccines-table-container slide-up">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-list"></i>
+                Lista de Vacunas
+            </h3>
+            <div class="table-actions">
+                <span class="table-count">Total: <strong>{{ vacunas.count }}</strong> vacunas</span>
+            </div>
+        </div>
+        
+        {% if vacunas %}
+        <div class="table-responsive">
+            <table class="table vaccines-table">
+                <thead>
+                    <tr>
+                        <th>Vacuna</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Aplicaciones</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="vaccinesTableBody">
+                    {% for vacuna in vacunas %}
+                    <tr class="vaccine-row" data-vaccine-name="{{ vacuna.nombre|lower }}" data-vaccine-description="{{ vacuna.descripcion|lower }}">
+                        <td>
+                            <div class="vaccine-info">
+                                <div class="vaccine-icon">
+                                    <i class="fas fa-syringe"></i>
+                                </div>
+                                <div class="vaccine-details">
+                                    <h6>
+                                        <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}">
+                                            {{ vacuna.nombre }}
+                                        </a>
+                                    </h6>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <p class="vaccine-description">{{ vacuna.descripcion|truncatechars:100 }}</p>
+                        </td>
+                        <td class="text-center">
+                            <div class="applications-badge">
+                                <i class="fas fa-chart-bar"></i>
+                                {{ vacuna.vacunaaplicada_set.count }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}" 
+                                   class="btn-action view" 
+                                   title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'inventario:editar_vacuna' vacuna.id %}" 
+                                   class="btn-action edit" 
+                                   title="Editar vacuna">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'inventario:eliminar_vacuna' vacuna.id %}" 
+                                   class="btn-action delete" 
+                                   title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-syringe"></i>
+            </div>
+            <h3>No hay vacunas registradas</h3>
+            <p>Comienza agregando tu primera vacuna al sistema</p>
+            <a href="{% url 'inventario:crear_vacuna' %}" class="add-vaccine-btn">
+                <i class="fas fa-plus"></i>
+                Registrar primera vacuna
+            </a>
+        </div>
+        {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const vaccineRows = document.querySelectorAll('.vaccine-row');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        vaccineRows.forEach(row => {
+            const vaccineName = row.dataset.vaccineName;
+            const vaccineDescription = row.dataset.vaccineDescription;
+            
+            const isVisible = vaccineName.includes(searchTerm) || 
+                            vaccineDescription.includes(searchTerm);
+            
+            if (isVisible) {
+                row.style.display = '';
+                row.style.animation = 'fadeIn 0.3s ease-in';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        updateResultsCount();
+    });
+    
+    function updateResultsCount() {
+        const visibleRows = document.querySelectorAll('.vaccine-row[style=""], .vaccine-row:not([style])');
+        const totalCount = document.querySelector('.table-count strong');
+        if (totalCount) {
+            totalCount.textContent = visibleRows.length;
+        }
+    }
+});
+
+// Add smooth animations to table rows
+document.querySelectorAll('.vaccine-row').forEach((row, index) => {
+    row.style.animationDelay = `${index * 0.05}s`;
+    row.classList.add('slide-up');
+});
+</script>
 {% endblock %}

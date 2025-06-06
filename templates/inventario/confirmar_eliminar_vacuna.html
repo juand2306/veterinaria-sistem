@@ -3,51 +3,560 @@
 
 {% block title %}Eliminar Vacuna | Sistema Veterinario{% endblock %}
 
+{% block page_title %}Eliminar Vacuna{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirm-delete-header {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(192, 57, 43, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(231, 76, 60, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .confirm-delete-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(231, 76, 60, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .confirm-delete-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .confirm-delete-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--danger-color);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .confirm-delete-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--danger-color), #c0392b);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .confirm-delete-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .breadcrumb-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb {
+        margin-bottom: 0;
+        background: none;
+        padding: 0;
+    }
+
+    .breadcrumb-item {
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--danger-color);
+        font-weight: 600;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "/";
+        color: var(--text-secondary);
+        font-weight: 400;
+    }
+
+    .confirmation-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-lg);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .confirmation-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--danger-color), #c0392b);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+    }
+
+    .card-header h5 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-header .icon {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .warning-content {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .warning-icon {
+        font-size: 4rem;
+        color: var(--danger-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.8;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    .warning-message {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .vaccine-name {
+        color: var(--danger-color);
+        font-weight: 700;
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(231, 76, 60, 0.05));
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        display: inline-block;
+    }
+
+    .danger-warning {
+        background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(231, 76, 60, 0.05) 100%);
+        border: 1px solid rgba(231, 76, 60, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .danger-warning::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--danger-color);
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    .danger-warning .warning-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--danger-color);
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+    }
+
+    .danger-warning .warning-text {
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .warning-alert {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+        border: 1px solid rgba(255, 193, 7, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .warning-alert::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: #ffc107;
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    .warning-alert .alert-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: #b8860b;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+    }
+
+    .warning-alert .alert-text {
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-cancel {
+        background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        min-width: 140px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+    }
+
+    .btn-cancel:hover {
+        background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(149, 165, 166, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, var(--danger-color) 0%, #c0392b 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 180px;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-delete::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-delete:hover::before {
+        left: 100%;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #c0392b 0%, var(--danger-color) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+    }
+
+    .vaccine-info-box {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0.02) 100%);
+        border: 1px solid rgba(52, 152, 219, 0.1);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .vaccine-info-box::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--secondary-color);
+        border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    .vaccine-info-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .vaccine-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 0.75rem;
+    }
+
+    .vaccine-detail-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(52, 152, 219, 0.2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--secondary-color);
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .vaccine-detail-content {
+        flex: 1;
+    }
+
+    .vaccine-detail-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .vaccine-detail-value {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .confirm-delete-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-cancel,
+        .btn-delete {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .breadcrumb-container {
+            padding: 0.75rem 1rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'inventario:lista_vacunas' %}">Vacunas</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'inventario:detalle_vacuna' vacuna.id %}">{{ vacuna.nombre }}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Eliminar</li>
-        </ol>
-    </nav>
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="confirm-delete-header">
+        <div class="confirm-delete-header-content">
+            <h1 class="confirm-delete-title">
+                <i class="fas fa-exclamation-triangle icon"></i>
+                Confirmar Eliminación
+            </h1>
+            <p class="confirm-delete-subtitle">
+                Confirma la eliminación de la vacuna del inventario
+            </p>
+        </div>
+    </div>
 
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-danger">
-                <div class="card-header bg-danger text-white py-3">
-                    <h1 class="h5 card-title mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmar eliminación
-                    </h1>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container slide-up">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'inventario:lista_vacunas' %}">
+                        <i class="fas fa-syringe me-1"></i>Vacunas
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}">{{ vacuna.nombre }}</a>
+                </li>
+                <li class="breadcrumb-item active">Eliminar</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Confirmation Card -->
+    <div class="confirmation-card slide-up">
+        <div class="card-header">
+            <h5>
+                <i class="fas fa-trash-alt icon"></i>
+                Confirmar Eliminación de Vacuna
+            </h5>
+        </div>
+        <div class="card-body">
+            <!-- Warning Content -->
+            <div class="warning-content">
+                <div class="warning-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        {% if vacuna.vacunaaplicada_set.count > 0 %}
-                            <strong>Advertencia:</strong> Esta vacuna tiene registros de aplicación asociados. Si la elimina, 
-                            no se perderán los registros históricos, pero no podrá usar esta vacuna en nuevas aplicaciones.
-                        {% else %}
-                            <strong>Advertencia:</strong> Esta acción no se puede deshacer.
-                        {% endif %}
-                    </div>
+                <p class="warning-message">
+                    ¿Está seguro que desea eliminar la vacuna 
+                    <span class="vaccine-name">{{ vacuna.nombre }}</span>?
+                </p>
+            </div>
 
-                    <p class="mb-4">¿Está seguro que desea eliminar la vacuna <strong>{{ vacuna.nombre }}</strong>?</p>
-                    
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i>Cancelar
-                            </a>
-                            
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i>Eliminar Vacuna
-                            </button>
-                        </div>
-                    </form>
+            <!-- Vaccine Information -->
+            <div class="vaccine-info-box">
+                <div class="vaccine-info-title">
+                    <i class="fas fa-syringe"></i>
+                    Información de la Vacuna
+                </div>
+                <div class="vaccine-detail-item">
+                    <div class="vaccine-detail-icon">
+                        <i class="fas fa-syringe"></i>
+                    </div>
+                    <div class="vaccine-detail-content">
+                        <div class="vaccine-detail-label">Nombre de la Vacuna</div>
+                        <div class="vaccine-detail-value">{{ vacuna.nombre }}</div>
+                    </div>
                 </div>
             </div>
+
+            <!-- Dynamic Warning Alert -->
+            {% if vacuna.vacunaaplicada_set.count > 0 %}
+            <div class="warning-alert">
+                <div class="alert-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Advertencia
+                </div>
+                <p class="alert-text">
+                    <strong>Esta vacuna tiene registros de aplicación asociados.</strong> Si la elimina, 
+                    no se perderán los registros históricos, pero no podrá usar esta vacuna en nuevas aplicaciones.
+                </p>
+            </div>
+            {% else %}
+            <div class="danger-warning">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    ¡Advertencia Importante!
+                </div>
+                <p class="warning-text">
+                    Esta acción no se puede deshacer. Al eliminar esta vacuna se removerá permanentemente del inventario.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <form method="post">
+                {% csrf_token %}
+                <div class="action-buttons">
+                    <a href="{% url 'inventario:detalle_vacuna' vacuna.id %}" class="btn-cancel hover-lift">
+                        <i class="fas fa-arrow-left"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn-delete hover-lift">
+                        <i class="fas fa-trash"></i>
+                        Eliminar Vacuna
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
