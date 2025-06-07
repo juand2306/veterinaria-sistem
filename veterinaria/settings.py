@@ -183,3 +183,17 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Para que se ejecute automáticamente en Render
+if os.environ.get('RENDER'):
+    from django.core.management import execute_from_command_line
+    import sys
+    
+    def setup_demo_data():
+        try:
+            execute_from_command_line(['manage.py', 'setup_demo'])
+        except:
+            pass
+    
+    # Ejecutar después de migrate
+    setup_demo_data()
