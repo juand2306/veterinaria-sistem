@@ -2,173 +2,529 @@
 {% load static %}
 
 {% block title %}Mi Perfil - Sistema Veterinario{% endblock %}
+{% block page_title %}Mi Perfil{% endblock %}
 
 {% block extra_css %}
 <style>
+    /* Profile Specific Styles */
     .perfil-container {
         min-height: 70vh;
+        padding: 2rem 0;
     }
+
     .perfil-card {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-lg);
         border: none;
-        border-radius: 15px;
+        overflow: hidden;
+        transition: var(--transition);
     }
+
+    .perfil-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
     .perfil-header {
-        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         color: white;
-        border-radius: 15px 15px 0 0;
-    }
-    .avatar-section {
+        padding: 2rem;
+        text-align: center;
         position: relative;
-        margin-bottom: 2rem;
+        overflow: hidden;
     }
+
+    .perfil-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .perfil-header h3 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .perfil-header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+        margin: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .avatar-section {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
     .avatar-circle {
-        width: 120px;
-        height: 120px;
+        width: 140px;
+        height: 140px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        background: linear-gradient(135deg, var(--accent-color), #e67e22);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 3rem;
+        font-size: 4rem;
         color: white;
         margin: 0 auto;
-        border: 4px solid white;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 6px solid white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
     }
-    .info-section {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border-left: 4px solid #6f42c1;
+
+    .avatar-circle::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
     }
-    .section-title {
-        color: #495057;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
+
+    .avatar-circle:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
     }
-    .section-icon {
-        width: 35px;
-        height: 35px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #6f42c1, #e83e8c);
-        color: white;
+
+    .avatar-circle:hover::before {
+        transform: translateX(100%);
+    }
+
+    .user-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 1rem 0 0.5rem;
+    }
+
+    .user-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 0.75rem;
+        gap: 0.5rem;
+        margin-bottom: 2rem;
     }
+
+    .info-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--primary-color);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .info-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+        opacity: 0.05;
+        transition: var(--transition);
+    }
+
+    .info-section.personal::before {
+        background: var(--primary-color);
+    }
+
+    .info-section.professional::before {
+        background: var(--success-color);
+    }
+
+    .info-section.account::before {
+        background: var(--info-color);
+    }
+
+    .info-section:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        border-left-color: var(--accent-color);
+    }
+
+    .info-section:hover::before {
+        transform: translate(20px, -20px) scale(1.2);
+        opacity: 0.1;
+    }
+
+    .section-title {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .section-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: var(--border-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.25rem;
+        color: white;
+        transition: var(--transition);
+    }
+
+    .info-section.personal .section-icon {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .info-section.professional .section-icon {
+        background: linear-gradient(135deg, var(--success-color), #2ecc71);
+    }
+
+    .info-section.account .section-icon {
+        background: linear-gradient(135deg, var(--info-color), var(--secondary-color));
+    }
+
+    .section-title:hover .section-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+
     .info-item {
         display: flex;
         align-items: center;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition);
+        position: relative;
+        z-index: 1;
     }
+
     .info-item:last-child {
         border-bottom: none;
     }
+
+    .info-item:hover {
+        background: rgba(255, 255, 255, 0.8);
+        margin: 0 -1rem;
+        padding: 1rem;
+        border-radius: var(--border-radius-sm);
+        transform: scale(1.02);
+    }
+
     .info-label {
         font-weight: 600;
-        color: #495057;
-        width: 150px;
+        color: var(--text-primary);
+        width: 180px;
         flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
     }
+
+    .info-label i {
+        color: var(--primary-color);
+        margin-right: 0.5rem;
+        width: 16px;
+        text-align: center;
+    }
+
     .info-value {
-        color: #6c757d;
+        color: var(--text-secondary);
         flex-grow: 1;
+        font-size: 0.95rem;
+        font-weight: 500;
     }
+
     .info-value.empty {
         color: #adb5bd;
         font-style: italic;
     }
+
+    .status-badge {
+        background: linear-gradient(135deg, var(--success-color), #2ecc71);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 10px rgba(39, 174, 96, 0.3);
+    }
+
     .action-buttons {
         text-align: center;
         margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
     }
-    .btn-config {
-        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+
+    .btn-modern {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
         border: none;
         border-radius: 25px;
-        padding: 12px 30px;
+        padding: 1rem 2rem;
         font-weight: 600;
         color: white;
-        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        box-shadow: 0 4px 15px rgba(22, 160, 133, 0.3);
+        position: relative;
+        overflow: hidden;
     }
-    .btn-config:hover {
-        background: linear-gradient(135deg, #e83e8c, #fd7e14);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    .btn-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(22, 160, 133, 0.4);
         color: white;
+        text-decoration: none;
     }
+
+    .btn-modern:hover::before {
+        left: 100%;
+    }
+
     .btn-password {
-        background: linear-gradient(135deg, #28a745, #20c997);
-        border: none;
-        border-radius: 25px;
-        padding: 12px 30px;
-        font-weight: 600;
-        color: white;
-        transition: all 0.3s ease;
+        background: linear-gradient(135deg, var(--success-color), #2ecc71);
+        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
     }
+
     .btn-password:hover {
-        background: linear-gradient(135deg, #20c997, #17a2b8);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        color: white;
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
     }
-    .stats-card {
-        background: white;
-        border-radius: 12px;
+
+    /* Stats Section */
+    .stats-mini {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .stat-mini-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
         padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border-left: 4px solid #6f42c1;
+        text-align: center;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
     }
-    .stat-value {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #6f42c1;
+
+    .stat-mini-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
     }
-    .stat-label {
-        color: #6c757d;
+
+    .stat-mini-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .stat-mini-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .stat-mini-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-mini-label {
+        color: var(--text-secondary);
         font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .perfil-container {
+            padding: 1rem 0;
+        }
+
+        .perfil-header {
+            padding: 1.5rem;
+        }
+
+        .perfil-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .avatar-circle {
+            width: 120px;
+            height: 120px;
+            font-size: 3rem;
+        }
+
+        .user-title {
+            font-size: 1.5rem;
+        }
+
+        .info-section {
+            padding: 1.5rem;
+        }
+
+        .info-label {
+            width: 140px;
+            font-size: 0.875rem;
+        }
+
+        .info-value {
+            font-size: 0.875rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn-modern {
+            padding: 0.875rem 1.5rem;
+        }
+
+        .stats-mini {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+    }
+
+    /* Animation classes */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
+    }
+
+    .animate-on-scroll.animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .slide-in-left {
+        opacity: 0;
+        transform: translateX(-30px);
+        transition: all 0.6s ease-out;
+    }
+
+    .slide-in-left.animate {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .slide-in-right {
+        opacity: 0;
+        transform: translateX(30px);
+        transition: all 0.6s ease-out;
+    }
+
+    .slide-in-right.animate {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .fade-in-up {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.7s ease-out;
+    }
+
+    .fade-in-up.animate {
+        opacity: 1;
+        transform: translateY(0);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container perfil-container mt-4">
+<div class="container perfil-container fade-in">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card perfil-card">
-                <div class="card-header perfil-header text-center py-4">
-                    <h3 class="mb-0">
-                        <i class="fas fa-user-circle me-2"></i>Mi Perfil
+        <div class="col-lg-10 col-xl-8">
+            <div class="perfil-card animate-on-scroll">
+                <!-- Header -->
+                <div class="perfil-header">
+                    <h3>
+                        <i class="fas fa-user-circle me-2"></i>Mi Perfil Profesional
                     </h3>
-                    <p class="mb-0">Información de tu cuenta personal</p>
+                    <p>Información completa de tu cuenta en el sistema veterinario</p>
                 </div>
+
                 <div class="card-body p-4">
-                    <!-- Avatar y nombre principal -->
-                    <div class="avatar-section text-center">
+                    <!-- Avatar y información principal -->
+                    <div class="avatar-section slide-in-left">
                         <div class="avatar-circle">
                             <i class="fas fa-user-md"></i>
                         </div>
-                        <h4 class="mt-3 mb-1">
+                        <h4 class="user-title">
                             {% if user.first_name and user.last_name %}
                                 {{ user.first_name }} {{ user.last_name }}
                             {% else %}
                                 {{ user.username }}
                             {% endif %}
                         </h4>
-                        <p class="text-muted mb-0">
-                            <i class="fas fa-stethoscope me-1"></i>
-                            {{ perfil.cargo|default:"Veterinario" }}
+                        <p class="user-subtitle">
+                            <i class="fas fa-stethoscope"></i>
+                            {{ perfil.cargo|default:"Veterinario Profesional" }}
                         </p>
                     </div>
                     
                     <!-- Información personal -->
-                    <div class="info-section">
+                    <div class="info-section personal slide-in-right">
                         <h5 class="section-title">
                             <div class="section-icon">
                                 <i class="fas fa-user"></i>
@@ -178,14 +534,14 @@
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-user-circle me-2"></i>Usuario:
+                                <i class="fas fa-user-circle"></i>Usuario:
                             </span>
                             <span class="info-value">{{ user.username }}</span>
                         </div>
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-signature me-2"></i>Nombre:
+                                <i class="fas fa-signature"></i>Nombre:
                             </span>
                             <span class="info-value {% if not user.first_name %}empty{% endif %}">
                                 {{ user.first_name|default:"No especificado" }}
@@ -194,7 +550,7 @@
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-signature me-2"></i>Apellido:
+                                <i class="fas fa-signature"></i>Apellido:
                             </span>
                             <span class="info-value {% if not user.last_name %}empty{% endif %}">
                                 {{ user.last_name|default:"No especificado" }}
@@ -203,7 +559,7 @@
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-envelope me-2"></i>Email:
+                                <i class="fas fa-envelope"></i>Email:
                             </span>
                             <span class="info-value {% if not user.email %}empty{% endif %}">
                                 {{ user.email|default:"No especificado" }}
@@ -212,7 +568,7 @@
                     </div>
                     
                     <!-- Información profesional -->
-                    <div class="info-section">
+                    <div class="info-section professional slide-in-left">
                         <h5 class="section-title">
                             <div class="section-icon">
                                 <i class="fas fa-briefcase"></i>
@@ -222,7 +578,7 @@
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-user-tie me-2"></i>Cargo:
+                                <i class="fas fa-user-tie"></i>Cargo:
                             </span>
                             <span class="info-value {% if not perfil.cargo %}empty{% endif %}">
                                 {{ perfil.cargo|default:"No especificado" }}
@@ -231,7 +587,7 @@
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-phone me-2"></i>Teléfono:
+                                <i class="fas fa-phone"></i>Teléfono:
                             </span>
                             <span class="info-value {% if not perfil.telefono %}empty{% endif %}">
                                 {{ perfil.telefono|default:"No especificado" }}
@@ -240,7 +596,7 @@
                     </div>
                     
                     <!-- Información de la cuenta -->
-                    <div class="info-section">
+                    <div class="info-section account slide-in-right">
                         <h5 class="section-title">
                             <div class="section-icon">
                                 <i class="fas fa-info-circle"></i>
@@ -250,43 +606,43 @@
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-calendar-plus me-2"></i>Miembro desde:
+                                <i class="fas fa-calendar-plus"></i>Miembro desde:
                             </span>
                             <span class="info-value">{{ user.date_joined|date:"d/m/Y H:i" }}</span>
                         </div>
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-clock me-2"></i>Último acceso:
+                                <i class="fas fa-clock"></i>Último acceso:
                             </span>
                             <span class="info-value">
                                 {% if user.last_login %}
                                     {{ user.last_login|date:"d/m/Y H:i" }}
                                 {% else %}
-                                    Nunca
+                                    <span class="empty">Nunca</span>
                                 {% endif %}
                             </span>
                         </div>
                         
                         <div class="info-item">
                             <span class="info-label">
-                                <i class="fas fa-check-circle me-2"></i>Estado:
+                                <i class="fas fa-check-circle"></i>Estado:
                             </span>
                             <span class="info-value">
-                                <span class="badge bg-success">
-                                    <i class="fas fa-check me-1"></i>Activo
+                                <span class="status-badge">
+                                    <i class="fas fa-check"></i>Cuenta Activa
                                 </span>
                             </span>
                         </div>
                     </div>
                     
                     <!-- Botones de acción -->
-                    <div class="action-buttons">
-                        <a href="{% url 'usuarios:configurar_cuenta' %}" class="btn btn-config me-3">
-                            <i class="fas fa-cog me-2"></i>Configurar Cuenta
+                    <div class="action-buttons fade-in-up">
+                        <a href="{% url 'usuarios:configurar_cuenta' %}" class="btn-modern">
+                            <i class="fas fa-cog"></i>Configurar Cuenta
                         </a>
-                        <a href="{% url 'usuarios:cambiar_password' %}" class="btn btn-password">
-                            <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                        <a href="{% url 'usuarios:cambiar_password' %}" class="btn-modern btn-password">
+                            <i class="fas fa-key"></i>Cambiar Contraseña
                         </a>
                     </div>
                 </div>
@@ -298,43 +654,151 @@
 
 {% block extra_js %}
 <script>
-$(document).ready(function() {
-    // Animación al cargar
-    $('.perfil-card').hide().fadeIn(800);
-    
-    // Efectos hover en las tarjetas de estadísticas
-    $('.stats-card').hover(
-        function() {
-            $(this).css('transform', 'translateY(-5px)');
-            $(this).css('box-shadow', '0 8px 16px rgba(0,0,0,0.1)');
-        },
-        function() {
-            $(this).css('transform', 'translateY(0)');
-            $(this).css('box-shadow', '0 2px 4px rgba(0,0,0,0.1)');
-        }
-    );
-    
-    // Efectos hover en secciones de información
-    $('.info-section').hover(
-        function() {
-            $(this).css('transform', 'translateY(-2px)');
-            $(this).css('box-shadow', '0 4px 8px rgba(0,0,0,0.1)');
-        },
-        function() {
-            $(this).css('transform', 'translateY(0)');
-            $(this).css('box-shadow', 'none');
-        }
-    );
-    
-    // Efectos en el avatar
-    $('.avatar-circle').hover(
-        function() {
-            $(this).css('transform', 'scale(1.05)');
-        },
-        function() {
-            $(this).css('transform', 'scale(1)');
-        }
-    );
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate elements on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all elements with animation classes
+    document.querySelectorAll('.animate-on-scroll, .slide-in-left, .slide-in-right, .fade-in-up').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Add staggered animation to info items
+    const infoItems = document.querySelectorAll('.info-item');
+    infoItems.forEach((item, index) => {
+        item.style.animationDelay = `${index * 0.1}s`;
+        item.classList.add('fade-in-item');
+    });
+
+    // Add hover sound effect simulation with visual feedback
+    document.querySelectorAll('.info-item').forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.background = 'linear-gradient(135deg, rgba(22, 160, 133, 0.05), rgba(243, 156, 18, 0.05))';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.background = '';
+        });
+    });
+
+    // Add click ripple effect to buttons
+    document.querySelectorAll('.btn-modern').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('div');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.4)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Avatar hover effects
+    const avatar = document.querySelector('.avatar-circle');
+    if (avatar) {
+        let hoverTimeout;
+        
+        avatar.addEventListener('mouseenter', function() {
+            clearTimeout(hoverTimeout);
+            this.style.transform = 'scale(1.05) rotate(5deg)';
+        });
+        
+        avatar.addEventListener('mouseleave', function() {
+            hoverTimeout = setTimeout(() => {
+                this.style.transform = 'scale(1) rotate(0deg)';
+            }, 100);
+        });
+    }
+
+    // Stats animation on scroll
+    const statsObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statValue = entry.target.querySelector('.stat-mini-value');
+                if (statValue && !statValue.classList.contains('animated')) {
+                    statValue.classList.add('animated');
+                    statValue.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        statValue.style.transform = 'scale(1)';
+                    }, 300);
+                }
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-mini-card').forEach(card => {
+        statsObserver.observe(card);
+    });
+
+    // Add typing effect to user name
+    const userName = document.querySelector('.user-title');
+    if (userName) {
+        const originalText = userName.textContent;
+        userName.textContent = '';
+        let i = 0;
+        
+        const typeWriter = () => {
+            if (i < originalText.length) {
+                userName.textContent += originalText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            }
+        };
+        
+        setTimeout(typeWriter, 1000);
+    }
 });
+
+// Add ripple keyframes
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+    
+    .fade-in-item {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

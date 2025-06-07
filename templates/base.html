@@ -426,11 +426,8 @@
             <div class="sidebar-header">
                 <a href="{% url 'index' %}" class="logo">
                     <i class="fas fa-paw"></i>
-                    <span class="nav-text">VetSystem</span>
+                    <span class="nav-text">VetNova</span>
                 </a>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
             
             {% if user.is_authenticated %}
@@ -546,11 +543,6 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="header-right">
-                    <a href="{% url 'usuarios:login' %}" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                    </a>
-                </div>
                 {% endif %}
             </div>
 
@@ -572,7 +564,7 @@
             <!-- Footer -->
             <footer class="footer">
                 <div class="container-fluid">
-                    <span>© {% now "Y" %} Sistema Veterinario VetSystem. Todos los derechos reservados.</span>
+                    <span>© {% now "Y" %} Sistema Veterinario VetNova. Todos los derechos reservados.</span>
                 </div>
             </footer>
         </div>
@@ -587,33 +579,6 @@
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
             const sidebarToggle = document.getElementById('sidebarToggle');
-            
-            // Sidebar toggle functionality
-            sidebarToggle.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('expanded');
-                
-                // Store preference
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            });
-            
-            // Restore sidebar state
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (isCollapsed) {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('expanded');
-            }
-            
-            // Mobile sidebar toggle
-            function handleResize() {
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('collapsed');
-                    mainContent.classList.remove('expanded');
-                }
-            }
-            
-            window.addEventListener('resize', handleResize);
-            handleResize();
             
             // Add smooth scroll behavior
             document.documentElement.style.scrollBehavior = 'smooth';

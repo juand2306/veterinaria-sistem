@@ -2,115 +2,491 @@
 {% load static %}
 
 {% block title %}Configurar Cuenta - Sistema Veterinario{% endblock %}
+{% block page_title %}Configurar Cuenta{% endblock %}
 
 {% block extra_css %}
 <style>
+    /* Configurar Cuenta Specific Styles */
     .config-container {
-        min-height: 70vh;
+        min-height: 80vh;
+        padding: 2rem 0;
     }
+
     .config-card {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow-lg);
         border: none;
-        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+        transition: var(--transition);
     }
+
+    .config-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
     .config-header {
-        background: linear-gradient(135deg, #fd7e14, #e83e8c);
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
         color: white;
-        border-radius: 15px 15px 0 0;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
     }
-    .form-control:focus {
-        border-color: #fd7e14;
-        box-shadow: 0 0 0 0.2rem rgba(253, 126, 20, 0.25);
+
+    .config-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
     }
-    .btn-save {
-        background: linear-gradient(135deg, #fd7e14, #e83e8c);
-        border: none;
-        border-radius: 25px;
-        padding: 12px 30px;
-        font-weight: 600;
-        transition: all 0.3s ease;
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(1deg); }
     }
-    .btn-save:hover {
-        background: linear-gradient(135deg, #e83e8c, #6f42c1);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+    .config-header h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 1;
     }
+
+    .config-header p {
+        opacity: 0.9;
+        margin: 0;
+        font-size: 1.1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .config-body {
+        padding: 2rem;
+    }
+
     .form-section {
-        background: #f8f9fa;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        border-left: 4px solid #fd7e14;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--accent-color);
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: var(--box-shadow);
     }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        transform: translate(30px, -30px);
+        opacity: 0.05;
+        transition: var(--transition);
+    }
+
+    .form-section:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow-lg);
+    }
+
+    .form-section:hover::before {
+        transform: translate(20px, -20px) scale(1.2);
+        opacity: 0.1;
+    }
+
+    .form-section:nth-child(1)::before {
+        background: var(--primary-color);
+    }
+
+    .form-section:nth-child(2)::before {
+        background: var(--accent-color);
+    }
+
+    .form-section:nth-child(3)::before {
+        background: var(--info-color);
+    }
+
     .section-title {
-        color: #495057;
-        font-weight: 600;
-        margin-bottom: 1rem;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
+        position: relative;
+        z-index: 1;
     }
+
     .section-icon {
-        width: 35px;
-        height: 35px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #fd7e14, #e83e8c);
-        color: white;
+        width: 45px;
+        height: 45px;
+        border-radius: var(--border-radius);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 0.75rem;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+        color: white;
+        position: relative;
+        transition: var(--transition);
     }
+
+    .section-icon::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: var(--border-radius);
+        background: inherit;
+        opacity: 0.1;
+        transform: scale(1.5);
+        transition: var(--transition);
+    }
+
+    .form-section:hover .section-icon::before {
+        transform: scale(2);
+        opacity: 0.05;
+    }
+
+    .section-icon.personal {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .section-icon.professional {
+        background: linear-gradient(135deg, var(--accent-color), #e67e22);
+    }
+
+    .section-icon.account {
+        background: linear-gradient(135deg, var(--info-color), var(--secondary-color));
+    }
+
     .form-group {
         margin-bottom: 1.5rem;
+        position: relative;
     }
+
     .form-label {
         font-weight: 600;
-        color: #495057;
-        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
     }
+
+    .form-label i {
+        color: var(--accent-color);
+        margin-right: 0.5rem;
+    }
+
+    .input-group {
+        position: relative;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+
+    .input-group:hover {
+        box-shadow: var(--box-shadow-lg);
+    }
+
     .input-group-text {
-        background: linear-gradient(135deg, #fd7e14, #e83e8c);
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
         color: white;
         border: none;
-    }
-    .alert-info {
-        background: linear-gradient(135deg, rgba(253, 126, 20, 0.1), rgba(232, 62, 140, 0.1));
-        border: 1px solid rgba(253, 126, 20, 0.3);
-        border-radius: 12px;
-    }
-    .btn-cancel {
-        border-radius: 25px;
-        padding: 12px 30px;
         font-weight: 600;
+        padding: 0.75rem 1rem;
+        transition: var(--transition);
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: var(--bg-white);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(22, 160, 133, 0.25);
+        background: var(--bg-white);
+    }
+
+    .form-control:hover {
+        border-color: var(--primary-color);
+    }
+
+    .form-control[readonly] {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, rgba(22, 160, 133, 0.1) 0%, rgba(93, 173, 226, 0.1) 100%);
+        border: 1px solid rgba(22, 160, 133, 0.3);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.25rem;
+        margin-bottom: 2rem;
+        color: var(--text-primary);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert-info::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+    }
+
+    .alert-info i {
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: none;
+        border-radius: var(--border-radius);
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: var(--transition);
+        box-shadow: 0 4px 15px rgba(22, 160, 133, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-save::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: var(--transition);
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(22, 160, 133, 0.4);
+        color: white;
+    }
+
+    .btn-save:hover::before {
+        left: 100%;
+    }
+
+    .btn-cancel {
+        border: 2px solid var(--text-secondary);
+        background: transparent;
+        color: var(--text-secondary);
+        border-radius: var(--border-radius);
+        padding: 0.875rem 2rem;
+        font-weight: 600;
+        transition: var(--transition);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+    .btn-cancel:hover {
+        background: var(--text-secondary);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--box-shadow);
+    }
+
+    .text-danger {
+        color: var(--danger-color) !important;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .text-danger::before {
+        content: '⚠';
+        margin-right: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .is-invalid {
+        border-color: var(--danger-color) !important;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .config-container {
+            padding: 1rem 0;
+        }
+
+        .config-header {
+            padding: 1.5rem;
+        }
+
+        .config-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .config-body {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .btn-save,
+        .btn-cancel {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    /* Animation classes */
+    .fade-in {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s ease-out;
+    }
+
+    .animate-on-scroll.animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Loading animation */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Pulse effect for important elements */
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(22, 160, 133, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(22, 160, 133, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(22, 160, 133, 0);
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container config-container mt-4">
+<div class="container config-container fade-in">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card config-card">
-                <div class="card-header config-header text-center py-4">
-                    <h3 class="mb-0">
+            <div class="config-card animate-on-scroll">
+                <div class="config-header">
+                    <h3>
                         <i class="fas fa-cog me-2"></i>Configurar Cuenta
                     </h3>
-                    <p class="mb-0">Actualiza tu información personal y profesional</p>
+                    <p>Actualiza tu información personal y profesional</p>
                 </div>
-                <div class="card-body p-4">
+                <div class="config-body">
                     <!-- Información sobre los cambios -->
-                    <div class="alert alert-info">
+                    <div class="alert alert-info animate-on-scroll">
                         <i class="fas fa-info-circle me-2"></i>
                         <strong>Información:</strong> Los cambios realizados aquí se aplicarán inmediatamente a tu cuenta.
                     </div>
                     
-                    <form method="post">
+                    <form method="post" id="configForm">
                         {% csrf_token %}
                         
                         <!-- Sección: Información Personal -->
-                        <div class="form-section">
+                        <div class="form-section animate-on-scroll">
                             <h5 class="section-title">
-                                <div class="section-icon">
+                                <div class="section-icon personal">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 Información Personal
@@ -120,7 +496,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
-                                            <i class="fas fa-signature me-2"></i>Nombre
+                                            <i class="fas fa-signature"></i>Nombre
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -129,7 +505,7 @@
                                             {{ user_form.first_name }}
                                         </div>
                                         {% if user_form.first_name.errors %}
-                                            <div class="text-danger mt-1">
+                                            <div class="text-danger">
                                                 {% for error in user_form.first_name.errors %}
                                                     <small>{{ error }}</small>
                                                 {% endfor %}
@@ -141,7 +517,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
-                                            <i class="fas fa-signature me-2"></i>Apellido
+                                            <i class="fas fa-signature"></i>Apellido
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -150,7 +526,7 @@
                                             {{ user_form.last_name }}
                                         </div>
                                         {% if user_form.last_name.errors %}
-                                            <div class="text-danger mt-1">
+                                            <div class="text-danger">
                                                 {% for error in user_form.last_name.errors %}
                                                     <small>{{ error }}</small>
                                                 {% endfor %}
@@ -162,7 +538,7 @@
                             
                             <div class="form-group">
                                 <label for="{{ user_form.email.id_for_label }}" class="form-label">
-                                    <i class="fas fa-envelope me-2"></i>Correo Electrónico
+                                    <i class="fas fa-envelope"></i>Correo Electrónico
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text">
@@ -171,7 +547,7 @@
                                     {{ user_form.email }}
                                 </div>
                                 {% if user_form.email.errors %}
-                                    <div class="text-danger mt-1">
+                                    <div class="text-danger">
                                         {% for error in user_form.email.errors %}
                                             <small>{{ error }}</small>
                                         {% endfor %}
@@ -181,9 +557,9 @@
                         </div>
                         
                         <!-- Sección: Información Profesional -->
-                        <div class="form-section">
+                        <div class="form-section animate-on-scroll">
                             <h5 class="section-title">
-                                <div class="section-icon">
+                                <div class="section-icon professional">
                                     <i class="fas fa-briefcase"></i>
                                 </div>
                                 Información Profesional
@@ -193,7 +569,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="{{ perfil_form.cargo.id_for_label }}" class="form-label">
-                                            <i class="fas fa-user-tie me-2"></i>Cargo
+                                            <i class="fas fa-user-tie"></i>Cargo
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -202,7 +578,7 @@
                                             {{ perfil_form.cargo }}
                                         </div>
                                         {% if perfil_form.cargo.errors %}
-                                            <div class="text-danger mt-1">
+                                            <div class="text-danger">
                                                 {% for error in perfil_form.cargo.errors %}
                                                     <small>{{ error }}</small>
                                                 {% endfor %}
@@ -214,7 +590,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="{{ perfil_form.telefono.id_for_label }}" class="form-label">
-                                            <i class="fas fa-phone me-2"></i>Teléfono
+                                            <i class="fas fa-phone"></i>Teléfono
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -223,7 +599,7 @@
                                             {{ perfil_form.telefono }}
                                         </div>
                                         {% if perfil_form.telefono.errors %}
-                                            <div class="text-danger mt-1">
+                                            <div class="text-danger">
                                                 {% for error in perfil_form.telefono.errors %}
                                                     <small>{{ error }}</small>
                                                 {% endfor %}
@@ -235,9 +611,9 @@
                         </div>
                         
                         <!-- Información de la cuenta (solo lectura) -->
-                        <div class="form-section">
+                        <div class="form-section animate-on-scroll">
                             <h5 class="section-title">
-                                <div class="section-icon">
+                                <div class="section-icon account">
                                     <i class="fas fa-info-circle"></i>
                                 </div>
                                 Información de la Cuenta
@@ -247,7 +623,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">
-                                            <i class="fas fa-user-circle me-2"></i>Nombre de Usuario
+                                            <i class="fas fa-user-circle"></i>Nombre de Usuario
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -261,7 +637,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">
-                                            <i class="fas fa-calendar-plus me-2"></i>Miembro desde
+                                            <i class="fas fa-calendar-plus"></i>Miembro desde
                                         </label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -275,11 +651,11 @@
                         </div>
                         
                         <!-- Botones de acción -->
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{% url 'usuarios:perfil' %}" class="btn btn-outline-secondary btn-cancel me-md-2">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end animate-on-scroll">
+                            <a href="{% url 'usuarios:perfil' %}" class="btn btn-cancel me-md-2">
                                 <i class="fas fa-times me-2"></i>Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary btn-save">
+                            <button type="submit" class="btn btn-save pulse">
                                 <i class="fas fa-save me-2"></i>Guardar Cambios
                             </button>
                         </div>
@@ -293,65 +669,149 @@
 
 {% block extra_js %}
 <script>
-$(document).ready(function() {
-    // Enfocar el primer campo
-    $('#{{ user_form.first_name.id_for_label }}').focus();
-    
-    // Animación al cargar
-    $('.config-card').hide().fadeIn(800);
-    
-    // Validación del formulario
-    $('form').on('submit', function(e) {
-        const button = $(this).find('button[type="submit"]');
-        button.html('<i class="fas fa-spinner fa-spin me-2"></i>Guardando...').prop('disabled', true);
-    });
-    
-    // Formatear teléfono automáticamente
-    $('#{{ perfil_form.telefono.id_for_label }}').on('input', function() {
-        let value = $(this).val().replace(/\D/g, '');
-        if (value.length > 0) {
-            if (value.length <= 3) {
-                value = value;
-            } else if (value.length <= 6) {
-                value = value.substring(0, 3) + '-' + value.substring(3);
-            } else if (value.length <= 10) {
-                value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6);
-            } else {
-                value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6, 10);
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate elements on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate');
             }
-        }
-        $(this).val(value);
+        });
+    }, observerOptions);
+
+    // Observe all elements with animate-on-scroll class
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
     });
+
+    // Focus first field
+    const firstField = document.querySelector('#{{ user_form.first_name.id_for_label }}');
+    if (firstField) {
+        firstField.focus();
+    }
+
+    // Form validation and submission
+    const form = document.getElementById('configForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
     
-    // Validación de email en tiempo real
-    $('#{{ user_form.email.id_for_label }}').on('blur', function() {
-        const email = $(this).val();
-        if (email && !isValidEmail(email)) {
-            $(this).addClass('is-invalid');
-            $(this).next('.invalid-feedback').remove();
-            $(this).after('<div class="invalid-feedback">Ingrese un email válido</div>');
-        } else {
-            $(this).removeClass('is-invalid');
-            $(this).next('.invalid-feedback').remove();
-        }
+    form.addEventListener('submit', function(e) {
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+        
+        // Restore button if form validation fails
+        setTimeout(() => {
+            if (form.querySelector('.is-invalid')) {
+                submitBtn.classList.remove('btn-loading');
+                submitBtn.disabled = false;
+            }
+        }, 100);
     });
-    
+
+    // Phone number formatting
+    const phoneField = document.getElementById('{{ perfil_form.telefono.id_for_label }}');
+    if (phoneField) {
+        phoneField.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 3) {
+                    value = value;
+                } else if (value.length <= 6) {
+                    value = value.substring(0, 3) + '-' + value.substring(3);
+                } else if (value.length <= 10) {
+                    value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6);
+                } else {
+                    value = value.substring(0, 3) + '-' + value.substring(3, 6) + '-' + value.substring(6, 10);
+                }
+            }
+            this.value = value;
+        });
+    }
+
+    // Email validation
+    const emailField = document.getElementById('{{ user_form.email.id_for_label }}');
+    if (emailField) {
+        emailField.addEventListener('blur', function() {
+            const email = this.value;
+            if (email && !isValidEmail(email)) {
+                this.classList.add('is-invalid');
+                // Remove existing feedback
+                const existingFeedback = this.parentNode.parentNode.querySelector('.invalid-feedback');
+                if (existingFeedback) {
+                    existingFeedback.remove();
+                }
+                // Add new feedback
+                const feedback = document.createElement('div');
+                feedback.className = 'invalid-feedback';
+                feedback.textContent = 'Ingrese un email válido';
+                this.parentNode.parentNode.appendChild(feedback);
+            } else {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        });
+    }
+
     function isValidEmail(email) {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return re.test(email);
     }
-    
-    // Efectos hover en secciones
-    $('.form-section').hover(
-        function() {
-            $(this).css('transform', 'translateY(-2px)');
-            $(this).css('box-shadow', '0 4px 8px rgba(0,0,0,0.1)');
-        },
-        function() {
-            $(this).css('transform', 'translateY(0)');
-            $(this).css('box-shadow', 'none');
-        }
-    );
+
+    // Add ripple effect to buttons
+    document.querySelectorAll('.btn-save, .btn-cancel').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('div');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.4)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Add smooth hover effects
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentNode.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentNode.style.transform = 'translateY(0)';
+        });
+    });
 });
+
+// Add ripple keyframes
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}
