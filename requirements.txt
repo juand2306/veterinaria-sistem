@@ -45,7 +45,7 @@ pyparsing==3.2.3
 PySocks==1.7.1
 python-dotenv==1.0.1
 pytz==2024.1
-pywin32==308
+#pywin32==308
 requests==2.32.3
 rsa==4.9
 selenium==4.26.0
