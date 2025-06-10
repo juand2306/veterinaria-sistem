@@ -5,7 +5,10 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
 from django.db import transaction
-
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from clientes.models import Mascota
 from .models import Cita, Consulta, ImagenDiagnostica
 from .forms import CitaForm, ConsultaForm, ImagenDiagnosticaForm
@@ -294,6 +297,73 @@ class HistoriaClinicaView(LoginRequiredMixin, View):
         eventos.sort(key=lambda x: x['fecha'], reverse=True)
         return eventos
 
+@login_required
+def historia_clinica_imprimible(request, mascota_id):
+    """
+    Vista para generar la versión imprimible de la historia clínica
+    """
+    mascota = get_object_or_404(Mascota, id=mascota_id)
+    
+    # Obtener todos los datos relacionados
+    consultas = Consulta.objects.filter(
+        cita__mascota=mascota
+    ).select_related('cita').order_by('-cita__fecha')
+    
+    vacunas_aplicadas = VacunaAplicada.objects.filter(
+        mascota=mascota
+    ).select_related('vacuna').order_by('-fecha_aplicacion')
+    
+    productos_aplicados = ProductoAplicado.objects.filter(
+        mascota=mascota
+    ).select_related('producto').order_by('-fecha_aplicacion')
+    
+    imagenes_diagnosticas = ImagenDiagnostica.objects.filter(
+        mascota=mascota
+    ).order_by('-fecha')
+    
+    context = {
+        'mascota': mascota,
+        'consultas': consultas,
+        'vacunas_aplicadas': vacunas_aplicadas,
+        'productos_aplicados': productos_aplicados,
+        'imagenes_diagnosticas': imagenes_diagnosticas,
+    }
+    
+    return render(request, 'consultas/historia_clinica_print.html', context)
+
+
+@method_decorator(login_required, name='dispatch')
+class HistoriaClinicaImprimibleView(DetailView):
+    """
+    Vista basada en clase para la historia clínica imprimible
+    """
+    model = Mascota
+    template_name = 'consultas/historia_clinica_print.html'
+    context_object_name = 'mascota'
+    pk_url_kwarg = 'mascota_id'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mascota = self.get_object()
+        
+        # Obtener historial médico
+        context['consultas'] = Consulta.objects.filter(
+            cita__mascota=mascota
+        ).select_related('cita').order_by('-cita__fecha')
+        
+        context['vacunas_aplicadas'] = VacunaAplicada.objects.filter(
+            mascota=mascota
+        ).select_related('vacuna').order_by('-fecha_aplicacion')
+        
+        context['productos_aplicados'] = ProductoAplicado.objects.filter(
+            mascota=mascota
+        ).select_related('producto').order_by('-fecha_aplicacion')
+        
+        context['imagenes_diagnosticas'] = ImagenDiagnostica.objects.filter(
+            mascota=mascota
+        ).order_by('-fecha')
+        
+        return context
 
 # Vistas para Imágenes Diagnósticas
 class ImagenDiagnosticaListView(LoginRequiredMixin, ListView):

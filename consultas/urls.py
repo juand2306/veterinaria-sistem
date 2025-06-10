@@ -20,6 +20,7 @@ urlpatterns = [
     
     # URL para Historia Clínica #Check
     path('mascota/<int:mascota_id>/historia-clinica/', views.HistoriaClinicaView.as_view(), name='historia_clinica'),
+    path('mascota/<int:mascota_id>/historia-clinica/imprimir/v2/', views.HistoriaClinicaImprimibleView.as_view(), name='historia_clinica_imprimible_v2'),    
     
     # URLs para Imágenes Diagnósticas #Check
     path('imagenes/', views.ImagenDiagnosticaListView.as_view(), name='lista_imagenes_diagnosticas'),# No hace falta #Falla

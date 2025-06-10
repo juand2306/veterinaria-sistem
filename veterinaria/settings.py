@@ -20,20 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-from dotenv import load_dotenv
-load_dotenv()
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 'django-insecure-v-+s5x5r4i_j5e1p&1^jehoi1xahrsu&ey=wh7l=s-du3ivwa6'
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'inseguro-en-desarrollo')
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 
+ALLOWED_HOSTS = []
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.onrender.com',  # Permite todos los subdominios de Render
-    'vetnova-sistem.onrender.com',  # Mi dominio específico
-]
 
 # Application definition
 
@@ -59,7 +53,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,15 +85,12 @@ WSGI_APPLICATION = 'veterinaria.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
-
 
 # Para configurar PostgreSQL (descomentar cuando sea necesario):
 # DATABASES = {
@@ -150,12 +140,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-] if os.path.exists(os.path.join(BASE_DIR, 'static')) else []
 
-# Media files
+# Media files (Uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
@@ -187,17 +175,3 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Para que se ejecute automáticamente en Render
-if os.environ.get('RENDER'):
-    from django.core.management import execute_from_command_line
-    import sys
-    
-    def setup_demo_data():
-        try:
-            execute_from_command_line(['manage.py', 'setup_demo'])
-        except:
-            pass
-    
-    # Ejecutar después de migrate
-    setup_demo_data()

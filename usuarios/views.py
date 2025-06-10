@@ -11,6 +11,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 import re
 from .models import PerfilUsuario
+from django.views.generic.edit import CreateView
+from .forms import RegistroUsuarioForm
 
 
 class CustomUserForm(forms.ModelForm):
@@ -199,3 +201,17 @@ class ConfigurarCuentaView(LoginRequiredMixin, TemplateView):
             context['perfil_form'] = perfil_form
             
             return self.render_to_response(context)
+
+class RegistroUsuarioView(CreateView):
+    form_class = RegistroUsuarioForm
+    template_name = 'usuarios/signup.html'
+    success_url = reverse_lazy('usuarios:login')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Tu cuenta ha sido creada exitosamente. Ahora puedes iniciar sesión.")
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Por favor corrige los errores en el formulario.")
+        return super().form_invalid(form)

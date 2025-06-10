@@ -632,10 +632,9 @@
                             <i class="fas fa-arrow-left"></i>
                             Volver
                         </a>
-                        <button onclick="window.print()" class="btn-modern btn-primary">
-                            <i class="fas fa-print"></i>
+                        <a href="{% url 'consultas:historia_clinica_imprimible_v2' mascota.pk %}" target="_blank" class="btn-modern btn-secondary">
                             Imprimir
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
