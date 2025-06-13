@@ -222,6 +222,32 @@
         box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
     }
 
+    .btn-modern.btn-portal {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-modern.btn-portal:hover {
+        background: #9b59b6; /* Color púrpura para acceso portal */
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+    }
+
+    .btn-modern.btn-portal-edit {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-modern.btn-portal-edit:hover {
+        background: #8e44ad; /* Color púrpura más oscuro para gestionar */
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3);
+    }
+
     .card-body-modern {
         padding: 2rem;
         background: var(--bg-white);
@@ -557,6 +583,20 @@
                             <i class="fas fa-edit"></i>
                             Editar
                         </a>
+                        
+                        <!-- NUEVO BOTÓN PARA CREAR ACCESO AL PORTAL -->
+                        {% if not cliente.acceso_portal %}
+                        <a href="{% url 'portal_cliente:crear_acceso' cliente.id %}" class="btn-modern btn-portal">
+                            <i class="fas fa-key"></i>
+                            Crear Acceso
+                        </a>
+                        {% else %}
+                        <a href="{% url 'portal_cliente:editar_acceso' cliente.acceso_portal.id %}" class="btn-modern btn-portal-edit">
+                            <i class="fas fa-user-cog"></i>
+                            Gestionar Portal
+                        </a>
+                        {% endif %}
+                        
                         <a href="{% url 'clientes:eliminar_cliente' cliente.id %}" class="btn-modern btn-delete">
                             <i class="fas fa-trash"></i>
                             Eliminar

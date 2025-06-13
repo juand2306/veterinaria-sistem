@@ -1,0 +1,1169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia Clinica - {{ mascota.nombre }}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #16a085;
+            --primary-dark: #138d75;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --info-color: #5dade2;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --text-primary: #2c3e50;
+            --text-secondary: #34495e;
+            --bg-white: #ffffff;
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --box-shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        .clinic-history-header {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(52, 152, 219, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .clinic-history-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(52, 152, 219, 0.05) 0%, transparent 50%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .clinic-history-header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .detail-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+        }
+
+        .detail-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-lg);
+        }
+
+        .card-header-modern {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header-modern.bg-primary-custom {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        }
+
+        .card-header-modern.bg-success-custom {
+            background: linear-gradient(135deg, var(--success-color) 0%, #1e8449 100%);
+        }
+
+        .card-header-modern.bg-info-custom {
+            background: linear-gradient(135deg, var(--info-color) 0%, #2e86c1 100%);
+        }
+
+        .card-header-modern.bg-warning-custom {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #d68910 100%);
+        }
+
+        .card-header-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .detail-card:hover .card-header-modern::before {
+            transform: translateX(100%);
+        }
+
+        .card-title-modern {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .btn-modern {
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius-sm);
+            font-weight: 500;
+            font-size: 0.875rem;
+            border: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-modern.btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-modern.btn-secondary:hover {
+            background: var(--text-secondary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(127, 140, 141, 0.3);
+        }
+
+        .card-body-modern {
+            padding: 2rem;
+            background: var(--bg-white);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            background: rgba(52, 152, 219, 0.02);
+            border-radius: var(--border-radius-sm);
+            border-left: 4px solid var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .info-item:hover {
+            background: rgba(52, 152, 219, 0.05);
+            transform: translateX(4px);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-label i {
+            color: var(--secondary-color);
+            font-size: 1rem;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .photo-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            height: fit-content;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-lg);
+        }
+
+        .pet-photo {
+            max-height: 200px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .pet-photo:hover {
+            transform: scale(1.02);
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .status-active {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        .status-inactive {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger-color);
+            border: 1px solid rgba(231, 76, 60, 0.2);
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--secondary-color), var(--primary-color));
+            border-radius: 1px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -0.5rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--secondary-color);
+            border: 3px solid var(--bg-white);
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .timeline-item.consulta::before {
+            background: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.2);
+        }
+
+        .timeline-item.vacuna::before {
+            background: var(--success-color);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+        }
+
+        .timeline-item.producto::before {
+            background: var(--warning-color);
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
+        }
+
+        .timeline-item.imagen::before {
+            background: var(--info-color);
+            box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.2);
+        }
+
+        .timeline-card {
+            background: var(--bg-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .timeline-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--box-shadow-lg);
+        }
+
+        .timeline-card-header {
+            padding: 1rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-card-header.consulta {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+
+        .timeline-card-header.vacuna {
+            background: linear-gradient(135deg, var(--success-color), #1e8449);
+        }
+
+        .timeline-card-header.producto {
+            background: linear-gradient(135deg, var(--warning-color), #d68910);
+            color: #2c3e50;
+        }
+
+        .timeline-card-header.imagen {
+            background: linear-gradient(135deg, var(--info-color), #2e86c1);
+        }
+
+        .timeline-card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .timeline-card:hover .timeline-card-header::before {
+            transform: translateX(100%);
+        }
+
+        .timeline-card-body {
+            padding: 1.5rem;
+        }
+
+        .timeline-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-info-item {
+            background: rgba(52, 152, 219, 0.02);
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        .timeline-info-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timeline-info-label i {
+            color: var(--secondary-color);
+        }
+
+        .timeline-info-value {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(52, 152, 219, 0.02);
+            border-radius: var(--border-radius);
+            border: 2px dashed rgba(52, 152, 219, 0.2);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            color: rgba(52, 152, 219, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .volver-btn {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+
+        .volver-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-imprimir {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-imprimir:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        /* Estilos para la grilla de imágenes */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+
+        .image-item {
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .image-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Clases de estilo para timeline items */
+        .timeline-item.consulta .timeline-card-header.consulta {
+            background: linear-gradient(135deg, #4c84ff, #3b7ae0);
+            color: white;
+        }
+
+        .timeline-item.vacuna .timeline-card-header.vacuna {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .timeline-item.producto .timeline-card-header.producto {
+            background: linear-gradient(135deg, #fd7e14, #e63946);
+            color: white;
+        }
+
+        .bg-secondary-custom {
+            background: linear-gradient(135deg, #6c757d, #495057) !important;
+            color: white;
+        }
+
+        .bg-secondary-custom .card-title-modern {
+            color: white;
+        }
+
+
+        @media print {
+            .no-print { display: none !important; }
+            .timeline-card { break-inside: avoid; }
+            .detail-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+            .timeline::before { background: #ddd !important; }
+        }
+
+        @media (max-width: 768px) {
+            .clinic-history-header {
+                padding: 1.5rem;
+            }
+
+            .card-header-modern {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .card-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline {
+                padding-left: 1rem;
+            }
+
+            .timeline-item {
+                padding-left: 1rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4 fade-in">
+    <!-- Header de Historia Clínica -->
+    <div class="clinic-history-header slide-up">
+        <div class="clinic-history-header-content">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="fas fa-file-medical me-3 text-secondary"></i>
+                        Historia Clínica
+                    </h1>
+                    <p class="mb-0 text-muted">
+                        <i class="fas fa-paw me-2"></i>
+                        {{ mascota.nombre }} • Registro médico completo
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end no-print">
+                    <div class="card-actions">
+                        <a href="{% url 'portal_cliente:dashboard' %}" class="volver-btn me-2">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                        <a href="{% url 'portal_cliente:historia_clinica_imprimible_v3' mascota.pk %}" target="_blank" class="btn-imprimir">
+                            <i class="fas fa-print me-2"></i>Imprimir
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Columna de la foto -->
+        <div class="col-md-4 mb-4">
+            <div class="photo-card slide-up">
+                <h5 class="mb-3">
+                    <i class="fas fa-camera me-2 text-secondary"></i>
+                    Foto de {{ mascota.nombre }}
+                </h5>
+                {% if mascota.foto %}
+                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="img-fluid pet-photo">
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-paw empty-state-icon"></i>
+                        <h6>Sin foto</h6>
+                        <p class="text-muted mb-0">No hay foto disponible</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Columna principal -->
+        <div class="col-md-8">
+            <!-- Información General -->
+            <div class="detail-card slide-up">
+                <div class="card-header-modern">
+                    <h5 class="card-title-modern">
+                        <i class="fas fa-info-circle"></i>
+                        Información General
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-paw"></i>
+                                Nombre
+                            </div>
+                            <div class="info-value">{{ mascota.nombre }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-dna"></i>
+                                Especie
+                            </div>
+                            <div class="info-value">{{ mascota.especie.nombre }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-tags"></i>
+                                Raza
+                            </div>
+                            <div class="info-value">{{ mascota.raza.nombre }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-venus-mars"></i>
+                                Sexo
+                            </div>
+                            <div class="info-value">{{ mascota.get_sexo_display }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-birthday-cake"></i>
+                                Fecha de Nacimiento
+                            </div>
+                            <div class="info-value">{{ mascota.fecha_nacimiento|date:'d/m/Y' }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-heartbeat"></i>
+                                Estado
+                            </div>
+                            <div class="info-value">
+                                {% if mascota.activa %}
+                                    <span class="status-badge status-active">
+                                        <i class="fas fa-check-circle"></i>
+                                        Activa
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge status-inactive">
+                                        <i class="fas fa-times-circle"></i>
+                                        Inactiva
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial Médico -->
+    {% if consultas or vacunas_aplicadas or productos_aplicados %}
+        <div class="detail-card slide-up">
+            <div class="card-header-modern bg-primary-custom">
+                <h5 class="card-title-modern">
+                    <i class="fas fa-clock"></i>
+                    Historial Médico Completo
+                </h5>
+            </div>
+            <div class="card-body-modern">
+                <div class="timeline">
+                    <!-- Consultas -->
+                    {% for consulta in consultas %}
+                        <div class="timeline-item consulta">
+                            <div class="timeline-card">
+                                <div class="timeline-card-header consulta">
+                                    <div>
+                                        <strong>
+                                            <i class="fas fa-stethoscope me-2"></i>Consulta
+                                        </strong>
+                                        {% if consulta.es_eutanasia %}
+                                            <span class="status-badge ms-2" style="background: rgba(0,0,0,0.2); color: white;">
+                                                <i class="fas fa-heart"></i>
+                                                Eutanasia
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <span class="timeline-date">{{ consulta.cita.fecha|date:"d/m/Y" }}</span>
+                                </div>
+                                
+                                <div class="timeline-card-body">
+                                    <div class="timeline-info-grid">
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-clipboard-list"></i>
+                                                Motivo de Consulta
+                                            </div>
+                                            <div class="timeline-info-value">{{ consulta.cita.motivo|default:"No especificado" }}</div>
+                                        </div>
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-diagnoses"></i>
+                                                Diagnóstico
+                                            </div>
+                                            <div class="timeline-info-value">{{ consulta.diagnostico|default:"No especificado" }}</div>
+                                        </div>
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-prescription-bottle-alt"></i>
+                                                Tratamiento
+                                            </div>
+                                            <div class="timeline-info-value">{{ consulta.tratamiento|default:"No especificado" }}</div>
+                                        </div>
+                                        {% if consulta.notas %}
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-sticky-note"></i>
+                                                Notas
+                                            </div>
+                                            <div class="timeline-info-value">{{ consulta.notas }}</div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <!-- Vacunas Aplicadas -->
+                    {% for vacuna in vacunas_aplicadas %}
+                        <div class="timeline-item vacuna">
+                            <div class="timeline-card">
+                                <div class="timeline-card-header vacuna">
+                                    <div>
+                                        <strong>
+                                            <i class="fas fa-syringe me-2"></i>Vacuna
+                                        </strong>
+                                    </div>
+                                    <span class="timeline-date">{{ vacuna.fecha_aplicacion|date:"d/m/Y" }}</span>
+                                </div>
+                                
+                                <div class="timeline-card-body">
+                                    <div class="timeline-info-grid">
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-syringe"></i>
+                                                Vacuna
+                                            </div>
+                                            <div class="timeline-info-value">{{ vacuna.vacuna.nombre }}</div>
+                                        </div>
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                Próxima Dosis
+                                            </div>
+                                            <div class="timeline-info-value">{{ vacuna.fecha_proxima|date:"d/m/Y"|default:"No programada" }}</div>
+                                        </div>
+                                        {% if vacuna.veterinario %}
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-user-md"></i>
+                                                Aplicada por
+                                            </div>
+                                            <div class="timeline-info-value">{{ vacuna.veterinario }}</div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if vacuna.observaciones %}
+                                        <div class="timeline-info-item mt-3" style="grid-column: 1 / -1;">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-sticky-note"></i>
+                                                Observaciones
+                                            </div>
+                                            <div class="timeline-info-value">{{ vacuna.observaciones }}</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <!-- Productos Aplicados -->
+                    {% for producto in productos_aplicados %}
+                        <div class="timeline-item producto">
+                            <div class="timeline-card">
+                                <div class="timeline-card-header producto">
+                                    <div>
+                                        <strong>
+                                            <i class="fas fa-pills me-2"></i>Producto
+                                        </strong>
+                                    </div>
+                                    <span class="timeline-date">{{ producto.fecha_aplicacion|date:"d/m/Y" }}</span>
+                                </div>
+                                
+                                <div class="timeline-card-body">
+                                    <div class="timeline-info-grid">
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-pills"></i>
+                                                Producto
+                                            </div>
+                                            <div class="timeline-info-value">{{ producto.producto.nombre }}</div>
+                                        </div>
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-weight"></i>
+                                                Dosis
+                                            </div>
+                                            <div class="timeline-info-value">{{ producto.dosis|default:"No especificada" }}</div>
+                                        </div>
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                Próxima Aplicación
+                                            </div>
+                                            <div class="timeline-info-value">{{ producto.fecha_proxima|date:"d/m/Y"|default:"No programada" }}</div>
+                                        </div>
+                                        {% if producto.veterinario %}
+                                        <div class="timeline-info-item">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-user-md"></i>
+                                                Aplicado por
+                                            </div>
+                                            <div class="timeline-info-value">{{ producto.veterinario }}</div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if producto.observaciones %}
+                                        <div class="timeline-info-item mt-3" style="grid-column: 1 / -1;">
+                                            <div class="timeline-info-label">
+                                                <i class="fas fa-sticky-note"></i>
+                                                Observaciones
+                                            </div>
+                                            <div class="timeline-info-value">{{ producto.observaciones }}</div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Imágenes Diagnósticas -->
+    {% if imagenes_diagnosticas %}
+        <div class="detail-card slide-up">
+            <div class="card-header-modern bg-secondary-custom">
+                <h5 class="card-title-modern">
+                    <i class="fas fa-images"></i>
+                    Imágenes Diagnósticas ({{ imagenes_diagnosticas.count }})
+                </h5>
+            </div>
+            <div class="card-body-modern">
+                <div class="images-grid">
+                    {% for imagen in imagenes_diagnosticas|slice:":6" %}
+                    <div class="image-item">
+                        {% if imagen.archivo %}
+                            {% if imagen.archivo.name|lower|slice:"-4:" == ".pdf" %}
+                                <div class="file-icon text-danger">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                                <small class="text-muted">PDF</small>
+                            {% elif imagen.archivo.name|lower|slice:"-4:" == ".doc" or imagen.archivo.name|lower|slice:"-5:" == ".docx" %}
+                                <div class="file-icon text-primary">
+                                    <i class="fas fa-file-word"></i>
+                                </div>
+                                <small class="text-muted">DOC</small>
+                            {% else %}
+                                <img src="{{ imagen.archivo.url }}" alt="Imagen diagnóstica" class="img-fluid image-preview">
+                            {% endif %}
+                        {% endif %}
+                        <div class="mt-2">
+                            <small class="text-muted d-block">{{ imagen.fecha|date:"d/m/Y" }}</small>
+                            <small class="text-muted">{{ imagen.descripcion|truncatechars:30 }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if imagenes_diagnosticas.count > 6 %}
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        Mostrando las 6 más recientes de {{ imagenes_diagnosticas.count }} imágenes.
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Mensaje cuando no hay historial -->
+    {% if not consultas and not vacunas_aplicadas and not productos_aplicados %}
+        <div class="detail-card slide-up">
+            <div class="card-body-modern">
+                <div class="empty-state">
+                    <i class="fas fa-clipboard-list empty-state-icon"></i>
+                    <h4>No hay registros médicos</h4>
+                    <p class="text-muted mb-0">Esta mascota aún no tiene historial médico registrado.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Información adicional -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="detail-card slide-up">
+                <div class="card-header-modern bg-info-custom">
+                    <h5 class="card-title-modern">
+                        <i class="fas fa-chart-line"></i>
+                        Estadísticas
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-stethoscope"></i>
+                                Total Consultas
+                            </div>
+                            <div class="info-value">{{ consultas|length|default:0 }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-syringe"></i>
+                                Vacunas Aplicadas
+                            </div>
+                            <div class="info-value">{{ vacunas_aplicadas|length|default:0 }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-pills"></i>
+                                Productos Aplicados
+                            </div>
+                            <div class="info-value">{{ productos_aplicados|length|default:0 }}</div>
+                        </div>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-x-ray"></i>
+                                Imágenes Diagnósticas
+                            </div>
+                            <div class="info-value">{{ imagenes_diagnosticas.count|default:0 }}</div>
+                        </div>
+                        
+                        {% if consultas %}
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Última Consulta
+                            </div>
+                            <div class="info-value">{{ consultas.first.cita.fecha|date:'d/m/Y' }}</div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-clock"></i>
+                                Edad Actual
+                            </div>
+                            <div class="info-value">
+                                <span id="edad-mascota" data-fecha-nacimiento="{{ mascota.fecha_nacimiento|date:'Y-m-d' }}">
+                                    Calculando...
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="detail-card slide-up">
+                <div class="card-header-modern bg-success-custom">
+                    <h5 class="card-title-modern">
+                        <i class="fas fa-calendar-check"></i>
+                        Próximas Citas
+                    </h5>
+                </div>
+                <div class="card-body-modern">
+                    {% if proximas_citas %}
+                        {% for cita in proximas_citas %}
+                            <div class="info-item mb-3">
+                                <div class="info-label">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ cita.fecha|date:"d/m/Y" }} - {{ cita.hora|time:"H:i" }}
+                                </div>
+                                <div class="info-value">{{ cita.motivo|default:"Consulta general" }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times empty-state-icon"></i>
+                            <h6>No hay citas programadas</h6>
+                            <p class="text-muted mb-0">No hay próximas citas registradas</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Animaciones de entrada
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observar elementos para animación
+    document.querySelectorAll('.timeline-item').forEach(function(item) {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(30px)';
+        item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(item);
+    });
+
+    // Efecto hover mejorado para cards
+    document.querySelectorAll('.timeline-card').forEach(function(card) {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px) scale(1.01)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Smooth scroll para timeline
+    document.querySelectorAll('.timeline-item').forEach(function(item, index) {
+        setTimeout(function() {
+            item.classList.add('fade-in');
+        }, index * 100);
+    });
+
+    // Función para imprimir
+    window.imprimirHistoria = function() {
+        window.print();
+    };
+
+    // Tooltip para elementos informativos
+    const tooltipElements = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipElements.forEach(function(element) {
+        new bootstrap.Tooltip(element);
+    });
+
+    const edadElement = document.getElementById('edad-mascota');
+    if (edadElement) {
+        const fechaNacimiento = edadElement.getAttribute('data-fecha-nacimiento');
+        if (fechaNacimiento) {
+            const nacimiento = new Date(fechaNacimiento);
+            const hoy = new Date();
+            let años = hoy.getFullYear() - nacimiento.getFullYear();
+            let meses = hoy.getMonth() - nacimiento.getMonth();
+            
+            if (meses < 0) {
+                años--;
+                meses += 12;
+            }
+            
+            if (hoy.getDate() < nacimiento.getDate()) {
+                meses--;
+                if (meses < 0) {
+                    años--;
+                    meses += 12;
+                }
+            }
+            
+            let edadTexto = '';
+            if (años > 0) {
+                edadTexto += años + (años === 1 ? ' año' : ' años');
+                if (meses > 0) {
+                    edadTexto += ' y ' + meses + (meses === 1 ? ' mes' : ' meses');
+                }
+            } else if (meses > 0) {
+                edadTexto = meses + (meses === 1 ? ' mes' : ' meses');
+            } else {
+                edadTexto = 'Menos de 1 mes';
+            }
+            
+            edadElement.textContent = edadTexto;
+        }
+    }
+});
+</script>

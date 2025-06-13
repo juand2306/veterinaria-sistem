@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'inventario.apps.InventarioConfig',
     'reportes.apps.ReportesConfig',
     'configuracion.apps.ConfiguracionConfig',
+    'portal_cliente.apps.PortalClienteConfig',
     # Apps de terceros
     'crispy_forms',
     'crispy_bootstrap5',

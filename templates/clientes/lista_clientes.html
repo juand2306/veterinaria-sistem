@@ -200,6 +200,28 @@
         box-shadow: 0 8px 25px rgba(22, 160, 133, 0.4);
     }
 
+    .access-list-btn {
+        background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .access-list-btn:hover {
+        background: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+    }
+
     .clients-table-container {
         background: var(--bg-white);
         border-radius: var(--border-radius);
@@ -488,6 +510,26 @@
             gap: 1rem;
             align-items: flex-start;
         }
+
+        .header-buttons {
+            width: 100%;
+            justify-content: stretch;
+        }
+
+        .header-buttons .access-list-btn,
+        .header-buttons .add-client-btn {
+            flex: 1;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .header-buttons .access-list-btn {
+            font-size: 0.9rem;
+        }
+
+        .header-buttons .add-client-btn {
+            font-size: 0.9rem;
+        }
     }
 
     .fade-in {
@@ -531,10 +573,16 @@
                         Administra todos los clientes del sistema
                     </p>
                 </div>
-                <a href="{% url 'clientes:crear_cliente' %}" class="add-client-btn hover-lift">
-                    <i class="fas fa-plus"></i>
-                    Nuevo Cliente
-                </a>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'clientes:crear_cliente' %}" class="add-client-btn hover-lift">
+                        <i class="fas fa-plus"></i>
+                        Nuevo Cliente
+                    </a>
+                    <a href="{% url 'portal_cliente:lista_accesos' %}" class="access-list-btn hover-lift">
+                        <i class="fas fa-list-alt"></i>
+                        Lista de Accesos
+                    </a>
+                </div>
             </div>
         </div>
     </div>

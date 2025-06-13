@@ -1,0 +1,1604 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Acceso - {{ object.cliente.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Root variables para consistencia con paleta morada */
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --primary-dark: #5a67d8;
+        --success-color: #48bb78;
+        --danger-color: #f56565;
+        --warning-color: #ed8936;
+        --info-color: #4299e1;
+        --text-primary: #2d3748;
+        --text-light: #ffffff;
+        --bg-white: #ffffff;
+        --glass-bg: rgba(255, 255, 255, 0.25);
+        --glass-border: rgba(255, 255, 255, 0.18);
+        --input-bg: #f7fafc;
+        --input-border: #e2e8f0;
+        --purple-light: rgba(102, 126, 234, 0.1);
+        --purple-medium: rgba(118, 75, 162, 0.15);
+    }
+    
+    .form-container {
+        background: var(--bg-white);
+        border-radius: 24px;
+        box-shadow: 
+            0 32px 64px -12px rgba(102, 126, 234, 0.15),
+            0 16px 32px -8px rgba(118, 75, 162, 0.1),
+            0 8px 16px -4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.02) 0%, 
+            rgba(118, 75, 162, 0.02) 50%, 
+            rgba(90, 103, 216, 0.02) 100%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--secondary-color) 50%, 
+            var(--primary-dark) 100%);
+        color: var(--text-light);
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+    }
+
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .form-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .form-header-content {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .form-header h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-header .icon {
+        width: 70px;
+        height: 70px;
+        background: var(--glass-bg);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-badge {
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background: linear-gradient(135deg, 
+            rgba(72, 187, 120, 0.9) 0%, 
+            rgba(56, 161, 105, 0.9) 100%);
+        color: white;
+    }
+
+    .status-inactive {
+        background: linear-gradient(135deg, 
+            rgba(245, 101, 101, 0.9) 0%, 
+            rgba(229, 62, 62, 0.9) 100%);
+        color: white;
+    }
+
+    .form-body {
+        padding: 3rem;
+        position: relative;
+        background: rgba(255, 255, 255, 0.98);
+        z-index: 2;
+    }
+
+    /* Información del cliente estilizada */
+    .cliente-info {
+        background: linear-gradient(135deg, 
+            var(--purple-light) 0%, 
+            var(--purple-medium) 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(16px);
+        box-shadow: 
+            0 8px 32px rgba(102, 126, 234, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .cliente-info::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite;
+    }
+
+    .cliente-info-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .cliente-info h5 {
+        color: var(--primary-color);
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .cliente-info h5 i {
+        width: 40px;
+        height: 40px;
+        background: rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .cliente-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .cliente-info-item {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+    }
+
+    .cliente-info-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    }
+
+    .cliente-info-item strong {
+        color: var(--primary-color);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .cliente-info-item strong i {
+        color: var(--secondary-color);
+        width: 16px;
+    }
+
+    .cliente-info-item span {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    /* Información del acceso actual */
+    .acceso-info {
+        background: linear-gradient(135deg, 
+            rgba(237, 137, 54, 0.1) 0%, 
+            rgba(237, 137, 54, 0.05) 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid rgba(237, 137, 54, 0.2);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(16px);
+        box-shadow: 
+            0 8px 32px rgba(237, 137, 54, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .acceso-info::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(237, 137, 54, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 12s ease-in-out infinite;
+    }
+
+    .acceso-info-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .acceso-info h5 {
+        color: var(--warning-color);
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .acceso-info h5 i {
+        width: 40px;
+        height: 40px;
+        background: rgba(237, 137, 54, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .acceso-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .acceso-info-item {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid rgba(237, 137, 54, 0.1);
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+    }
+
+    .acceso-info-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(237, 137, 54, 0.15);
+    }
+
+    .acceso-info-item strong {
+        color: var(--warning-color);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .acceso-info-item strong i {
+        color: #c05621;
+        width: 16px;
+    }
+
+    .acceso-info-item span {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    /* Form groups mejorados */
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label i {
+        color: var(--primary-color);
+        width: 18px;
+        font-size: 1.1rem;
+    }
+
+    /* Inputs estilizados con paleta morada */
+    .form-control {
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background-color: var(--input-bg);
+        width: 100%;
+        outline: none;
+        transition: all 0.3s ease;
+        box-shadow: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    .form-control:hover {
+        border-color: rgba(102, 126, 234, 0.4);
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        background-color: #ffffff;
+        box-shadow: 
+            0 0 0 3px rgba(102, 126, 234, 0.1),
+            0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .form-control::placeholder {
+        color: #a0aec0;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    /* Checkbox personalizado */
+    .form-check {
+        padding: 1rem;
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.05) 0%, 
+            rgba(118, 75, 162, 0.03) 100%);
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        margin-top: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-check:hover {
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.08) 0%, 
+            rgba(118, 75, 162, 0.05) 100%);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-input {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-top: 0;
+        border: 2px solid var(--primary-color);
+        border-radius: 6px;
+        background-color: transparent;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+
+    .form-check-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-left: 0.75rem;
+        cursor: pointer;
+    }
+
+    /* Estados de validación */
+    .form-control.is-valid {
+        border-color: var(--success-color);
+        background-color: rgba(72, 187, 120, 0.02);
+        box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger-color);
+        background-color: rgba(245, 101, 101, 0.02);
+        box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .invalid-feedback {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, 
+            rgba(245, 101, 101, 0.08) 0%, 
+            rgba(245, 101, 101, 0.05) 100%);
+        border-radius: 12px;
+        border-left: 3px solid var(--danger-color);
+        backdrop-filter: blur(8px);
+    }
+
+    .invalid-feedback::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--danger-color);
+    }
+
+    .text-danger {
+        color: var(--danger-color) !important;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, 
+            rgba(245, 101, 101, 0.08) 0%, 
+            rgba(245, 101, 101, 0.05) 100%);
+        border-radius: 12px;
+        border-left: 3px solid var(--danger-color);
+        backdrop-filter: blur(8px);
+    }
+
+    .text-danger::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--danger-color);
+    }
+
+    /* Alerts estilizados */
+    .alert {
+        border-radius: 16px;
+        border: none;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: currentColor;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, 
+            rgba(66, 153, 225, 0.1) 0%, 
+            rgba(66, 153, 225, 0.05) 100%);
+        color: #2c5282;
+        border: 1px solid rgba(66, 153, 225, 0.2);
+    }
+
+    .alert i {
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    .alert strong {
+        font-weight: 700;
+    }
+
+    /* Form text mejorado */
+    .form-text {
+        color: #718096;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-text::before {
+        content: '\f05a';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--info-color);
+        font-size: 0.8rem;
+    }
+
+    /* Botones premium con paleta morada */
+    .btn-submit-container {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 2.5rem;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
+        margin-top: 2.5rem;
+    }
+
+    .btn-actions-left {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-actions-right {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--secondary-color) 50%, 
+            var(--primary-dark) 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 10px 15px -3px rgba(102, 126, 234, 0.3),
+            0 4px 6px -2px rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 20px 25px -5px rgba(102, 126, 234, 0.4),
+            0 10px 10px -5px rgba(102, 126, 234, 0.2);
+        background: linear-gradient(135deg, 
+            var(--secondary-color) 0%, 
+            var(--primary-color) 50%, 
+            var(--primary-dark) 100%);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(145deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(248, 250, 252, 0.95) 100%);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        color: var(--text-primary);
+        padding: 1rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(145deg, 
+            rgba(102, 126, 234, 0.08) 0%, 
+            rgba(255, 255, 255, 0.95) 100%);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 
+            0 10px 15px -3px rgba(102, 126, 234, 0.2),
+            0 4px 6px -2px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, 
+            var(--danger-color) 0%, 
+            #e53e3e 50%, 
+            #c53030 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 10px 15px -3px rgba(245, 101, 101, 0.3),
+            0 4px 6px -2px rgba(245, 101, 101, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-danger::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-danger:hover::before {
+        left: 100%;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 20px 25px -5px rgba(245, 101, 101, 0.4),
+            0 10px 10px -5px rgba(245, 101, 101, 0.2);
+        background: linear-gradient(135deg, 
+            #e53e3e 0%, 
+            var(--danger-color) 50%, 
+            #c53030 100%);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Breadcrumb glassmorphism */
+    .breadcrumb-container {
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.1) 0%, 
+            rgba(118, 75, 162, 0.08) 100%);
+        backdrop-filter: blur(16px);
+        border-radius: 16px;
+        padding: 1.25rem 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        box-shadow: 
+            0 8px 32px rgba(102, 126, 234, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    /* Animaciones de entrada */
+    .slide-in {
+        animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Form group micro-interacciones */
+    .form-group {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .form-group:hover {
+        transform: translateY(-1px);
+    }
+
+    .form-group:focus-within {
+        z-index: 10;
+    }
+
+    .form-group:focus-within .form-label {
+        color: var(--primary-color);
+        transform: translateX(3px);
+    }
+
+    /* Responsividad premium */
+    @media (max-width: 768px) {
+        .form-container {
+            margin: 1rem;
+            border-radius: 20px;
+        }
+
+        .form-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-header h2 {
+            font-size: 1.5rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .form-header .icon {
+            width: 60px;
+            height: 60px;
+            font-size: 1.75rem;
+        }
+
+        .form-header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .form-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .cliente-info-grid,
+        .acceso-info-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .btn-submit-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-actions-left,
+        .btn-actions-right {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .btn-danger {
+            width: 100%;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .form-container {
+            margin: 0.5rem;
+            border-radius: 16px;
+        }
+
+        .form-header {
+            padding: 1.5rem 1rem;
+        }
+
+        .form-body {
+            padding: 1.5rem 1rem;
+        }
+
+        .cliente-info,
+        .acceso-info {
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+
+        .form-control {
+            padding: 0.875rem 1rem;
+        }
+    }
+
+    /* Estados de carga y éxito */
+    .form-submitting {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .form-submitting .btn-primary {
+        background: linear-gradient(135deg, #cbd5e0, #a0aec0);
+        cursor: not-allowed;
+    }
+
+    .form-submitting .btn-primary::after {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+        margin-left: 0.5rem;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Efectos de partículas flotantes */
+    .form-container::after {
+        content: '';
+        position: absolute;
+        top: 20%;
+        right: 10%;
+        width: 6px;
+        height: 6px;
+        background: radial-gradient(circle, var(--primary-color), transparent);
+        border-radius: 50%;
+        animation: particle-float 15s ease-in-out infinite;
+        opacity: 0.6;
+    }
+
+    @keyframes particle-float {
+        0%, 100% { 
+            transform: translate(0, 0) scale(1);
+            opacity: 0.6;
+        }
+        25% { 
+            transform: translate(30px, -40px) scale(1.2);
+            opacity: 0.8;
+        }
+        50% { 
+            transform: translate(-20px, -80px) scale(0.8);
+            opacity: 0.4;
+        }
+        75% { 
+            transform: translate(40px, -60px) scale(1.3);
+            opacity: 0.7;
+        }
+    }
+
+    /* Mejoras de accesibilidad */
+    .form-control:focus,
+    .form-check-input:focus,
+    .btn:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+
+    /* Modo oscuro soporte (preparado para futuro) */
+    @media (prefers-color-scheme: dark) {
+        .form-container {
+            background: rgba(45, 55, 72, 0.95);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .form-body {
+            background: rgba(45, 55, 72, 0.98);
+        }
+
+        .form-control {
+            background-color: rgba(74, 85, 104, 0.8);
+            border-color: rgba(102, 126, 234, 0.3);
+            color: #f7fafc;
+        }
+
+        .form-control:focus {
+            background-color: rgba(74, 85, 104, 0.9);
+        }
+
+        .cliente-info,
+        .acceso-info {
+            background: rgba(74, 85, 104, 0.3);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .cliente-info-item,
+        .acceso-info-item {
+            background: rgba(74, 85, 104, 0.6);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .text-primary,
+        .form-label,
+        .cliente-info-item strong,
+        .acceso-info-item strong {
+            color: #e2e8f0 !important;
+        }
+
+        .cliente-info-item span,
+        .acceso-info-item span {
+            color: #cbd5e0 !important;
+        }
+    }
+
+    /* Animaciones de validación mejoradas */
+    .form-control.validating {
+        border-color: var(--info-color);
+        background-image: linear-gradient(45deg, transparent 40%, rgba(66, 153, 225, 0.1) 50%, transparent 60%);
+        background-size: 20px 20px;
+        animation: progress-bar 1s linear infinite;
+    }
+
+    @keyframes progress-bar {
+        0% { background-position: 0 0; }
+        100% { background-position: 20px 0; }
+    }
+
+    /* Indicadores de fortaleza de contraseña */
+    .password-strength {
+        margin-top: 0.5rem;
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .strength-weak {
+        width: 33%;
+        background: linear-gradient(90deg, var(--danger-color), #ff6b6b);
+    }
+
+    .strength-medium {
+        width: 66%;
+        background: linear-gradient(90deg, var(--warning-color), #ffd93d);
+    }
+
+    .strength-strong {
+        width: 100%;
+        background: linear-gradient(90deg, var(--success-color), #51cf66);
+    }
+
+    /* Tooltips personalizados */
+    .tooltip-custom {
+        position: relative;
+        cursor: help;
+    }
+
+    .tooltip-custom::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(45, 55, 72, 0.95);
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        z-index: 1000;
+    }
+
+    .tooltip-custom::after {
+        content: '';
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: rgba(45, 55, 72, 0.95);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .tooltip-custom:hover::before,
+    .tooltip-custom:hover::after {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb premium -->
+    <div class="breadcrumb-container slide-in">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'portal_cliente:dashboard' %}">
+                        <i class="fas fa-home me-1"></i>Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'portal_cliente:lista_accesos' %}">
+                        <i class="fas fa-users me-1"></i>Accesos
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user-edit me-1"></i>Editar Acceso
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+            <div class="form-container slide-in">
+                <!-- Header premium con glassmorphism -->
+                <div class="form-header">
+                    <div class="form-header-content">
+                        <div class="header-left">
+                            <div class="icon">
+                                <i class="fas fa-user-edit"></i>
+                            </div>
+                            <div>
+                                <h2>Editar Acceso al Portal</h2>
+                                <p style="margin: 0; opacity: 0.9; font-size: 1rem; font-weight: 500;">
+                                    Modificar credenciales y configuración de acceso web
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="status-badge {% if object.activo %}status-active{% else %}status-inactive{% endif %}">
+                            <i class="fas fa-{% if object.activo %}check-circle{% else %}times-circle{% endif %}"></i>
+                            {% if object.activo %}Activo{% else %}Inactivo{% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-body">
+                    <!-- Información del Cliente con estilo premium -->
+                    <div class="cliente-info">
+                        <div class="cliente-info-content">
+                            <h5>
+                                <i class="fas fa-user"></i>
+                                Información del Cliente
+                            </h5>
+                            <div class="cliente-info-grid">
+                                <div class="cliente-info-item">
+                                    <strong>
+                                        <i class="fas fa-signature"></i>
+                                        Nombre Completo
+                                    </strong>
+                                    <span>{{ object.cliente.nombre }}</span>
+                                </div>
+                                <div class="cliente-info-item">
+                                    <strong>
+                                        <i class="fas fa-phone"></i>
+                                        Teléfono
+                                    </strong>
+                                    <span>{{ object.cliente.telefono }}</span>
+                                </div>
+                                {% if object.cliente.correo %}
+                                <div class="cliente-info-item">
+                                    <strong>
+                                        <i class="fas fa-envelope"></i>
+                                        Correo Electrónico
+                                    </strong>
+                                    <span>{{ object.cliente.correo }}</span>
+                                </div>
+                                {% endif %}
+                                <div class="cliente-info-item">
+                                    <strong>
+                                        <i class="fas fa-paw"></i>
+                                        Mascotas Registradas
+                                    </strong>
+                                    <span>{{ object.cliente.mascotas.count }} mascota{{ object.cliente.mascotas.count|pluralize:"s" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información del Acceso Actual con estilo premium -->
+                    <div class="acceso-info">
+                        <div class="acceso-info-content">
+                            <h5>
+                                <i class="fas fa-key"></i>
+                                Detalles del Acceso Actual
+                            </h5>
+                            <div class="acceso-info-grid">
+                                <div class="acceso-info-item">
+                                    <strong>
+                                        <i class="fas fa-user-circle"></i>
+                                        Usuario Actual
+                                    </strong>
+                                    <span>{{ object.username }}</span>
+                                </div>
+                                <div class="acceso-info-item">
+                                    <strong>
+                                        <i class="fas fa-calendar-plus"></i>
+                                        Fecha de Creación
+                                    </strong>
+                                    <span>{{ object.fecha_creacion|date:"d/m/Y H:i" }}</span>
+                                </div>
+                                <div class="acceso-info-item">
+                                    <strong>
+                                        <i class="fas fa-clock"></i>
+                                        Último Acceso
+                                    </strong>
+                                    <span>
+                                        {% if object.fecha_ultimo_acceso %}
+                                            {{ object.fecha_ultimo_acceso|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            <em style="color: #718096;">Nunca ha accedido</em>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="acceso-info-item">
+                                    <strong>
+                                        <i class="fas fa-shield-alt"></i>
+                                        Estado de Seguridad
+                                    </strong>
+                                    <span>
+                                        {% if object.activo %}
+                                            <span style="color: var(--success-color);">✓ Acceso Permitido</span>
+                                        {% else %}
+                                            <span style="color: var(--danger-color);">✗ Acceso Bloqueado</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Alert informativo premium -->
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Información importante:</strong> Si modificas la contraseña, el cliente deberá 
+                        utilizar las nuevas credenciales en su próximo acceso al portal web. Se recomienda 
+                        notificar al cliente sobre cualquier cambio realizado.
+                    </div>
+                    
+                    <!-- Formulario premium -->
+                    <form method="post" novalidate id="accesoForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                                        <i class="fas fa-user"></i>
+                                        {{ form.username.label }}
+                                    </label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <div class="text-danger">
+                                            {{ form.username.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        El nombre de usuario debe ser único en todo el sistema
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-toggle-on"></i>
+                                        Estado del Acceso
+                                    </label>
+                                    <div class="form-check">
+                                        {{ form.activo }}
+                                        <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                            Permitir acceso al portal web
+                                        </label>
+                                    </div>
+                                    {% if form.activo.errors %}
+                                        <div class="text-danger">
+                                            {{ form.activo.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Si está desactivado, el cliente no podrá iniciar sesión
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="{{ form.password.id_for_label }}" class="form-label tooltip-custom" 
+                                           data-tooltip="Mínimo 8 caracteres, incluye números y letras">
+                                        <i class="fas fa-lock"></i>
+                                        {{ form.password.label }}
+                                    </label>
+                                    {{ form.password }}
+                                    <div class="password-strength" id="passwordStrength" style="display: none;">
+                                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                                    </div>
+                                    {% if form.password.errors %}
+                                        <div class="text-danger">
+                                            {{ form.password.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Dejar en blanco para mantener la contraseña actual
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="{{ form.confirmar_password.id_for_label }}" class="form-label">
+                                        <i class="fas fa-lock"></i>
+                                        {{ form.confirmar_password.label }}
+                                    </label>
+                                    {{ form.confirmar_password }}
+                                    {% if form.confirmar_password.errors %}
+                                        <div class="text-danger">
+                                            {{ form.confirmar_password.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Repetir la nueva contraseña para confirmar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción premium -->
+                        <div class="btn-submit-container">
+                            <div class="btn-actions-left">
+                                <a href="{% url 'portal_cliente:lista_accesos' %}" class="btn-secondary">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Volver a Lista
+                                </a>
+                            </div>
+                            
+                            <div class="btn-actions-right">
+                                <a href="{% url 'portal_cliente:eliminar_acceso' object.id %}" 
+                                   class="btn-danger"
+                                   onclick="return confirm('⚠️ ¿Estás completamente seguro?\n\nEsta acción eliminará permanentemente el acceso de {{ object.cliente.nombre }} y no se puede deshacer.\n\n¿Confirmas que deseas proceder?')">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Eliminar Acceso
+                                </a>
+                                
+                                <button type="submit" class="btn-primary" id="submitBtn">
+                                    <i class="fas fa-save"></i>
+                                    Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript premium para interactividad -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('accesoForm');
+    const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+    const confirmPasswordField = document.getElementById('{{ form.confirmar_password.id_for_label }}');
+    const submitBtn = document.getElementById('submitBtn');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+    
+    // Función para evaluar fortaleza de contraseña
+    function evaluatePasswordStrength(password) {
+        let strength = 0;
+        
+        if (password.length >= 8) strength += 25;
+        if (password.match(/[a-z]/)) strength += 25;
+        if (password.match(/[A-Z]/)) strength += 25;
+        if (password.match(/[0-9]/)) strength += 15;
+        if (password.match(/[^a-zA-Z0-9]/)) strength += 10;
+        
+        return Math.min(strength, 100);
+    }
+    
+    // Actualizar indicador de fortaleza
+    function updatePasswordStrength(password) {
+        if (!password) {
+            passwordStrength.style.display = 'none';
+            return;
+        }
+        
+        passwordStrength.style.display = 'block';
+        const strength = evaluatePasswordStrength(password);
+        
+        passwordStrengthBar.style.width = strength + '%';
+        
+        if (strength < 40) {
+            passwordStrengthBar.className = 'password-strength-bar strength-weak';
+        } else if (strength < 80) {
+            passwordStrengthBar.className = 'password-strength-bar strength-medium';
+        } else {
+            passwordStrengthBar.className = 'password-strength-bar strength-strong';
+        }
+    }
+    
+    // Validación en tiempo real de contraseñas
+    function validatePasswords() {
+        const password = passwordField.value;
+        const confirmPassword = confirmPasswordField.value;
+        
+        // Actualizar indicador de fortaleza
+        updatePasswordStrength(password);
+        
+        // Validar coincidencia
+        if (password && confirmPassword) {
+            if (password !== confirmPassword) {
+                confirmPasswordField.setCustomValidity('Las contraseñas no coinciden');
+                confirmPasswordField.classList.add('is-invalid');
+                confirmPasswordField.classList.remove('is-valid');
+            } else {
+                confirmPasswordField.setCustomValidity('');
+                confirmPasswordField.classList.remove('is-invalid');
+                confirmPasswordField.classList.add('is-valid');
+                passwordField.classList.add('is-valid');
+            }
+        } else if (!password && !confirmPassword) {
+            // Si ambos están vacíos, limpiar validación
+            confirmPasswordField.setCustomValidity('');
+            confirmPasswordField.classList.remove('is-invalid', 'is-valid');
+            passwordField.classList.remove('is-invalid', 'is-valid');
+        }
+    }
+    
+    // Event listeners para validación
+    if (passwordField && confirmPasswordField) {
+        passwordField.addEventListener('input', validatePasswords);
+        confirmPasswordField.addEventListener('input', validatePasswords);
+        
+        // Placeholder dinámico
+        passwordField.addEventListener('focus', function() {
+            if (!this.value) {
+                this.placeholder = 'Ingresa nueva contraseña segura...';
+            }
+        });
+        
+        confirmPasswordField.addEventListener('focus', function() {
+            if (!this.value) {
+                this.placeholder = 'Repite la nueva contraseña...';
+            }
+        });
+        
+        passwordField.addEventListener('blur', function() {
+            if (!this.value) {
+                this.placeholder = '';
+            }
+        });
+        
+        confirmPasswordField.addEventListener('blur', function() {
+            if (!this.value) {
+                this.placeholder = '';
+            }
+        });
+    }
+    
+    // Estado de envío del formulario
+    form.addEventListener('submit', function(e) {
+        const formData = new FormData(form);
+        let hasChanges = false;
+        
+        // Verificar si hay cambios
+        for (let [key, value] of formData.entries()) {
+            if (value.trim() !== '') {
+                hasChanges = true;
+                break;
+            }
+        }
+        
+        if (!hasChanges) {
+            e.preventDefault();
+            alert('⚠️ No se han detectado cambios para guardar.');
+            return;
+        }
+        
+        // Aplicar estado de carga
+        form.classList.add('form-submitting');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        
+        // Simular validación del lado del cliente
+        setTimeout(() => {
+            // El formulario se enviará normalmente
+        }, 500);
+    });
+    
+    // Validación del username en tiempo real
+    const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+    if (usernameField) {
+        let usernameTimeout;
+        
+        usernameField.addEventListener('input', function() {
+            clearTimeout(usernameTimeout);
+            const username = this.value.trim();
+            
+            if (username.length >= 3) {
+                this.classList.add('validating');
+                
+                usernameTimeout = setTimeout(() => {
+                    // Aquí podrías hacer una validación AJAX
+                    this.classList.remove('validating');
+                    
+                    // Simulación de validación
+                    if (username.length >= 3 && /^[a-zA-Z0-9_]+$/.test(username)) {
+                        this.classList.add('is-valid');
+                        this.classList.remove('is-invalid');
+                    } else {
+                        this.classList.add('is-invalid');
+                        this.classList.remove('is-valid');
+                    }
+                }, 1000);
+            }
+        });
+    }
+    
+    // Animaciones de entrada escalonadas
+    const elementos = document.querySelectorAll('.slide-in');
+    elementos.forEach((el, index) => {
+        el.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Auto-save indication (opcional)
+    let formChanged = false;
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', () => {
+            formChanged = true;
+            // Podrías mostrar un indicador de cambios no guardados
+        });
+    });
+    
+    // Advertencia antes de salir si hay cambios no guardados
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged && !form.classList.contains('form-submitting')) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,702 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Acceso - Portal Cliente{% endblock %}
+
+{% block page_title %}Eliminar Acceso{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --portal-primary: #667eea;
+        --portal-primary-dark: #5a6fd8;
+        --portal-secondary: #764ba2;
+        --portal-accent: #8b5fbf;
+        --portal-light: rgba(102, 126, 234, 0.1);
+        --portal-success: #28a745;
+        --portal-danger: #dc3545;
+        --portal-warning: #ffc107;
+        --portal-info: #17a2b8;
+    }
+
+    .delete-page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+
+    .portal-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .portal-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(220, 53, 69, 0.05) 0%, transparent 70%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .portal-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .portal-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .portal-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--portal-danger), #c82333);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .portal-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .breadcrumb-section {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1rem 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .breadcrumb-custom {
+        margin: 0;
+        background: transparent;
+        padding: 0;
+    }
+
+    .breadcrumb-custom .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    .breadcrumb-custom .breadcrumb-item a {
+        color: var(--portal-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .breadcrumb-custom .breadcrumb-item a:hover {
+        color: var(--portal-primary-dark);
+    }
+
+    .breadcrumb-custom .breadcrumb-item.active {
+        color: var(--text-secondary);
+    }
+
+    .delete-card {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .delete-card-header {
+        background: linear-gradient(135deg, var(--portal-danger) 0%, #c82333 100%);
+        color: white;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .delete-card-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .delete-card-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .delete-icon {
+        font-size: 2rem;
+        opacity: 0.9;
+    }
+
+    .delete-card-body {
+        padding: 2.5rem;
+    }
+
+    .warning-alert {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 171, 0, 0.1) 100%);
+        border: 1px solid rgba(255, 193, 7, 0.2);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .warning-alert::before {
+        content: '⚠️';
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        font-size: 4rem;
+        opacity: 0.1;
+        transform: rotate(15deg);
+    }
+
+    .warning-title {
+        color: #856404;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .warning-text {
+        color: #856404;
+        margin: 0;
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .access-info-section {
+        background: rgba(102, 126, 234, 0.03);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .access-info-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, var(--portal-primary), var(--portal-secondary));
+        border-radius: 0 2px 2px 0;
+    }
+
+    .info-section-title {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-left: 1rem;
+    }
+
+    .client-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        padding-left: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-label i {
+        width: 16px;
+        text-align: center;
+        color: var(--portal-primary);
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 1rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        width: fit-content;
+    }
+
+    .status-badge.active {
+        background: rgba(40, 167, 69, 0.1);
+        color: var(--portal-success);
+    }
+
+    .status-badge.inactive {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--portal-danger);
+    }
+
+    .no-data {
+        color: var(--text-secondary);
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+
+    .action-section {
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        padding-top: 2rem;
+        text-align: center;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-delete-confirm {
+        background: linear-gradient(135deg, var(--portal-danger) 0%, #c82333 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        text-decoration: none;
+    }
+
+    .btn-delete-confirm:hover {
+        background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    }
+
+    .btn-cancel {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+        border: 2px solid #e9ecef;
+        padding: 0.875rem 2rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+    }
+
+    .btn-cancel:hover {
+        background: #6c757d;
+        color: white;
+        border-color: #6c757d;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .client-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--portal-primary), var(--portal-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        border: 3px solid white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .client-name {
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .delete-page-container {
+            padding: 1rem;
+        }
+
+        .portal-title {
+            font-size: 1.75rem;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .delete-card-body {
+            padding: 1.5rem;
+        }
+
+        .client-info-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn-delete-confirm,
+        .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .portal-header {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .portal-title {
+            font-size: 1.5rem;
+        }
+
+        .portal-title .icon {
+            font-size: 2rem;
+        }
+
+        .delete-card-header {
+            padding: 1.5rem;
+        }
+
+        .delete-card-body {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-page-container fade-in">
+    <!-- Header Section -->
+    <div class="portal-header">
+        <div class="portal-header-content">
+            <h1 class="portal-title">
+                <i class="fas fa-exclamation-triangle icon"></i>
+                Eliminar Acceso al Portal
+            </h1>
+            <p class="portal-subtitle">
+                Confirmar eliminación permanente del acceso
+            </p>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-section slide-up">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'portal_cliente:lista_accesos' %}">
+                        <i class="fas fa-users-cog me-1"></i>Gestión de Accesos
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-trash-alt me-1"></i>Eliminar Acceso
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Delete Card -->
+    <div class="delete-card slide-up">
+        <!-- Card Header -->
+        <div class="delete-card-header">
+            <h3>
+                <i class="fas fa-exclamation-triangle delete-icon"></i>
+                Confirmar Eliminación
+            </h3>
+        </div>
+        
+        <!-- Card Body -->
+        <div class="delete-card-body">
+            <!-- Warning Alert -->
+            <div class="warning-alert">
+                <div class="warning-title">
+                    <i class="fas fa-exclamation-circle"></i>
+                    ¡Atención! Esta acción es irreversible
+                </div>
+                <p class="warning-text">
+                    Está a punto de eliminar permanentemente el acceso al portal para este cliente. 
+                    Una vez eliminado, el cliente no podrá acceder a su portal web hasta que se le 
+                    cree un nuevo acceso. Esta acción no se puede deshacer.
+                </p>
+            </div>
+
+            <!-- Client Avatar and Name -->
+            <div class="client-avatar">
+                {{ object.cliente.nombre|first|upper }}
+            </div>
+            <div class="client-name">{{ object.cliente.nombre }}</div>
+
+            <!-- Access Information -->
+            <div class="access-info-section">
+                <div class="info-section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Información del Acceso a Eliminar
+                </div>
+                
+                <div class="client-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i>
+                            Cliente
+                        </div>
+                        <div class="info-value">{{ object.cliente.nombre }}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-at"></i>
+                            Usuario Portal
+                        </div>
+                        <div class="info-value">{{ object.username }}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-phone"></i>
+                            Teléfono
+                        </div>
+                        <div class="info-value">
+                            {% if object.cliente.telefono %}
+                                {{ object.cliente.telefono }}
+                            {% else %}
+                                <span class="no-data">No registrado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-envelope"></i>
+                            Correo Electrónico
+                        </div>
+                        <div class="info-value">
+                            {% if object.cliente.correo %}
+                                {{ object.cliente.correo }}
+                            {% else %}
+                                <span class="no-data">No registrado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-calendar-plus"></i>
+                            Fecha Creación
+                        </div>
+                        <div class="info-value">{{ object.fecha_creacion|date:"d/m/Y H:i" }}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-clock"></i>
+                            Último Acceso
+                        </div>
+                        <div class="info-value">
+                            {% if object.fecha_ultimo_acceso %}
+                                {{ object.fecha_ultimo_acceso|date:"d/m/Y H:i" }}
+                            {% else %}
+                                <span class="no-data">Nunca ha ingresado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-toggle-on"></i>
+                            Estado Actual
+                        </div>
+                        <div class="info-value">
+                            {% if object.activo %}
+                                <span class="status-badge active">
+                                    <i class="fas fa-check-circle"></i>Activo
+                                </span>
+                            {% else %}
+                                <span class="status-badge inactive">
+                                    <i class="fas fa-times-circle"></i>Inactivo
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if object.cliente.mascotas.exists %}
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-paw"></i>
+                            Mascotas Registradas
+                        </div>
+                        <div class="info-value">
+                            {{ object.cliente.mascotas.count }} mascota{{ object.cliente.mascotas.count|pluralize }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Section -->
+            <div class="action-section">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="action-buttons">
+                        <button type="submit" class="btn-delete-confirm">
+                            <i class="fas fa-trash-alt"></i>
+                            Sí, Eliminar Acceso
+                        </button>
+                        
+                        <a href="{% url 'portal_cliente:lista_accesos' %}" class="btn-cancel">
+                            <i class="fas fa-arrow-left"></i>
+                            Cancelar y Regresar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirmación adicional antes de eliminar
+    const deleteForm = document.querySelector('form[method="post"]');
+    const deleteButton = document.querySelector('.btn-delete-confirm');
+    
+    if (deleteForm && deleteButton) {
+        deleteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Crear modal de confirmación personalizado
+            const confirmDelete = confirm(
+                '⚠️ CONFIRMACIÓN FINAL\n\n' +
+                'Esta acción eliminará permanentemente el acceso al portal para:\n\n' +
+                '👤 Cliente: {{ object.cliente.nombre }}\n' +
+                '🔑 Usuario: {{ object.username }}\n\n' +
+                '¿Está completamente seguro de que desea continuar?\n\n' +
+                '❌ Esta acción NO se puede deshacer'
+            );
+            
+            if (confirmDelete) {
+                // Mostrar loading en el botón
+                deleteButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+                deleteButton.disabled = true;
+                
+                // Enviar formulario
+                this.submit();
+            }
+        });
+    }
+    
+    // Efecto de hover mejorado para los botones
+    const buttons = document.querySelectorAll('.btn-delete-confirm, .btn-cancel');
+    buttons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-3px) scale(1.02)';
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            if (!this.disabled) {
+                this.style.transform = 'translateY(0) scale(1)';
+            }
+        });
+    });
+    
+    // Animación de entrada suave
+    const elements = document.querySelectorAll('.slide-up');
+    elements.forEach((element, index) => {
+        element.style.animationDelay = `${index * 0.1}s`;
+    });
+});
+</script>
+{% endblock %}

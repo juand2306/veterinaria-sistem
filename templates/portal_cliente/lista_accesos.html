@@ -1,0 +1,931 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Accesos Portal{% endblock %}
+
+{% block page_title %}Gestión de Accesos Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --portal-primary: #667eea;
+        --portal-primary-dark: #5a6fd8;
+        --portal-secondary: #764ba2;
+        --portal-accent: #8b5fbf;
+        --portal-light: rgba(102, 126, 234, 0.1);
+        --portal-success: #28a745;
+        --portal-danger: #dc3545;
+        --portal-warning: #ffc107;
+        --portal-info: #17a2b8;
+    }
+
+    .portal-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .portal-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .portal-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .portal-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .portal-title .icon {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, var(--portal-primary), var(--portal-secondary));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .portal-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .search-filter-section {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 3rem;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: #f8f9fa;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--portal-primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+
+    .filter-select {
+        padding: 0.875rem 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background: #f8f9fa;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--portal-primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .search-btn {
+        background: linear-gradient(135deg, var(--portal-primary) 0%, var(--portal-primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .search-btn:hover {
+        background: linear-gradient(135deg, var(--portal-primary-dark) 0%, var(--portal-primary) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .clear-btn {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+        border: 2px solid #e9ecef;
+        padding: 0.875rem 1.5rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 500;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .clear-btn:hover {
+        background: #6c757d;
+        color: white;
+        border-color: #6c757d;
+        transform: translateY(-1px);
+    }
+
+    .add-access-btn {
+        background: linear-gradient(135deg, var(--portal-secondary) 0%, var(--portal-accent) 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+    }
+
+    .add-access-btn:hover {
+        background: linear-gradient(135deg, var(--portal-accent) 0%, var(--portal-secondary) 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(118, 75, 162, 0.4);
+    }
+
+    .accesos-table-container {
+        background: var(--bg-white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table-header {
+        background: linear-gradient(135deg, var(--portal-primary) 0%, var(--portal-secondary) 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .table-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .table-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .table-count {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .accesos-table {
+        margin: 0;
+    }
+
+    .accesos-table thead th {
+        background: rgba(102, 126, 234, 0.05);
+        color: var(--text-primary);
+        font-weight: 600;
+        border: none;
+        padding: 1rem 1.5rem;
+        position: relative;
+    }
+
+    .accesos-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--portal-primary), transparent);
+    }
+
+    .accesos-table tbody tr {
+        transition: var(--transition);
+        border: none;
+    }
+
+    .accesos-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.03);
+        transform: scale(1.01);
+    }
+
+    .accesos-table tbody td {
+        padding: 1.25rem 1.5rem;
+        border: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        vertical-align: middle;
+    }
+
+    .client-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .client-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--portal-primary), var(--portal-secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .client-details h6 {
+        margin: 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1rem;
+    }
+
+    .client-details small {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    .username-info {
+        font-weight: 600;
+        color: var(--portal-primary);
+        font-size: 1rem;
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .contact-item i {
+        width: 16px;
+        text-align: center;
+        color: var(--portal-primary);
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-badge.active {
+        background: rgba(40, 167, 69, 0.1);
+        color: var(--portal-success);
+    }
+
+    .status-badge.inactive {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--portal-danger);
+    }
+
+    .date-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .date-main {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+    }
+
+    .date-time {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: var(--transition);
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .btn-action.edit {
+        background: rgba(255, 193, 7, 0.1);
+        color: var(--portal-warning);
+    }
+
+    .btn-action.edit:hover {
+        background: var(--portal-warning);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .btn-action.delete {
+        background: rgba(220, 53, 69, 0.1);
+        color: var(--portal-danger);
+    }
+
+    .btn-action.delete:hover {
+        background: var(--portal-danger);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        color: rgba(102, 126, 234, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .no-results-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-secondary);
+    }
+
+    .no-results-icon {
+        font-size: 3rem;
+        color: rgba(102, 126, 234, 0.3);
+        margin-bottom: 1rem;
+    }
+
+    .filter-info {
+        background: rgba(102, 126, 234, 0.05);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .filter-tag {
+        background: linear-gradient(135deg, var(--portal-primary), var(--portal-primary-dark));
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.25rem;
+    }
+
+    /* Pagination Styles */
+    .pagination-section {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .pagination-custom {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .pagination-custom .page-item {
+        list-style: none;
+    }
+
+    .pagination-custom .page-link {
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        color: var(--portal-primary);
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius-sm);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        background: white;
+    }
+
+    .pagination-custom .page-link:hover {
+        background: var(--portal-primary);
+        color: white;
+        border-color: var(--portal-primary);
+        transform: translateY(-1px);
+    }
+
+    .pagination-custom .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--portal-primary), var(--portal-secondary));
+        color: white;
+        border-color: var(--portal-primary);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .portal-title {
+            font-size: 1.75rem;
+        }
+        
+        .stats-section {
+            grid-template-columns: 1fr;
+        }
+        
+        .search-filter-section {
+            padding: 1rem;
+        }
+        
+        .table-responsive {
+            border-radius: var(--border-radius);
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .table-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .search-filter-section .row {
+            gap: 1rem;
+        }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Hover effects */
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-3px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Header Section -->
+    <div class="portal-header">
+        <div class="portal-header-content">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h1 class="portal-title">
+                        <i class="fas fa-users-cog icon"></i>
+                        Gestión de Accesos Portal
+                    </h1>
+                    <p class="portal-subtitle">
+                        Administra los accesos de clientes al portal web
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filter-section slide-up">
+        <form method="GET" class="row g-3 align-items-end">
+            <div class="col-lg-5">
+                <label class="form-label">Buscar accesos</label>
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" name="buscar" 
+                           placeholder="Buscar por nombre o usuario..." 
+                           value="{{ request.GET.buscar }}">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <label class="form-label">Estado</label>
+                <select class="filter-select" name="estado">
+                    <option value="">Todos los estados</option>
+                    <option value="activo" {% if request.GET.estado == 'activo' %}selected{% endif %}>Activos</option>
+                    <option value="inactivo" {% if request.GET.estado == 'inactivo' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-lg-4">
+                <div class="d-flex gap-2">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>Buscar
+                    </button>
+                    <a href="{% url 'portal_cliente:lista_accesos' %}" class="clear-btn">
+                        <i class="fas fa-times"></i>Limpiar
+                    </a>
+                </div>
+            </div>
+        </form>
+        
+        {% if request.GET.buscar or request.GET.estado %}
+        <div class="filter-info">
+            <strong>Filtros aplicados:</strong>
+            {% if request.GET.buscar %}
+                <span class="filter-tag">
+                    <i class="fas fa-search"></i>
+                    Búsqueda: "{{ request.GET.buscar }}"
+                </span>
+            {% endif %}
+            {% if request.GET.estado %}
+                <span class="filter-tag">
+                    <i class="fas fa-filter"></i>
+                    Estado: {{ request.GET.estado|capfirst }}
+                </span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Table Section -->
+    {% if accesos %}
+    <div class="accesos-table-container slide-up">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-list"></i>
+                Lista de Accesos
+            </h3>
+            <div class="table-actions">
+                <span class="table-count">Total: <strong>{{ accesos.count }}</strong> accesos</span>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table accesos-table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user me-2"></i>Cliente</th>
+                        <th><i class="fas fa-at me-2"></i>Usuario</th>
+                        <th><i class="fas fa-envelope me-2"></i>Contacto</th>
+                        <th><i class="fas fa-toggle-on me-2"></i>Estado</th>
+                        <th><i class="fas fa-calendar me-2"></i>Creado</th>
+                        <th><i class="fas fa-clock me-2"></i>Último Acceso</th>
+                        <th><i class="fas fa-cogs me-2"></i>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for acceso in accesos %}
+                    <tr class="acceso-row">
+                        <td>
+                            <div class="client-info">
+                                <div class="client-avatar">
+                                    {{ acceso.cliente.nombre|first|upper }}
+                                </div>
+                                <div class="client-details">
+                                    <h6>{{ acceso.cliente.nombre }}</h6>
+                                    <small class="text-muted"># {{ acceso.cliente.id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="username-info">{{ acceso.username }}</div>
+                        </td>
+                        <td>
+                            <div class="contact-info">
+                                {% if acceso.cliente.correo %}
+                                <div class="contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>{{ acceso.cliente.correo }}</span>
+                                </div>
+                                {% endif %}
+                                {% if acceso.cliente.telefono %}
+                                <div class="contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>{{ acceso.cliente.telefono }}</span>
+                                </div>
+                                {% endif %}
+                                {% if not acceso.cliente.correo and not acceso.cliente.telefono %}
+                                <em class="text-muted">No registrado</em>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if acceso.activo %}
+                                <span class="status-badge active">
+                                    <i class="fas fa-check-circle"></i>Activo
+                                </span>
+                            {% else %}
+                                <span class="status-badge inactive">
+                                    <i class="fas fa-times-circle"></i>Inactivo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="date-info">
+                                <div class="date-main">{{ acceso.fecha_creacion|date:"d/m/Y" }}</div>
+                                <div class="date-time">{{ acceso.fecha_creacion|date:"H:i" }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if acceso.fecha_ultimo_acceso %}
+                                <div class="date-info">
+                                    <div class="date-main">{{ acceso.fecha_ultimo_acceso|date:"d/m/Y" }}</div>
+                                    <div class="date-time">{{ acceso.fecha_ultimo_acceso|date:"H:i" }}</div>
+                                </div>
+                            {% else %}
+                                <em class="text-muted">Nunca</em>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'portal_cliente:editar_acceso' acceso.id %}" 
+                                   class="btn-action edit" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'portal_cliente:eliminar_acceso' acceso.id %}" 
+                                   class="btn-action delete" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination-section">
+        <nav>
+            <ul class="pagination pagination-custom">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.buscar %}&buscar={{ request.GET.buscar|urlencode }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado|urlencode }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                            Primera
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar|urlencode }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado|urlencode }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                            Anterior
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar|urlencode }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado|urlencode }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar|urlencode }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado|urlencode }}{% endif %}">
+                            Siguiente
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.buscar %}&buscar={{ request.GET.buscar|urlencode }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado|urlencode }}{% endif %}">
+                            Última
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Estados sin accesos -->
+    {% if request.GET.buscar or request.GET.estado %}
+        <!-- No se encontraron resultados con filtros -->
+        <div class="accesos-table-container slide-up">
+            <div class="no-results-state">
+                <div class="no-results-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>No se encontraron resultados</h3>
+                <p>No hay accesos que coincidan con los filtros aplicados.</p>
+                
+                <div class="mt-4">
+                    <a href="{% url 'portal_cliente:lista_accesos' %}" class="add-access-btn">
+                        <i class="fas fa-list"></i>
+                        Ver Todos los Accesos
+                    </a>
+                </div>
+                
+                <div class="filter-info mt-3">
+                    <strong>Filtros aplicados:</strong>
+                    {% if request.GET.buscar %}
+                        <span class="filter-tag">
+                            <i class="fas fa-search"></i>
+                            Búsqueda: "{{ request.GET.buscar }}"
+                        </span>
+                    {% endif %}
+                    {% if request.GET.estado %}
+                        <span class="filter-tag">
+                            <i class="fas fa-filter"></i>
+                            Estado: {{ request.GET.estado|capfirst }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- No hay accesos en absoluto -->
+        <div class="accesos-table-container slide-up">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3>No hay accesos registrados</h3>
+                <p>Comienza creando el primer acceso para un cliente al portal web.</p>
+                
+                <div class="mt-4">
+                    <a href="{% url 'clientes:lista' %}" class="add-access-btn">
+                        <i class="fas fa-plus"></i>
+                        Crear Primer Acceso
+                    </a>
+                </div>
+                
+                <div class="mt-3">
+                    <p class="mb-0"><strong>¿Necesitas ayuda?</strong></p>
+                    <small class="text-muted">
+                        Los accesos al portal permiten a tus clientes ver información personalizada 
+                        sobre sus mascotas y servicios veterinarios.
+                    </small>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script>
+// Animaciones y efectos adicionales
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de contadores en las estadísticas
+    const counters = document.querySelectorAll('.stat-number');
+    counters.forEach(counter => {
+        const target = parseInt(counter.textContent);
+        const duration = 1000;
+        const increment = target / (duration / 16);
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            counter.textContent = Math.floor(current);
+            
+            if (current >= target) {
+                counter.textContent = target;
+                clearInterval(timer);
+            }
+        }, 16);
+    });
+    
+    // Efecto de resaltado en filas de la tabla
+    const tableRows = document.querySelectorAll('.acceso-row');
+    tableRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.background = 'rgba(102, 126, 234, 0.05)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.background = '';
+        });
+    });
+    
+    // Confirmación para eliminar accesos
+    const deleteButtons = document.querySelectorAll('.btn-action.delete');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            
+            if (confirm('¿Estás seguro de que deseas eliminar este acceso? Esta acción no se puede deshacer.')) {
+                window.location.href = href;
+            }
+        });
+    });
+    
+    // Auto-focus en el campo de búsqueda
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput && window.location.search.includes('buscar=')) {
+        searchInput.focus();
+        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+    }
+    
+    // Tooltip para botones de acción
+    const actionButtons = document.querySelectorAll('.btn-action');
+    actionButtons.forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            const title = this.getAttribute('title');
+            if (title) {
+                this.setAttribute('data-original-title', title);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

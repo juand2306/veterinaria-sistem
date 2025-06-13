@@ -1,0 +1,1228 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Acceso Portal - {{ cliente.nombre }}{% endblock %}
+
+{% block page_title %}Crear Acceso Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Root variables para consistencia con paleta morada */
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --primary-dark: #5a67d8;
+        --success-color: #48bb78;
+        --danger-color: #f56565;
+        --warning-color: #ed8936;
+        --info-color: #4299e1;
+        --text-primary: #2d3748;
+        --text-light: #ffffff;
+        --bg-white: #ffffff;
+        --glass-bg: rgba(255, 255, 255, 0.25);
+        --glass-border: rgba(255, 255, 255, 0.18);
+        --input-bg: #f7fafc;
+        --input-border: #e2e8f0;
+        --purple-light: rgba(102, 126, 234, 0.1);
+        --purple-medium: rgba(118, 75, 162, 0.15);
+    }
+    
+    .form-container {
+        background: var(--bg-white);
+        border-radius: 24px;
+        box-shadow: 
+            0 32px 64px -12px rgba(102, 126, 234, 0.15),
+            0 16px 32px -8px rgba(118, 75, 162, 0.1),
+            0 8px 16px -4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        position: relative;
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.02) 0%, 
+            rgba(118, 75, 162, 0.02) 50%, 
+            rgba(90, 103, 216, 0.02) 100%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .form-header {
+        background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--secondary-color) 50%, 
+            var(--primary-dark) 100%);
+        color: var(--text-light);
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+    }
+
+    .form-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .form-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .form-header-content {
+        position: relative;
+        z-index: 3;
+    }
+
+    .form-header h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-header .icon {
+        width: 70px;
+        height: 70px;
+        background: var(--glass-bg);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-body {
+        padding: 3rem;
+        position: relative;
+        background: rgba(255, 255, 255, 0.98);
+        z-index: 2;
+    }
+
+    /* Información del cliente estilizada */
+    .cliente-info {
+        background: linear-gradient(135deg, 
+            var(--purple-light) 0%, 
+            var(--purple-medium) 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(16px);
+        box-shadow: 
+            0 8px 32px rgba(102, 126, 234, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .cliente-info::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 10s ease-in-out infinite;
+    }
+
+    .cliente-info-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .cliente-info h5 {
+        color: var(--primary-color);
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .cliente-info h5 i {
+        width: 40px;
+        height: 40px;
+        background: rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .cliente-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .cliente-info-item {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+    }
+
+    .cliente-info-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+    }
+
+    .cliente-info-item strong {
+        color: var(--primary-color);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .cliente-info-item strong i {
+        color: var(--secondary-color);
+        width: 16px;
+    }
+
+    .cliente-info-item span {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    /* Form groups mejorados */
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label i {
+        color: var(--primary-color);
+        width: 18px;
+        font-size: 1.1rem;
+    }
+
+    /* Inputs estilizados con paleta morada */
+    .form-control {
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        background-color: var(--input-bg);
+        width: 100%;
+        outline: none;
+        transition: all 0.3s ease;
+        box-shadow: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    .form-control:hover {
+        border-color: rgba(102, 126, 234, 0.4);
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        background-color: #ffffff;
+        box-shadow: 
+            0 0 0 3px rgba(102, 126, 234, 0.1),
+            0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateY(-1px);
+    }
+
+    .form-control::placeholder {
+        color: #a0aec0;
+        font-weight: 400;
+        font-style: italic;
+    }
+
+    /* Checkbox personalizado */
+    .form-check {
+        padding: 1rem;
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.05) 0%, 
+            rgba(118, 75, 162, 0.03) 100%);
+        border-radius: 12px;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        margin-top: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-check:hover {
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.08) 0%, 
+            rgba(118, 75, 162, 0.05) 100%);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-input {
+        width: 1.5rem;
+        height: 1.5rem;
+        margin-top: 0;
+        border: 2px solid var(--primary-color);
+        border-radius: 6px;
+        background-color: transparent;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+
+    .form-check-label {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-left: 0.75rem;
+        cursor: pointer;
+    }
+
+    /* Estados de validación */
+    .form-control.is-valid {
+        border-color: var(--success-color);
+        background-color: rgba(72, 187, 120, 0.02);
+        box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger-color);
+        background-color: rgba(245, 101, 101, 0.02);
+        box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .invalid-feedback {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 500;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, 
+            rgba(245, 101, 101, 0.08) 0%, 
+            rgba(245, 101, 101, 0.05) 100%);
+        border-radius: 12px;
+        border-left: 3px solid var(--danger-color);
+        backdrop-filter: blur(8px);
+    }
+
+    .invalid-feedback::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--danger-color);
+    }
+
+    /* Alerts estilizados */
+    .alert {
+        border-radius: 16px;
+        border: none;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: currentColor;
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, 
+            rgba(237, 137, 54, 0.1) 0%, 
+            rgba(237, 137, 54, 0.05) 100%);
+        color: #c05621;
+        border: 1px solid rgba(237, 137, 54, 0.2);
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, 
+            rgba(66, 153, 225, 0.1) 0%, 
+            rgba(66, 153, 225, 0.05) 100%);
+        color: #2c5282;
+        border: 1px solid rgba(66, 153, 225, 0.2);
+    }
+
+    .alert i {
+        margin-right: 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    .alert strong {
+        font-weight: 700;
+    }
+
+    .alert-link {
+        color: inherit;
+        font-weight: 700;
+        text-decoration: underline;
+        transition: all 0.3s ease;
+    }
+
+    .alert-link:hover {
+        text-decoration: none;
+        opacity: 0.8;
+    }
+
+    /* Form text mejorado */
+    .form-text {
+        color: #718096;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-text::before {
+        content: '\f05a';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        color: var(--info-color);
+        font-size: 0.8rem;
+    }
+
+    /* Botones premium con paleta morada */
+    .btn-submit-container {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 2.5rem;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
+        margin-top: 2.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--secondary-color) 50%, 
+            var(--primary-dark) 100%);
+        border: none;
+        color: white;
+        padding: 1rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 
+            0 10px 15px -3px rgba(102, 126, 234, 0.3),
+            0 4px 6px -2px rgba(102, 126, 234, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(255, 255, 255, 0.3), 
+            transparent);
+        transition: left 0.6s ease;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 
+            0 20px 25px -5px rgba(102, 126, 234, 0.4),
+            0 10px 10px -5px rgba(102, 126, 234, 0.2);
+        background: linear-gradient(135deg, 
+            var(--secondary-color) 0%, 
+            var(--primary-color) 50%, 
+            var(--primary-dark) 100%);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(145deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(248, 250, 252, 0.95) 100%);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        color: var(--text-primary);
+        padding: 1rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(145deg, 
+            rgba(102, 126, 234, 0.08) 0%, 
+            rgba(255, 255, 255, 0.95) 100%);
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 
+            0 10px 15px -3px rgba(102, 126, 234, 0.2),
+            0 4px 6px -2px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Breadcrumb glassmorphism */
+    .breadcrumb-container {
+        background: linear-gradient(135deg, 
+            rgba(102, 126, 234, 0.1) 0%, 
+            rgba(118, 75, 162, 0.08) 100%);
+        backdrop-filter: blur(16px);
+        border-radius: 16px;
+        padding: 1.25rem 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        box-shadow: 
+            0 8px 32px rgba(102, 126, 234, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-dark);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    /* Animaciones de entrada */
+    .slide-in {
+        animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Form group micro-interacciones */
+    .form-group::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 0.3s ease;
+        border-radius: 1px;
+    }
+
+    .form-group:focus-within::after {
+        width: 100%;
+    }
+
+    /* Campo requerido */
+    .required-field::after {
+        content: '*';
+        color: var(--danger-color);
+        margin-left: 0.5rem;
+        font-weight: bold;
+        font-size: 1.1rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .form-container {
+            border-radius: 16px;
+            margin: 1rem;
+        }
+        
+        .form-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-header {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-header h2 {
+            font-size: 1.5rem;
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .form-header .icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .btn-submit-container {
+            flex-direction: column-reverse;
+            align-items: stretch;
+            gap: 1rem;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .cliente-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Separador visual elegante */
+    .form-separator {
+        display: flex;
+        align-items: center;
+        margin: 3rem 0 2.5rem 0;
+        position: relative;
+    }
+
+    .separator-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(102, 126, 234, 0.3) 20%, 
+            rgba(118, 75, 162, 0.5) 50%, 
+            rgba(102, 126, 234, 0.3) 80%, 
+            transparent 100%);
+    }
+
+    .separator-text {
+        padding: 0 2rem;
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(102, 126, 234, 0.2);
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+
+    .separator-text i {
+        color: var(--secondary-color);
+        font-size: 1rem;
+    }
+
+    /* Botón en estado listo */
+    .btn-primary.btn-ready {
+        background: linear-gradient(135deg, 
+            var(--success-color) 0%, 
+            #38a169 50%, 
+            #2f855a 100%);
+        box-shadow: 
+            0 12px 20px -5px rgba(72, 187, 120, 0.4),
+            0 6px 10px -5px rgba(72, 187, 120, 0.2);
+        animation: readyPulse 2s infinite;
+    }
+
+    @keyframes readyPulse {
+        0%, 100% { 
+            box-shadow: 
+                0 12px 20px -5px rgba(72, 187, 120, 0.4),
+                0 6px 10px -5px rgba(72, 187, 120, 0.2);
+        }
+        50% { 
+            box-shadow: 
+                0 15px 25px -5px rgba(72, 187, 120, 0.5),
+                0 8px 15px -5px rgba(72, 187, 120, 0.3);
+        }
+    }
+
+    /* Spinner de carga del botón */
+    .btn-loading-spinner {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-loading-spinner i {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Estados de validación mejorados */
+    .form-control.is-valid {
+        animation: validField 0.6s ease-out;
+    }
+
+    .form-control.is-invalid {
+        animation: invalidField 0.6s ease-out;
+    }
+
+    @keyframes validField {
+        0% { 
+            border-color: var(--input-border);
+            background-color: var(--input-bg);
+        }
+        50% {
+            border-color: var(--success-color);
+            background-color: rgba(72, 187, 120, 0.1);
+            transform: scale(1.02);
+        }
+        100% {
+            border-color: var(--success-color);
+            background-color: rgba(72, 187, 120, 0.02);
+            transform: scale(1);
+        }
+    }
+
+    @keyframes invalidField {
+        0% { 
+            border-color: var(--input-border);
+            transform: translateX(0);
+        }
+        25% { 
+            border-color: var(--danger-color);
+            transform: translateX(-5px);
+        }
+        75% { 
+            border-color: var(--danger-color);
+            transform: translateX(5px);
+        }
+        100% {
+            border-color: var(--danger-color);
+            transform: translateX(0);
+        }
+    }
+
+    /* Mejoras responsivas adicionales */
+    @media (max-width: 576px) {
+        .separator-text {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            flex-direction: column;
+            gap: 0.25rem;
+            text-align: center;
+        }
+        
+        .form-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .cliente-info-grid {
+            gap: 1rem;
+        }
+        
+        .cliente-info-item {
+            padding: 1rem;
+        }
+    }
+
+    /* Efectos hover mejorados para inputs */
+    .form-control:not(:focus):hover {
+        background: linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(248, 250, 252, 0.95) 100%);
+    }
+
+    /* Indicador de campo requerido animado */
+    @keyframes pulseRequired {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+    }
+
+    .required-field::after {
+        animation: pulseRequired 2s infinite ease-in-out;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid slide-in">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'portal_cliente:lista_accesos' %}">
+                        <i class="fas fa-key me-1"></i>Accesos Portal
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user-plus me-1"></i>Crear Acceso
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container hover-lift">
+        <!-- Form Header -->
+        <div class="form-header">
+            <div class="form-header-content">
+                <h2>
+                    <div class="icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    Crear Acceso al Portal
+                </h2>
+                <p>Configure las credenciales de acceso web para el cliente</p>
+            </div>
+        </div>
+
+        <!-- Form Body -->
+        <div class="form-body">
+            <!-- Información del Cliente -->
+            <div class="cliente-info">
+                <div class="cliente-info-content">
+                    <h5>
+                        <i class="fas fa-user"></i>
+                        Información del Cliente
+                    </h5>
+                    <div class="cliente-info-grid">
+                        <div class="cliente-info-item">
+                            <strong>
+                                <i class="fas fa-user"></i>
+                                Nombre
+                            </strong>
+                            <span>{{ cliente.nombre }}</span>
+                        </div>
+                        <div class="cliente-info-item">
+                            <strong>
+                                <i class="fas fa-phone"></i>
+                                Teléfono
+                            </strong>
+                            <span>{{ cliente.telefono }}</span>
+                        </div>
+                        {% if cliente.correo %}
+                        <div class="cliente-info-item">
+                            <strong>
+                                <i class="fas fa-envelope"></i>
+                                Email
+                            </strong>
+                            <span>{{ cliente.correo }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="cliente-info-item">
+                            <strong>
+                                <i class="fas fa-paw"></i>
+                                Mascotas
+                            </strong>
+                            <span>{{ cliente.mascotas.count }} registradas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if ya_tiene_acceso %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>¡Atención!</strong> Este cliente ya tiene acceso al portal web.
+                    <a href="{% url 'portal_cliente:editar_acceso' cliente.acceso_portal.id %}" class="alert-link">
+                        Editar acceso existente
+                    </a>
+                </div>
+                
+                <div class="btn-submit-container">
+                    <div></div>
+                    <a href="{% url 'portal_cliente:lista_accesos' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>Volver a la Lista
+                    </a>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Instrucciones:</strong> Las credenciales creadas permitirán al cliente acceder 
+                    a sus mascotas e historias clínicas desde el portal web.
+                </div>
+                
+                <form method="post" id="accesoForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.username.id_for_label }}" class="form-label required-field">
+                                    <i class="fas fa-user"></i>
+                                    {{ form.username.label }}
+                                </label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.username.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text">Debe ser único en el sistema</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-toggle-on"></i>
+                                    Estado del Acceso
+                                </label>
+                                <div class="form-check">
+                                    {{ form.activo }}
+                                    <label class="form-check-label" for="{{ form.activo.id_for_label }}">
+                                        Acceso activo
+                                    </label>
+                                </div>
+                                {% if form.activo.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.activo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.password.id_for_label }}" class="form-label required-field">
+                                    <i class="fas fa-lock"></i>
+                                    {{ form.password.label }}
+                                </label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.password.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text">{{ form.password.help_text }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ form.confirmar_password.id_for_label }}" class="form-label required-field">
+                                    <i class="fas fa-lock"></i>
+                                    {{ form.confirmar_password.label }}
+                                </label>
+                                {{ form.confirmar_password }}
+                                {% if form.confirmar_password.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.confirmar_password.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text">Las contraseñas deben coincidir exactamente</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Separador visual -->
+                    <div class="form-separator">
+                        <div class="separator-line"></div>
+                        <div class="separator-text">
+                            <i class="fas fa-shield-alt"></i>
+                            Configuración de Seguridad
+                        </div>
+                        <div class="separator-line"></div>
+                    </div>
+                    
+                    <!-- Botones de acción -->
+                    <div class="btn-submit-container">
+                        <a href="{% url 'portal_cliente:lista_accesos' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Cancelar
+                        </a>
+                        
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-save"></i>
+                            Crear Acceso
+                            <div class="btn-loading-spinner" style="display: none;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables del formulario
+    const form = document.getElementById('accesoForm');
+    const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+    const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+    const confirmPasswordField = document.getElementById('{{ form.confirmar_password.id_for_label }}');
+    const submitBtn = document.getElementById('submitBtn');
+    const clienteNombre = '{{ cliente.nombre|lower }}';
+    
+    // Generar sugerencia de username inteligente
+    if (usernameField && !usernameField.value) {
+        const sugerencia = clienteNombre
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+            .replace(/\s+/g, '')
+            .replace(/[^a-zA-Z0-9]/g, '')
+            .substring(0, 15);
+        
+        if (sugerencia) {
+            usernameField.placeholder = `Sugerencia: ${sugerencia}`;
+            
+            // Auto-completar si el campo está vacío al hacer clic
+            usernameField.addEventListener('focus', function() {
+                if (!this.value) {
+                    this.value = sugerencia;
+                    this.select();
+                }
+            });
+        }
+    }
+    
+    // Manejo del envío del formulario (solo para mostrar loading)
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Mostrar spinner de carga
+            const iconElement = submitBtn.querySelector('i.fas.fa-save');
+            const spinner = submitBtn.querySelector('.btn-loading-spinner');
+            
+            if (iconElement && spinner) {
+                iconElement.style.display = 'none';
+                spinner.style.display = 'inline-flex';
+                
+                // Opcional: deshabilitar temporalmente solo durante el envío
+                submitBtn.disabled = true;
+                
+                // Restaurar si hay algún error de validación del servidor
+                setTimeout(() => {
+                    if (form.querySelector('.invalid-feedback')) {
+                        iconElement.style.display = 'inline';
+                        spinner.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }
+                }, 100);
+            }
+        });
+    }
+    
+    // Función para mostrar alertas dinámicas 
+    function showAlert(message, type = 'info') {
+        const alertContainer = document.createElement('div');
+        alertContainer.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertContainer.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        `;
+        
+        alertContainer.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : type === 'danger' ? 'times-circle' : 'info-circle'} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertContainer);
+        
+        // Auto-remover después de 5 segundos
+        setTimeout(() => {
+            if (alertContainer.parentNode) {
+                alertContainer.classList.remove('show');
+                setTimeout(() => alertContainer.remove(), 300);
+            }
+        }, 5000);
+    }
+    
+    // Opcional: Generador de contraseña segura (funcionalidad extra)
+    function generateSecurePassword() {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@$!%*?&';
+        let password = '';
+        
+        // Asegurar al menos uno de cada tipo
+        password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+        password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+        password += '0123456789'[Math.floor(Math.random() * 10)];
+        password += '@$!%*?&'[Math.floor(Math.random() * 7)];
+        
+        // Completar hasta 12 caracteres
+        for (let i = 4; i < 12; i++) {
+            password += chars[Math.floor(Math.random() * chars.length)];
+        }
+        
+        // Mezclar caracteres
+        return password.split('').sort(() => Math.random() - 0.5).join('');
+    }
+    
+    // Agregar botón de generar contraseña (opcional)
+    const addGeneratePasswordBtn = true; // Cambiar a false si no lo quieres
+    
+    if (addGeneratePasswordBtn && passwordField) {
+        const generateBtn = document.createElement('button');
+        generateBtn.type = 'button';
+        generateBtn.className = 'btn btn-outline-secondary btn-sm mt-2';
+        generateBtn.innerHTML = '<i class="fas fa-key me-1"></i>Generar Contraseña Segura';
+        
+        generateBtn.addEventListener('click', function() {
+            const newPassword = generateSecurePassword();
+            passwordField.value = newPassword;
+            if (confirmPasswordField) {
+                confirmPasswordField.value = newPassword;
+            }
+            
+            // Mostrar contraseña temporalmente
+            showAlert(`Contraseña generada: ${newPassword}`, 'info');
+        });
+        
+        passwordField.parentNode.appendChild(generateBtn);
+    }
+    
+    // Mejorar UX: Seleccionar todo el texto al hacer focus en username
+    if (usernameField) {
+        usernameField.addEventListener('focus', function() {
+            this.select();
+        });
+    }
+    
+    // Sincronizar contraseñas automáticamente (opcional)
+    if (passwordField && confirmPasswordField) {
+        passwordField.addEventListener('input', function() {
+            // Solo sincronizar si el campo de confirmación está vacío
+            if (!confirmPasswordField.value) {
+                confirmPasswordField.value = this.value;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
