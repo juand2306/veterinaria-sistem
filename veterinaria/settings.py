@@ -16,14 +16,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import dj_database_url
-from dotenv import load_dotenv
-from decouple import config
-
-load_dotenv()  # Carga las variables del archivo .env si existe
-
-SECRET_KEY = os.getenv("SECRET_KEY", "inseguro-en-desarrollo")
-DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -32,18 +24,9 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 SECRET_KEY = 'django-insecure-v-+s5x5r4i_j5e1p&1^jehoi1xahrsu&ey=wh7l=s-du3ivwa6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if not DEBUG:
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.render.com',
-    'vetnova-sistem.onrender.com',
-    config('DOMAIN', default=''),
-]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -71,7 +54,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -105,12 +87,11 @@ WSGI_APPLICATION = 'veterinaria.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{os.path.join(BASE_DIR, 'db.sqlite3')}",
-        conn_max_age=600,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
-
 
 # Para configurar PostgreSQL (descomentar cuando sea necesario):
 # DATABASES = {
@@ -195,4 +176,3 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
