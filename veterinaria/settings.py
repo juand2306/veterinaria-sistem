@@ -32,7 +32,6 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 SECRET_KEY = 'django-insecure-v-+s5x5r4i_j5e1p&1^jehoi1xahrsu&ey=wh7l=s-du3ivwa6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
