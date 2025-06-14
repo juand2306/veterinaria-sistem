@@ -771,6 +771,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Remove existing validation classes
         field.classList.remove('is-valid', 'is-invalid');
 
+        // Buscar o crear el elemento de error
+        let errorElement = field.parentNode.querySelector('.invalid-feedback');
+        if (!errorElement) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'invalid-feedback';
+            field.parentNode.appendChild(errorElement);
+        }
+
         // Required field validation (nombre es requerido)
         if (field.name === 'nombre') {
             if (!value) {
